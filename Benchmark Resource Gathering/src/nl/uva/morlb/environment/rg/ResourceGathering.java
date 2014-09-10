@@ -1,5 +1,6 @@
 package nl.uva.morlb.environment.rg;
 
+import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class ResourceGathering {
 
     /**
      * Creates a new resource gathering problem based on the given parameters.
-     *
+     * 
      * @param parameters
      *            The parameters that define the shape of the problem
      */
@@ -49,14 +50,19 @@ public class ResourceGathering {
     }
 
     /**
-     * Lets the agent perform a certain action to transition to the next state and collect a reward.
-     *
+     * Lets the agent perform a certain action to transition to the next state and collect a reward. The action must
+     * follow the parameter's action space size restrictions.
+     * 
      * @param action
      *            The action to perform
-     *
+     * 
      * @return The reward gathered by performing the action
      */
     public double[] performAction(final DiscreteAction action) {
+        if (!mParameters.actionsExpanded && action.ordinal() > 3) {
+            throw new InvalidParameterException("Action value cannot exceed 3 with a non-expanded action space");
+        }
+
         // Get the agent's new location
         double x = mAgent.getX() + action.getLocation().getX();
         double y = mAgent.getY() + action.getLocation().getY();
@@ -85,7 +91,7 @@ public class ResourceGathering {
 
     /**
      * Checks if the agent is at the goal, indicating a terminal state.
-     *
+     * 
      * @return True iff the current state is terminal
      */
     public boolean isTerminal() {

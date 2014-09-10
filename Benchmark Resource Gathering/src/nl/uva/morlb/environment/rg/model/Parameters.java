@@ -20,9 +20,12 @@ public class Parameters {
     /** The amount of different types of resources available, related to the amount of objectives */
     public final int numResourceTypes;
 
+    /** Whether or not the action space has an increased size */
+    public final boolean actionsExpanded;
+
     /**
      * Creates a new parameter set for a discrete problem.
-     *
+     * 
      * @param maxX
      *            The highest possible x value of a location
      * @param maxY
@@ -30,7 +33,9 @@ public class Parameters {
      * @param resources
      *            The resources to place in the problem
      */
-    public Parameters(final double maxX, final double maxY, final List<PlacedResource> resources) {
+    public Parameters(final double maxX, final double maxY, final List<PlacedResource> resources,
+            final boolean actionsExpanded) {
+        // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
 
@@ -42,6 +47,9 @@ public class Parameters {
             maxType = Math.max(maxType, resource.getType());
         }
         numResourceTypes = maxType + 1;
+
+        // Define the action space size
+        this.actionsExpanded = actionsExpanded;
     }
 
 }

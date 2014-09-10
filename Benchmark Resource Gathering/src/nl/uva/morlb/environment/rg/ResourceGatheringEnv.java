@@ -40,7 +40,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Creates a new resource gathering problem with a given parameter set.
-     *
+     * 
      * @param parameters
      *            The parameters affecting the problem
      */
@@ -75,8 +75,8 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
             taskSpec.addContinuousObservation(new DoubleRange(0, mParameters.numResourceTypes));
         }
 
-        // Specify that there will be an integer action [0,4]
-        taskSpec.addDiscreteAction(new IntRange(0, 4));
+        // Specify the action space size
+        taskSpec.addDiscreteAction(new IntRange(0, (mParameters.actionsExpanded ? 7 : 3)));
 
         // Specify the number of objectives as the amount of resource types and time taken
         taskSpec.setNumOfObjectives(mParameters.numResourceTypes + 1);
@@ -100,10 +100,10 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Performs an action in the problem and determines the resulting reward and state
-     *
+     * 
      * @param action
      *            The action that the agent wants to perform
-     *
+     * 
      * @return The resulting reward, observation and whether or not the problem is now terminal
      */
     @Override
@@ -134,7 +134,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Handles Glue messages, not implemented yet
-     *
+     * 
      * @param message
      *            The message to handle
      */
