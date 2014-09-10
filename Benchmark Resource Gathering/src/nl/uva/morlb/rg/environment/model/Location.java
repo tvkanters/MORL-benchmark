@@ -1,4 +1,4 @@
-package nl.uva.morlb.environment.rg.model;
+package nl.uva.morlb.rg.environment.model;
 
 /**
  * A location for an object.

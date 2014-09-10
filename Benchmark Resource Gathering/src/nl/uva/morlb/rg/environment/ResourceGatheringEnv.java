@@ -1,11 +1,11 @@
-package nl.uva.morlb.environment.rg;
+package nl.uva.morlb.rg.environment;
 
 import java.util.List;
 
-import nl.uva.morlb.environment.rg.model.DiscreteAction;
-import nl.uva.morlb.environment.rg.model.Location;
-import nl.uva.morlb.environment.rg.model.Parameters;
-import nl.uva.morlb.environment.rg.model.PlacedResource;
+import nl.uva.morlb.rg.environment.model.DiscreteAction;
+import nl.uva.morlb.rg.environment.model.Location;
+import nl.uva.morlb.rg.environment.model.Parameters;
+import nl.uva.morlb.rg.environment.model.PlacedResource;
 
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.taskspec.TaskSpec;
@@ -16,6 +16,7 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
+import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
 
 /**
  * The Glue wrapper for the environment.
@@ -175,6 +176,11 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         }
 
         return observation;
+    }
+
+    public static void main(final String[] args) {
+        final EnvironmentLoader theLoader = new EnvironmentLoader(new ResourceGatheringEnv());
+        theLoader.run();
     }
 
 }

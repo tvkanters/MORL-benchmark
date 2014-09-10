@@ -1,13 +1,13 @@
-package nl.uva.morlb.environment.rg;
+package nl.uva.morlb.rg.environment;
 
 import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.List;
 
-import nl.uva.morlb.environment.rg.model.DiscreteAction;
-import nl.uva.morlb.environment.rg.model.Location;
-import nl.uva.morlb.environment.rg.model.Parameters;
-import nl.uva.morlb.environment.rg.model.PlacedResource;
+import nl.uva.morlb.rg.environment.model.DiscreteAction;
+import nl.uva.morlb.rg.environment.model.Location;
+import nl.uva.morlb.rg.environment.model.Parameters;
+import nl.uva.morlb.rg.environment.model.PlacedResource;
 
 /**
  * The main resource gathering problem. Controls the states, transitions and rewards based on a set of parameters.

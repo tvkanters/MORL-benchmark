@@ -1,10 +1,10 @@
-package nl.uva.morlb.environment.rg;
+package nl.uva.morlb.rg.environment;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import nl.uva.morlb.environment.rg.model.Parameters;
-import nl.uva.morlb.environment.rg.model.PlacedResource;
+import nl.uva.morlb.rg.environment.model.Parameters;
+import nl.uva.morlb.rg.environment.model.PlacedResource;
 
 /**
  * A collection of sequential decision problems (SDPs) that can be used as resource gathering
