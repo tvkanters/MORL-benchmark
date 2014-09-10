@@ -44,6 +44,10 @@ public class Resource {
      *            The location's x-coordinate
      * @param y
      *            The location's y-coordinate
+     * @param minReward
+     *            The minimum possible reward for collecting this resource
+     * @param maxReward
+     *            The maximum possible reward for collecting this resource
      */
     public Resource(final int type, final double x, final double y, final double minReward, final double maxReward) {
         if (type < 0) {
@@ -68,10 +72,10 @@ public class Resource {
     }
 
     /**
-     * Calculates the reward that should be given when the resource is picked up. When the minimal reward is different
+     * Calculates the reward that should be given when the resource is collected. When the minimal reward is different
      * from the maximum reward, a uniformly chosen random reward will be returned.
      * 
-     * @return A reward for picking up this resource
+     * @return A reward for collecting this resource
      */
     public double calculateReward() {
         return Util.RNG.nextDouble() * (mMaxReward - mMinReward) + mMinReward;

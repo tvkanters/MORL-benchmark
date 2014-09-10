@@ -8,6 +8,7 @@ import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.environment.model.Resource;
+import nl.uva.morlb.util.Util;
 
 /**
  * The main resource gathering problem. Controls the states, transitions and rewards based on a set of parameters.
@@ -62,17 +63,18 @@ public class ResourceGathering {
         }
 
         // Get the agent's new location
-        double x = mAgent.getX() + action.getLocation().getX();
-        double y = mAgent.getY() + action.getLocation().getY();
+        final Location newAgent = mAgent.sum(action.getLocation());
 
-        // Keep the agent within bounds
-        x = Math.max(x, 0);
-        y = Math.max(y, 0);
-        x = Math.min(x, mParameters.maxX);
-        y = Math.min(x, mParameters.maxY);
+        // Check if an action failure occurs
+        if (Util.RNG.nextDouble() < mParameters.actionFailProb) {
+            // Determine which action from 1 to 8 is the failure that altered the next state outcome
+            final int failureIndex = Util.RNG.nextInt(mParameters.actionsExpanded ? 7 : 3) + 1;
+            final DiscreteAction failure = DiscreteAction.values()[failureIndex];
+            newAgent.sum(failure.getLocation());
+        }
 
-        // Set the agent's new location
-        mAgent = new Location(x, y);
+        // Set the agent's new location bound within the problem size
+        mAgent = newAgent.bound(0, mParameters.maxX, 0, mParameters.maxY);
 
         // Collect resources and calculate reward
         final double[] reward = new double[mParameters.numResourceTypes + 1];

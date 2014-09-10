@@ -157,13 +157,13 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
         // Specify the location of the agent
         final Location agent = mProblem.getAgent();
-        observation.setDouble(i++, agent.getX());
-        observation.setDouble(i++, agent.getY());
+        observation.setDouble(i++, agent.x);
+        observation.setDouble(i++, agent.y);
 
         // Specify the location of the goal
         final Location goal = mProblem.getGoal();
-        observation.setDouble(i++, goal.getX());
-        observation.setDouble(i++, goal.getY());
+        observation.setDouble(i++, goal.x);
+        observation.setDouble(i++, goal.y);
 
         // Specify the locations of the resources
         final List<Resource> resources = mProblem.getResources();
@@ -173,8 +173,8 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
                 observation.setDouble(i++, -1);
             } else {
                 final Location location = resource.getLocation();
-                observation.setDouble(i++, location.getX());
-                observation.setDouble(i++, location.getY());
+                observation.setDouble(i++, location.x);
+                observation.setDouble(i++, location.y);
             }
             observation.setInt(i++, resource.getType());
         }

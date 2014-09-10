@@ -29,6 +29,9 @@ public class Parameters {
     /** The discount factor applied to rewards */
     public final double discountFactor;
 
+    /** The probability that an additional random action will be performed when taking an action */
+    public final double actionFailProb;
+
     /**
      * Creates a new parameter set for a discrete problem.
      * 
@@ -42,9 +45,11 @@ public class Parameters {
      *            Whether or not the action space has an increased size
      * @param discountFactor
      *            The discount factor applied to rewards, indicates a finite horizon problem when the value is 1
+     * @param actionFailProb
+     *            The probability that an additional random action will be performed when taking an action
      */
     public Parameters(final double maxX, final double maxY, final List<Resource> resources,
-            final boolean actionsExpanded, final double discountFactor) {
+            final boolean actionsExpanded, final double discountFactor, final double actionFailProb) {
         // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
@@ -67,6 +72,13 @@ public class Parameters {
         }
         finiteHorizon = discountFactor == 1;
         this.discountFactor = discountFactor;
+
+        // Define the probability or an action failing
+        if (actionFailProb < 0 || actionFailProb > 1) {
+            throw new InvalidParameterException("Action failure probability must be in range [0,1]");
+
+        }
+        this.actionFailProb = actionFailProb;
     }
 
 }
