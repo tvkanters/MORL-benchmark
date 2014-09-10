@@ -15,7 +15,7 @@ public class Parameters {
     public final double maxY;
 
     /** The resources to place in the problem */
-    public final List<PlacedResource> resources;
+    public final List<Resource> resources;
     /** The amount of resources */
     public final int numResources;
     /** The amount of different types of resources available, related to the amount of objectives */
@@ -43,7 +43,7 @@ public class Parameters {
      * @param discountFactor
      *            The discount factor applied to rewards, indicates a finite horizon problem when the value is 1
      */
-    public Parameters(final double maxX, final double maxY, final List<PlacedResource> resources,
+    public Parameters(final double maxX, final double maxY, final List<Resource> resources,
             final boolean actionsExpanded, final double discountFactor) {
         // Define the state space size
         this.maxX = maxX;
@@ -53,7 +53,7 @@ public class Parameters {
         this.resources = Collections.unmodifiableList(resources);
         numResources = resources.size();
         int maxType = 0;
-        for (final PlacedResource resource : resources) {
+        for (final Resource resource : resources) {
             maxType = Math.max(maxType, resource.getType());
         }
         numResourceTypes = maxType + 1;

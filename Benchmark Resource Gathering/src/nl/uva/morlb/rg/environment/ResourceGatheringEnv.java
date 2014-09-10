@@ -5,7 +5,7 @@ import java.util.List;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.Parameters;
-import nl.uva.morlb.rg.environment.model.PlacedResource;
+import nl.uva.morlb.rg.environment.model.Resource;
 
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.taskspec.TaskSpec;
@@ -166,8 +166,8 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         observation.setDouble(i++, goal.getY());
 
         // Specify the locations of the resources
-        final List<PlacedResource> resources = mProblem.getResources();
-        for (final PlacedResource resource : resources) {
+        final List<Resource> resources = mProblem.getResources();
+        for (final Resource resource : resources) {
             if (resource.isPickedUp()) {
                 observation.setDouble(i++, -1);
                 observation.setDouble(i++, -1);

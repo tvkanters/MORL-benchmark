@@ -7,7 +7,7 @@ import java.util.List;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.Parameters;
-import nl.uva.morlb.rg.environment.model.PlacedResource;
+import nl.uva.morlb.rg.environment.model.Resource;
 
 /**
  * The main resource gathering problem. Controls the states, transitions and rewards based on a set of parameters.
@@ -22,7 +22,7 @@ public class ResourceGathering {
     /** The goal's location that when reached by the agent indicates a terminal state */
     private final Location mGoal;
     /** The resources that can be collected by the agent */
-    private final List<PlacedResource> mResources;
+    private final List<Resource> mResources;
 
     /**
      * Creates a new resource gathering problem based on the given parameters.
@@ -42,7 +42,7 @@ public class ResourceGathering {
      */
     public void reset() {
         mAgent = new Location(0, 0);
-        for (final PlacedResource resource : mResources) {
+        for (final Resource resource : mResources) {
             resource.setPickedUp(false);
         }
     }
@@ -77,9 +77,9 @@ public class ResourceGathering {
         // Collect resources and calculate reward
         final double[] reward = new double[mParameters.numResourceTypes + 1];
         reward[0] = -1;
-        for (final PlacedResource resource : mResources) {
+        for (final Resource resource : mResources) {
             if (mAgent.equals(resource.getLocation())) {
-                ++reward[resource.getType() + 1];
+                reward[resource.getType() + 1] += resource.calculateReward();
 
                 if (mParameters.finiteHorizon) {
                     resource.setPickedUp(true);
@@ -116,7 +116,7 @@ public class ResourceGathering {
     /**
      * @return The list of resources in the game
      */
-    public List<PlacedResource> getResources() {
+    public List<Resource> getResources() {
         return Collections.unmodifiableList(mResources);
     }
 
