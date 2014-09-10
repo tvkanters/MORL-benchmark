@@ -35,12 +35,10 @@ public class ResourceGathering {
 
         mGoal = new Location(mParameters.maxX, mParameters.maxY);
         mResources = mParameters.resources;
-
-        reset();
     }
 
     /**
-     * Resets the problem to the initial state.
+     * Resets the problem to the initial state. Should be called before running each episode.
      */
     public void reset() {
         mAgent = new Location(0, 0);

@@ -96,6 +96,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
      */
     @Override
     public Observation env_start() {
+        mProblem.reset();
         return getObservation();
     }
 
@@ -179,8 +180,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
     }
 
     public static void main(final String[] args) {
-        final EnvironmentLoader theLoader = new EnvironmentLoader(new ResourceGatheringEnv());
-        theLoader.run();
+        new EnvironmentLoader(new ResourceGatheringEnv()).run();
     }
 
 }
