@@ -77,13 +77,16 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         }
 
         // Specify the action space size
-        taskSpec.addDiscreteAction(new IntRange(0, (mParameters.actionsExpanded ? 7 : 3)));
+        taskSpec.addDiscreteAction(new IntRange(0, (mParameters.actionsExpanded ? 8 : 4)));
 
         // Specify the number of objectives as the amount of resource types and time taken
         taskSpec.setNumOfObjectives(mParameters.numResourceTypes + 1);
 
         // Specify the map dimensions
         taskSpec.setExtra(mParameters.maxX + "," + mParameters.maxY);
+
+        // Set the discount factor
+        taskSpec.setDiscountFactor(mParameters.discountFactor);
 
         // Convert specification object to a string
         final String taskSpecString = taskSpec.toTaskSpec();

@@ -1,5 +1,6 @@
 package nl.uva.morlb.rg.environment.model;
 
+import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +24,11 @@ public class Parameters {
     /** Whether or not the action space has an increased size */
     public final boolean actionsExpanded;
 
+    /** Whether or not the problem has a finite horizon rather than an infinite horizon */
+    public final boolean finiteHorizon;
+    /** The discount factor applied to rewards */
+    public final double discountFactor;
+
     /**
      * Creates a new parameter set for a discrete problem.
      * 
@@ -32,9 +38,13 @@ public class Parameters {
      *            The highest possible y value of a location
      * @param resources
      *            The resources to place in the problem
+     * @param actionsExpanded
+     *            Whether or not the action space has an increased size
+     * @param discountFactor
+     *            The discount factor applied to rewards, indicates a finite horizon problem when the value is 1
      */
     public Parameters(final double maxX, final double maxY, final List<PlacedResource> resources,
-            final boolean actionsExpanded) {
+            final boolean actionsExpanded, final double discountFactor) {
         // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
@@ -50,6 +60,13 @@ public class Parameters {
 
         // Define the action space size
         this.actionsExpanded = actionsExpanded;
+
+        // Define the discount factor
+        if (discountFactor <= 0 || discountFactor > 1) {
+            throw new InvalidParameterException("Discount factor must be in range ]0,1]");
+        }
+        finiteHorizon = discountFactor == 1;
+        this.discountFactor = discountFactor;
     }
 
 }

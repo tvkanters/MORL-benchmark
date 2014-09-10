@@ -80,7 +80,10 @@ public class ResourceGathering {
         for (final PlacedResource resource : mResources) {
             if (mAgent.equals(resource.getLocation())) {
                 ++reward[resource.getType() + 1];
-                resource.setPickedUp(true);
+
+                if (mParameters.finiteHorizon) {
+                    resource.setPickedUp(true);
+                }
             }
         }
 

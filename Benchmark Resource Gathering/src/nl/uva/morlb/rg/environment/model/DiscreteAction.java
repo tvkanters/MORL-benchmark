@@ -5,6 +5,7 @@ package nl.uva.morlb.rg.environment.model;
  */
 public enum DiscreteAction {
 
+    WAIT(0, 0),
     UP(0, 1),
     RIGHT(1, 0),
     DOWN(0, -1),
