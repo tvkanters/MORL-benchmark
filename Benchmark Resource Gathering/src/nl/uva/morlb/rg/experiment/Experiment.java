@@ -8,8 +8,12 @@ import org.rlcommunity.rlglue.codec.RLGlue;
 import org.rlcommunity.rlglue.codec.types.Reward;
 import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
 
+/**
+ * The experiment that sets the benchmark in motions.
+ */
 public class Experiment {
 
+    /** The amount of episodes ran */
     private int mEpisodeCount = 0;
 
     /**
