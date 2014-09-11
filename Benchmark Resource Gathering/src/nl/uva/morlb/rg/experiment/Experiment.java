@@ -2,12 +2,10 @@ package nl.uva.morlb.rg.experiment;
 
 import java.util.Arrays;
 
-import nl.uva.morlb.rg.agent.DumbAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 
 import org.rlcommunity.rlglue.codec.RLGlue;
 import org.rlcommunity.rlglue.codec.types.Reward;
-import org.rlcommunity.rlglue.codec.util.AgentLoader;
 import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
 
 /**
@@ -65,14 +63,6 @@ public class Experiment {
             @Override
             public void run() {
                 new EnvironmentLoader(new ResourceGatheringEnv()).run();
-            }
-        }).start();
-
-        // Start the agent
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                new AgentLoader(new DumbAgent()).run();
             }
         }).start();
     }
