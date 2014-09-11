@@ -3,6 +3,7 @@ package nl.uva.morlb.rg.agent;
 import java.util.Arrays;
 
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
+import nl.uva.morlb.util.Log;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
 import org.rlcommunity.rlglue.codec.taskspec.TaskSpecVRLGLUE3;
@@ -71,7 +72,7 @@ public class DumbAgent implements AgentInterface {
      */
     @Override
     public Action agent_step(final Reward reward, final Observation observation) {
-        System.out.println("AGENT: Got a reward of " + Arrays.toString(reward.doubleArray));
+        Log.d("AGENT: Got a reward of " + Arrays.toString(reward.doubleArray));
 
         final Action action = new Action(1, 0);
         action.setInt(0, getAction());
@@ -86,7 +87,7 @@ public class DumbAgent implements AgentInterface {
      */
     @Override
     public void agent_end(final Reward reward) {
-        System.out.println("AGENT: Got a reward of " + Arrays.toString(reward.doubleArray));
+        Log.d("AGENT: Got a reward of " + Arrays.toString(reward.doubleArray));
     }
 
     /**

@@ -121,8 +121,8 @@ public class State {
     public int hashCode() {
         int intHash = HASH_SEED;
         intHash = intHash * HASH_OFFSET + mAgent.hashCode();
-        intHash = intHash * HASH_OFFSET + mPickedUp.hashCode();
-        intHash = intHash * HASH_OFFSET + mReward.hashCode();
+        intHash = intHash * HASH_OFFSET + Arrays.hashCode(mPickedUp);
+        intHash = intHash * HASH_OFFSET + Arrays.hashCode(mReward);
         return intHash;
     }
 

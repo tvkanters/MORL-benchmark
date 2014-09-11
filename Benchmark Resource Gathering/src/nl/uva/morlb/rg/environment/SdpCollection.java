@@ -13,7 +13,7 @@ public class SdpCollection {
 
     /**
      * Creates a small, discrete problem with 3 objectives.
-     * 
+     *
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getSimpleProblem() {

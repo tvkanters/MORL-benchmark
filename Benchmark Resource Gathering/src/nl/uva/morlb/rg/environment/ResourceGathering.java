@@ -11,6 +11,7 @@ import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.environment.model.Resource;
 import nl.uva.morlb.rg.environment.model.State;
+import nl.uva.morlb.util.Log;
 import nl.uva.morlb.util.Util;
 
 /**
@@ -50,7 +51,7 @@ public class ResourceGathering {
      */
     public void reset() {
         mCurrentState = mInitialState;
-        System.out.println("ENV: New state is " + mCurrentState);
+        Log.d("ENV: New state is " + mCurrentState);
     }
 
     /**
@@ -67,6 +68,15 @@ public class ResourceGathering {
             throw new InvalidParameterException("Action value cannot exceed 4 with a non-expanded action space");
         }
 
+        Log.d("");
+        Log.d("ENV: Performing action " + action);
+        Log.d("ENV: Possible results");
+        final Map<State, Double> stateProbabilities = getPossibleTransitions(mCurrentState, action);
+        for (final State state : stateProbabilities.keySet()) {
+            Log.d("    " + state + " - " + stateProbabilities.get(state));
+        }
+        Log.d("");
+
         // Determine which failure action to add to the agent's action
         final DiscreteAction failAction;
         if (Util.RNG.nextDouble() < mParameters.actionFailProb) {
@@ -78,7 +88,7 @@ public class ResourceGathering {
         }
 
         mCurrentState = getNextState(mCurrentState, action, failAction);
-        System.out.println("ENV: New state is " + mCurrentState);
+        Log.d("ENV: New state is " + mCurrentState);
         return mCurrentState;
     }
 
@@ -106,7 +116,7 @@ public class ResourceGathering {
             if (actionIndex == 0) {
                 probability = 1.0 - mParameters.actionFailProb;
             } else {
-                probability = mParameters.actionFailProb / numSecondActions;
+                probability = mParameters.actionFailProb / (numSecondActions - 1);
             }
 
             // Add the state and probability to the possible outcomes
@@ -114,7 +124,7 @@ public class ResourceGathering {
                 // Sum probabilities if one state can be reached through different ways
                 probability += stateProbabilities.get(nextState);
             }
-            stateProbabilities.put(state, probability);
+            stateProbabilities.put(nextState, probability);
         }
 
         return stateProbabilities;
