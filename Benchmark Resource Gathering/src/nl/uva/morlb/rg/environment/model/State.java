@@ -94,7 +94,7 @@ public class State {
     }
 
     /**
-     * Checks if this state has the same contents as the given one. The reward is ignored in this comparison.
+     * Checks if this state has the same contents as the given one.
      *
      * @param other
      *            The state to compare
@@ -108,19 +108,21 @@ public class State {
         }
 
         final State state = (State) other;
-        return mAgent.equals(state.mAgent) && Arrays.equals(mPickedUp, state.mPickedUp);
+        return mAgent.equals(state.mAgent) && Arrays.equals(mPickedUp, state.mPickedUp)
+                && Arrays.equals(mReward, state.mReward);
     }
 
     /**
-     * Hashes the state based on the contents. The reward is ignored in this operation.
+     * Hashes the state based on the contents.
      *
      * @return The hash code for the state
      */
     @Override
     public int hashCode() {
         int intHash = HASH_SEED;
-        intHash += HASH_OFFSET * mAgent.hashCode();
-        intHash += HASH_OFFSET * mPickedUp.hashCode();
+        intHash = intHash * HASH_OFFSET + mAgent.hashCode();
+        intHash = intHash * HASH_OFFSET + mPickedUp.hashCode();
+        intHash = intHash * HASH_OFFSET + mReward.hashCode();
         return intHash;
     }
 

@@ -152,10 +152,10 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Converts a state to an observation to be given to an agent.
-     * 
+     *
      * @param state
      *            The state to convert to an observation
-     * 
+     *
      * @return The observation representation of the state
      */
     private Observation getObservation(final State state) {
