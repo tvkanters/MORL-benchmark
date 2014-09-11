@@ -18,12 +18,10 @@ public class Resource {
 
     /** The location of the resource */
     private final Location mLocation;
-    /** Whether or not the resource has been picked up this episode */
-    private boolean mPickedUp = false;
 
     /**
      * Creates a resource to place in a problem
-     * 
+     *
      * @param type
      *            The type of resource
      * @param x
@@ -37,7 +35,7 @@ public class Resource {
 
     /**
      * Creates a resource to place in a problem
-     * 
+     *
      * @param type
      *            The type of resource
      * @param x
@@ -74,7 +72,7 @@ public class Resource {
     /**
      * Calculates the reward that should be given when the resource is collected. When the minimal reward is different
      * from the maximum reward, a uniformly chosen random reward will be returned.
-     * 
+     *
      * @return A reward for collecting this resource
      */
     public double calculateReward() {
@@ -86,23 +84,6 @@ public class Resource {
      */
     public Location getLocation() {
         return mLocation;
-    }
-
-    /**
-     * Sets whether or not a resource has been picked up.
-     * 
-     * @param pickedUp
-     *            True iff the resource is picked up
-     */
-    public void setPickedUp(final boolean pickedUp) {
-        mPickedUp = pickedUp;
-    }
-
-    /**
-     * @return True iff the resource has been picked up
-     */
-    public boolean isPickedUp() {
-        return mPickedUp;
     }
 
 }
