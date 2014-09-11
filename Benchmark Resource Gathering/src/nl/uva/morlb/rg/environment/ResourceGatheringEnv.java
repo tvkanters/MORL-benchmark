@@ -6,6 +6,7 @@ import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.environment.model.Resource;
+import nl.uva.morlb.rg.environment.model.State;
 
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.taskspec.TaskSpec;
@@ -16,7 +17,6 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
-import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
 
 /**
  * The Glue wrapper for the environment.
@@ -41,7 +41,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Creates a new resource gathering problem with a given parameter set.
-     * 
+     *
      * @param parameters
      *            The parameters affecting the problem
      */
@@ -100,31 +100,33 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
     @Override
     public Observation env_start() {
         mProblem.reset();
-        return getObservation();
+        return getObservation(mProblem.getCurrentState());
     }
 
     /**
      * Performs an action in the problem and determines the resulting reward and state
-     * 
+     *
      * @param action
      *            The action that the agent wants to perform
-     * 
-     * @return The resulting reward, observation and whether or not the problem is now terminal
+     *
+     * @return The resulting reward, observation and whether or not the state is now terminal
      */
     @Override
     public Reward_observation_terminal env_step(final Action action) {
+        final State state = mProblem.performAction(DiscreteAction.values()[action.getInt(0)]);
+
         final Reward_observation_terminal rewObsTer = new Reward_observation_terminal();
 
-        // Perform the action and collect the reward
+        // Get the reward given
         final Reward reward = new Reward(0, mNumRewards, 0);
-        reward.doubleArray = mProblem.performAction(DiscreteAction.values()[action.getInt(0)]);
+        reward.doubleArray = state.getReward();
         rewObsTer.setReward(reward);
 
         // Get the observation of the new state that the action transitioned to
-        rewObsTer.setObservation(getObservation());
+        rewObsTer.setObservation(getObservation(state));
 
         // Check if the resulting state is terminal
-        rewObsTer.setTerminal(mProblem.isTerminal());
+        rewObsTer.setTerminal(state.isTerminal());
 
         return rewObsTer;
     }
@@ -139,7 +141,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Handles Glue messages, not implemented yet
-     * 
+     *
      * @param message
      *            The message to handle
      */
@@ -149,14 +151,19 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
     }
 
     /**
-     * @return The observation representation of the current problem state
+     * Converts a state to an observation to be given to an agent.
+     * 
+     * @param state
+     *            The state to convert to an observation
+     * 
+     * @return The observation representation of the state
      */
-    private Observation getObservation() {
+    private Observation getObservation(final State state) {
         final Observation observation = new Observation(0, mNumObservations, 0);
         int i = 0;
 
         // Specify the location of the agent
-        final Location agent = mProblem.getAgent();
+        final Location agent = state.getAgent();
         observation.setDouble(i++, agent.x);
         observation.setDouble(i++, agent.y);
 
@@ -167,8 +174,9 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
         // Specify the locations of the resources
         final List<Resource> resources = mProblem.getResources();
+        int resourceIndex = 0;
         for (final Resource resource : resources) {
-            if (resource.isPickedUp()) {
+            if (state.isPickedUp(resourceIndex++)) {
                 observation.setDouble(i++, -1);
                 observation.setDouble(i++, -1);
             } else {
@@ -180,10 +188,6 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         }
 
         return observation;
-    }
-
-    public static void main(final String[] args) {
-        new EnvironmentLoader(new ResourceGatheringEnv()).run();
     }
 
 }

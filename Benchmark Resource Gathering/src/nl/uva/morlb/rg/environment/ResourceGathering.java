@@ -8,6 +8,7 @@ import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.environment.model.Resource;
+import nl.uva.morlb.rg.environment.model.State;
 import nl.uva.morlb.util.Util;
 
 /**
@@ -17,53 +18,55 @@ public class ResourceGathering {
 
     /** The parameters affecting the problem */
     private final Parameters mParameters;
-
-    /** The agent's location */
-    private Location mAgent;
-    /** The goal's location that when reached by the agent indicates a terminal state */
-    private final Location mGoal;
     /** The resources that can be collected by the agent */
     private final List<Resource> mResources;
+    /** The goal's location that when reached by the agent indicates a terminal state */
+    private final Location mGoal;
+
+    /** The state that the problem starts with */
+    private final State mInitialState;
+    /** The state that the problem is currently in */
+    private State mCurrentState;
 
     /**
      * Creates a new resource gathering problem based on the given parameters.
-     * 
+     *
      * @param parameters
      *            The parameters that define the shape of the problem
      */
     public ResourceGathering(final Parameters parameters) {
         mParameters = parameters;
 
-        mGoal = new Location(mParameters.maxX, mParameters.maxY);
         mResources = mParameters.resources;
+        mGoal = new Location(mParameters.maxX, mParameters.maxY);
+
+        mInitialState = new State(new Location(0, 0), mResources.size());
+        reset();
     }
 
     /**
      * Resets the problem to the initial state. Should be called before running each episode.
      */
     public void reset() {
-        mAgent = new Location(0, 0);
-        for (final Resource resource : mResources) {
-            resource.setPickedUp(false);
-        }
+        mCurrentState = mInitialState;
     }
 
     /**
      * Lets the agent perform a certain action to transition to the next state and collect a reward. The action must
      * follow the parameter's action space size restrictions.
-     * 
+     *
      * @param action
      *            The action to perform
-     * 
-     * @return The reward gathered by performing the action
+     *
+     * @return The state resulting from performing the action
      */
-    public double[] performAction(final DiscreteAction action) {
-        if (!mParameters.actionsExpanded && action.ordinal() > 3) {
-            throw new InvalidParameterException("Action value cannot exceed 3 with a non-expanded action space");
+    public State performAction(final DiscreteAction action) {
+        if (!mParameters.actionsExpanded && action.ordinal() > 4) {
+            throw new InvalidParameterException("Action value cannot exceed 4 with a non-expanded action space");
         }
 
         // Get the agent's new location
-        final Location newAgent = mAgent.sum(action.getLocation());
+        Location newAgent = mCurrentState.getAgent().sum(action.getLocation());
 
         // Check if an action failure occurs
         if (Util.RNG.nextDouble() < mParameters.actionFailProb) {
@@ -74,45 +77,27 @@ public class ResourceGathering {
         }
 
         // Set the agent's new location bound within the problem size
-        mAgent = newAgent.bound(0, mParameters.maxX, 0, mParameters.maxY);
+        newAgent = newAgent.bound(0, mParameters.maxX, 0, mParameters.maxY);
 
         // Collect resources and calculate reward
         final double[] reward = new double[mParameters.numResourceTypes + 1];
         reward[0] = -1;
+        int i = 0;
+        final boolean[] pickedUp = mCurrentState.getPickedUp();
         for (final Resource resource : mResources) {
-            if (mAgent.equals(resource.getLocation())) {
+            if (!pickedUp[i] && newAgent.equals(resource.getLocation())) {
                 reward[resource.getType() + 1] += resource.calculateReward();
 
                 if (mParameters.finiteHorizon) {
-                    resource.setPickedUp(true);
+                    pickedUp[i] = true;
                 }
             }
+            ++i;
         }
 
-        return reward;
-    }
+        mCurrentState = new State(newAgent, pickedUp, reward, newAgent.equals(mGoal));
 
-    /**
-     * Checks if the agent is at the goal, indicating a terminal state.
-     * 
-     * @return True iff the current state is terminal
-     */
-    public boolean isTerminal() {
-        return mAgent.equals(mGoal);
-    }
-
-    /**
-     * @return The location of the agent
-     */
-    public Location getAgent() {
-        return mAgent;
-    }
-
-    /**
-     * @return The location of the goal
-     */
-    public Location getGoal() {
-        return mGoal;
+        return mCurrentState;
     }
 
     /**
@@ -120,6 +105,20 @@ public class ResourceGathering {
      */
     public List<Resource> getResources() {
         return Collections.unmodifiableList(mResources);
+    }
+
+    /**
+     * @return The state that the problem is currently in
+     */
+    public State getCurrentState() {
+        return mCurrentState;
+    }
+
+    /**
+     * @return The location of the goal
+     */
+    public Location getGoal() {
+        return mGoal;
     }
 
 }

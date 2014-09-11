@@ -7,19 +7,17 @@ public class Location {
 
     /** The initial hash value; must be prime */
     private static final int HASH_SEED = 7;
-
     /** The hash offset for following numbers; must be prime */
     private static final int HASH_OFFSET = 31;
 
     /** The x-coordinate for this location */
     public final double x;
-
     /** The y-coordinate for this location */
     public final double y;
 
     /**
      * Creates a new location for the specified coordinates.
-     * 
+     *
      * @param x
      *            The x-coordinate
      * @param y
@@ -32,10 +30,10 @@ public class Location {
 
     /**
      * Sums the coordinates of this location and another to create a new location.
-     * 
+     *
      * @param other
      *            The location to sum coordinates with
-     * 
+     *
      * @return The new location
      */
     public Location sum(final Location other) {
@@ -44,7 +42,7 @@ public class Location {
 
     /**
      * Bounds the coordinates of a location to ensure they're within a certain range.
-     * 
+     *
      * @param minX
      *            The minimum possible x-coordinate value
      * @param maxX
@@ -53,7 +51,7 @@ public class Location {
      *            The minimum possible y-coordinate value
      * @param maxY
      *            The maximum possible y-coordinate value
-     * 
+     *
      * @return The new bound location
      */
     public Location bound(final double minX, final double maxX, final double minY, final double maxY) {
@@ -62,11 +60,11 @@ public class Location {
 
     /**
      * Checks if this location has the same coordinates as the given one.
-     * 
-     * @param location
+     *
+     * @param other
      *            The location to compare
-     * 
-     * @return True of the coordinates are the same, false otherwise
+     *
+     * @return True iff the coordinates are the same
      */
     @Override
     public boolean equals(final Object other) {
@@ -80,7 +78,7 @@ public class Location {
 
     /**
      * Hashes the location based on the coordinates.
-     * 
+     *
      * @return The hash code for the location
      */
     @Override
@@ -92,7 +90,7 @@ public class Location {
     }
 
     /**
-     * @return The location in (x,y) format.
+     * @return The location in (x,y) format
      */
     @Override
     public String toString() {
