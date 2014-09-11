@@ -30,7 +30,7 @@ public class Resource {
      *            The location's y-coordinate
      */
     public Resource(final int type, final double x, final double y) {
-        this(type, x, type, 1, 1);
+        this(type, x, y, 1, 1);
     }
 
     /**
