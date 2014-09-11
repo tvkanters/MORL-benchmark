@@ -170,22 +170,34 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
         // Specify the location of the goal
         final Location goal = mProblem.getGoal();
-        observation.setDouble(i++, goal.x);
-        observation.setDouble(i++, goal.y);
+        final boolean showGoal = (Location.distance(agent, goal) <= mParameters.viewDistance);
+        observation.setDouble(i++, (showGoal ? goal.x : Double.NEGATIVE_INFINITY));
+        observation.setDouble(i++, (showGoal ? goal.y : Double.NEGATIVE_INFINITY));
 
         // Specify the locations of the resources
         final List<Resource> resources = mProblem.getResources();
         int resourceIndex = 0;
         for (final Resource resource : resources) {
-            if (state.isPickedUp(resourceIndex++)) {
-                observation.setDouble(i++, -1);
-                observation.setDouble(i++, -1);
-            } else {
-                final Location location = resource.getLocation();
-                observation.setDouble(i++, location.x);
-                observation.setDouble(i++, location.y);
+            // Determine what resource information to show in the observation
+            final boolean showResource = (!state.isPickedUp(resourceIndex++) && Location.distance(agent,
+                    resource.getLocation()) <= mParameters.viewDistance);
+
+            // Add the available resource information
+            final Location location = resource.getLocation();
+            observation.setDouble(i++, (showResource ? location.x : Double.NEGATIVE_INFINITY));
+            observation.setDouble(i++, (showResource ? location.y : Double.NEGATIVE_INFINITY));
+            observation.setDouble(i++, (showResource ? resource.getType() : Double.NEGATIVE_INFINITY));
+        }
+
+        // Make locations relative to agent in case of partial observability
+        if (!mParameters.fullyObservable) {
+            boolean setX = true;
+            for (i = 0; i < mNumObservations; ++i) {
+                if (i < 4 || (i - 3) % 3 != 0) {
+                    observation.setDouble(i, observation.getDouble(i) - (setX ? agent.x : agent.y));
+                    setX = !setX;
+                }
             }
-            observation.setDouble(i++, resource.getType());
         }
 
         return observation;

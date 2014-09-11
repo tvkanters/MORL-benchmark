@@ -16,6 +16,34 @@ public class Location {
     public final double y;
 
     /**
+     * Sums the coordinates of two locations.
+     *
+     * @param l1
+     *            The left hand location
+     * @param l2
+     *            The right hand location
+     *
+     * @return The summed up location
+     */
+    public static Location sum(final Location l1, final Location l2) {
+        return new Location(l1.x + l2.x, l1.y + l2.y);
+    }
+
+    /**
+     * Calculates the Manhattan distance between two locations.
+     *
+     * @param l1
+     *            The left hand location
+     * @param l2
+     *            The right hand location
+     *
+     * @return The Manhattan distance
+     */
+    public static double distance(final Location l1, final Location l2) {
+        return Math.abs(l1.x - l2.x) + Math.abs(l1.y - l2.y);
+    }
+
+    /**
      * Creates a new location for the specified coordinates.
      *
      * @param x
@@ -26,18 +54,6 @@ public class Location {
     public Location(final double x, final double y) {
         this.x = x;
         this.y = y;
-    }
-
-    /**
-     * Sums the coordinates of this location and another to create a new location.
-     *
-     * @param other
-     *            The location to sum coordinates with
-     *
-     * @return The new location
-     */
-    public Location sum(final Location other) {
-        return new Location(x + other.x, y + other.y);
     }
 
     /**

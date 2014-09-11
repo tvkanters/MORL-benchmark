@@ -168,7 +168,8 @@ public class ResourceGathering {
      */
     private State getNextState(final State state, final DiscreteAction agentAction, final DiscreteAction failAction) {
         // Set the agent's new location bound within the problem size
-        Location nextAgent = state.getAgent().sum(agentAction.getLocation()).sum(failAction.getLocation());
+        Location nextAgent = Location.sum(state.getAgent(),
+                Location.sum(agentAction.getLocation(), failAction.getLocation()));
         nextAgent = nextAgent.bound(0, mParameters.maxX, 0, mParameters.maxY);
 
         // Calculate the reward for this state and picks items up if needed
