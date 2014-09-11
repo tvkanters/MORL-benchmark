@@ -184,7 +184,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
                 observation.setDouble(i++, location.x);
                 observation.setDouble(i++, location.y);
             }
-            observation.setInt(i++, resource.getType());
+            observation.setDouble(i++, resource.getType());
         }
 
         return observation;
