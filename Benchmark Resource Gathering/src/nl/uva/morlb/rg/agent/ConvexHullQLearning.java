@@ -10,62 +10,62 @@ import org.rlcommunity.rlglue.codec.types.Reward;
 
 public class ConvexHullQLearning implements AgentInterface {
 
-	@Override
-	public void agent_init(final String taskSpec) {
-		TaskSpec tSpec = new TaskSpec(taskSpec);
-		System.out.println(taskSpec);
-	}
+    @Override
+    public void agent_init(final String taskSpec) {
+        final TaskSpec tSpec = new TaskSpec(taskSpec);
+        System.out.println(taskSpec);
+    }
 
-	boolean odd = true;
+    boolean odd = true;
 
-	@Override
-	public Action agent_start(final Observation observation) {
-		Action action = new Action(1, 0);
+    @Override
+    public Action agent_start(final Observation observation) {
+        final Action action = new Action(1, 0);
 
-		action.intArray[0] = DiscreteAction.RIGHT.ordinal();
+        action.intArray[0] = DiscreteAction.RIGHT.ordinal();
 
-		return action;
-	}
+        return action;
+    }
 
-	@Override
-	public Action agent_step(final Reward reward, final Observation observation) {
-		Action action = new Action(1, 0);
+    @Override
+    public Action agent_step(final Reward reward, final Observation observation) {
+        final Action action = new Action(1, 0);
 
-		if(odd) {
-			action.intArray[0] = DiscreteAction.RIGHT.ordinal();
-		} else {
-			action.intArray[0] = DiscreteAction.UP.ordinal();
-		}
-		odd = !odd;
+        if (odd) {
+            action.intArray[0] = DiscreteAction.RIGHT.ordinal();
+        } else {
+            action.intArray[0] = DiscreteAction.UP.ordinal();
+        }
+        odd = !odd;
 
-		printReward(reward);
+        printReward(reward);
 
-		return action;
-	}
+        return action;
+    }
 
-	@Override
-	public void agent_end(final Reward reward) {
-		// TODO Auto-generated method stub
+    @Override
+    public void agent_end(final Reward reward) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public void agent_cleanup() {
-		// TODO Auto-generated method stub
+    @Override
+    public void agent_cleanup() {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public String agent_message(final String arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String agent_message(final String arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public void printReward(final Reward reward) {
-		for(double d : reward.doubleArray) {
-			System.out.print( d + " ");
-		}
-		System.out.println();
+    public void printReward(final Reward reward) {
+        for (final double d : reward.doubleArray) {
+            System.out.print(d + " ");
+        }
+        System.out.println();
 
-	}
+    }
 }

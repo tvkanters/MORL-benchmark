@@ -9,22 +9,22 @@ import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 
 public class GlueWrapper {
 
-	public static void main(final String[] args) {
+    public static void main(final String[] args) {
 
-		ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
-		ConvexHullQLearning agent = new ConvexHullQLearning();
+        final ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
+        final ConvexHullQLearning agent = new ConvexHullQLearning();
 
-		agent.agent_init(environment.env_init());
-		Action performedAction = agent.agent_start(environment.env_start());
-		Reward_observation_terminal currentStep =  environment.env_step(performedAction);
+        agent.agent_init(environment.env_init());
+        Action performedAction = agent.agent_start(environment.env_start());
+        Reward_observation_terminal currentStep = environment.env_step(performedAction);
 
-		while(!currentStep.isTerminal()) {
+        while (!currentStep.isTerminal()) {
 
-			performedAction = agent.agent_step(currentStep.r, currentStep.o);
-			currentStep = environment.env_step(performedAction);
-		}
+            performedAction = agent.agent_step(currentStep.r, currentStep.o);
+            currentStep = environment.env_step(performedAction);
+        }
 
-		agent.agent_end(currentStep.r);
+        agent.agent_end(currentStep.r);
 
-	}
+    }
 }
