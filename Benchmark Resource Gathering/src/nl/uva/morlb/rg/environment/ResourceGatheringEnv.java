@@ -50,7 +50,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         mNumObservations = 4 + mParameters.numResources * 3;
         mNumRewards = 1 + mParameters.numResourceTypes;
 
-        // Initialize the problem
+        // Initialise the problem
         mProblem = new ResourceGathering(mParameters);
     }
 
@@ -113,20 +113,21 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
      */
     @Override
     public Reward_observation_terminal env_step(final Action action) {
-        final State state = mProblem.performAction(DiscreteAction.values()[action.getInt(0)]);
+        final double[] rewardValues = mProblem.performAction(DiscreteAction.values()[action.getInt(0)]);
+        final State newState = mProblem.getCurrentState();
 
         final Reward_observation_terminal rewObsTer = new Reward_observation_terminal();
 
         // Get the reward given
         final Reward reward = new Reward(0, mNumRewards, 0);
-        reward.doubleArray = state.getReward();
+        reward.doubleArray = rewardValues;
         rewObsTer.setReward(reward);
 
         // Get the observation of the new state that the action transitioned to
-        rewObsTer.setObservation(getObservation(state));
+        rewObsTer.setObservation(getObservation(newState));
 
         // Check if the resulting state is terminal
-        rewObsTer.setTerminal(state.isTerminal());
+        rewObsTer.setTerminal(newState.isTerminal());
 
         return rewObsTer;
     }
