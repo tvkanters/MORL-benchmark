@@ -43,7 +43,6 @@ public class ResourceGathering {
         mGoal = new Location(mParameters.maxX, mParameters.maxY);
 
         mInitialState = new State(new Location(0, 0), mResources.size());
-        reset();
     }
 
     /**
@@ -51,6 +50,7 @@ public class ResourceGathering {
      */
     public void reset() {
         mCurrentState = mInitialState;
+        System.out.println("ENV: New state is " + mCurrentState);
     }
 
     /**
@@ -78,6 +78,7 @@ public class ResourceGathering {
         }
 
         mCurrentState = getNextState(mCurrentState, action, failAction);
+        System.out.println("ENV: New state is " + mCurrentState);
         return mCurrentState;
     }
 

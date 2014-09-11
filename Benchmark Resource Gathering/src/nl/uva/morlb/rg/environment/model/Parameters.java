@@ -34,7 +34,7 @@ public class Parameters {
 
     /**
      * Creates a new parameter set for a discrete problem.
-     * 
+     *
      * @param maxX
      *            The highest possible x value of a location
      * @param maxY

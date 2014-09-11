@@ -9,4 +9,5 @@ public class Util {
 
     /** A random number generator for stochastic purposes */
     public static final Random RNG = new Random();
+
 }
