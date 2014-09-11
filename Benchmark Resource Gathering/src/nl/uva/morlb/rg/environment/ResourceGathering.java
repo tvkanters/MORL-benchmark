@@ -34,6 +34,8 @@ public class ResourceGathering {
     private final State mInitialState;
     /** The state that the problem is currently in */
     private State mCurrentState;
+    /** The amount of steps taken */
+    private int mStepCount = 0;
 
     /**
      * Creates a new resource gathering problem based on the given parameters.
@@ -55,6 +57,7 @@ public class ResourceGathering {
      */
     public void reset() {
         mCurrentState = mInitialState;
+        mStepCount = 0;
         Log.d("ENV: New state is " + mCurrentState);
     }
 
@@ -65,13 +68,12 @@ public class ResourceGathering {
      * @param action
      *            The action to perform
      *
-     * @return The reward resulting from performing the action
+     * @return The discounted reward resulting from performing the action
      */
     public double[] performAction(final DiscreteAction action) {
         if (!mParameters.actionsExpanded && action.ordinal() > 4) {
             throw new InvalidParameterException("Action value cannot exceed 4 with a non-expanded action space");
         }
-        
 
         // Log possible next states for debugging purposes
         if (Log.D) {
@@ -103,11 +105,12 @@ public class ResourceGathering {
         final RewardRange[] rewardRanges = getRewardRanges(mCurrentState, nextState);
         final double[] reward = new double[rewardRanges.length];
         for (int i = 0; i < reward.length; ++i) {
-            reward[i] = rewardRanges[i].calculateReward();
+            reward[i] = rewardRanges[i].calculateReward() * Math.pow(mParameters.discountFactor, mStepCount);
         }
 
         // Make the transition to the next state
         mCurrentState = nextState;
+        ++mStepCount;
 
         return reward;
     }
@@ -185,7 +188,8 @@ public class ResourceGathering {
     }
 
     /**
-     * Determines the reward ranges that can be given for a state transition for every objective.
+     * Determines the reward ranges that can be given for a state transition for every objective. Does NOT take discount
+     * factors into account.
      *
      * @param initialState
      *            The state before transitioning
