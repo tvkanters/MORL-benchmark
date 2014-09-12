@@ -53,6 +53,18 @@ public class Resource {
     }
 
     /**
+     * Checks if this resource is collected based on the Manhattan distance between them.
+     *
+     * @param agent
+     *            The agent's location
+     *
+     * @return True iff the agent is near enough to collect the resource
+     */
+    public boolean isCollected(final Location agent) {
+        return Location.distance(agent, mLocation) < 1;
+    }
+
+    /**
      * @return The reward for collecting this resource
      */
     public RewardRange getReward() {

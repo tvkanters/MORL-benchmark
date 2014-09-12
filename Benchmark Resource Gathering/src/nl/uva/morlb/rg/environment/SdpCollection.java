@@ -21,7 +21,7 @@ public class SdpCollection {
         resources.add(new Resource(0, 1, 2));
         resources.add(new Resource(1, 2, 1));
 
-        return new Parameters(3, 3, resources, false, 1, 0, Parameters.FULLY_OBSERVABLE);
+        return new Parameters(3, 3, resources, false, 1, 0, Parameters.FULLY_OBSERVABLE, false);
     }
 
 }
