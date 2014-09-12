@@ -171,8 +171,8 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         // Specify the location of the goal
         final Location goal = mProblem.getGoal();
         final boolean showGoal = (Location.distance(agent, goal) <= mParameters.viewDistance);
-        observation.setDouble(i++, (showGoal ? goal.x : Double.NEGATIVE_INFINITY));
-        observation.setDouble(i++, (showGoal ? goal.y : Double.NEGATIVE_INFINITY));
+        observation.setDouble(i++, (showGoal ? goal.x : Double.NaN));
+        observation.setDouble(i++, (showGoal ? goal.y : Double.NaN));
 
         // Specify the locations of the resources
         final List<Resource> resources = mProblem.getResources();
@@ -184,9 +184,9 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
             // Add the available resource information
             final Location location = resource.getLocation();
-            observation.setDouble(i++, (showResource ? location.x : Double.NEGATIVE_INFINITY));
-            observation.setDouble(i++, (showResource ? location.y : Double.NEGATIVE_INFINITY));
-            observation.setDouble(i++, (showResource ? resource.getType() : Double.NEGATIVE_INFINITY));
+            observation.setDouble(i++, (showResource ? location.x : Double.NaN));
+            observation.setDouble(i++, (showResource ? location.y : Double.NaN));
+            observation.setDouble(i++, (showResource ? resource.getType() : Double.NaN));
         }
 
         // Make locations relative to agent in case of partial observability
