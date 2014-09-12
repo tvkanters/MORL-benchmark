@@ -9,6 +9,8 @@ import java.util.List;
  */
 public class Parameters {
 
+    public static final double FULLY_OBSERVABLE = Double.POSITIVE_INFINITY;
+
     /** The highest possible x value of a location */
     public final double maxX;
     /** The highest possible y value of a location */
@@ -23,18 +25,22 @@ public class Parameters {
 
     /** Whether or not the action space has an increased size */
     public final boolean actionsExpanded;
+    /** The probability that an additional random action will be performed when taking an action */
+    public final double actionFailProb;
 
     /** Whether or not the problem has a finite horizon rather than an infinite horizon */
     public final boolean finiteHorizon;
     /** The discount factor applied to rewards */
     public final double discountFactor;
 
-    /** The probability that an additional random action will be performed when taking an action */
-    public final double actionFailProb;
+    /** Whether or not the state is fully observable */
+    public final boolean fullyObservable;
+    /** The maximum Manhattan distance that an agent can see in a partial observable setting */
+    public final double viewDistance;
 
     /**
      * Creates a new parameter set for a discrete problem.
-     * 
+     *
      * @param maxX
      *            The highest possible x value of a location
      * @param maxY
@@ -47,9 +53,13 @@ public class Parameters {
      *            The discount factor applied to rewards, indicates a finite horizon problem when the value is 1
      * @param actionFailProb
      *            The probability that an additional random action will be performed when taking an action
+     * @param viewDistance
+     *            The maximum Manhattan distance that an agent can see, {@link #FULLY_OBSERVABLE} indicates full
+     *            observability
      */
     public Parameters(final double maxX, final double maxY, final List<Resource> resources,
-            final boolean actionsExpanded, final double discountFactor, final double actionFailProb) {
+            final boolean actionsExpanded, final double discountFactor, final double actionFailProb,
+            final double viewDistance) {
         // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
@@ -79,6 +89,10 @@ public class Parameters {
 
         }
         this.actionFailProb = actionFailProb;
+
+        // Define the observability of the problem
+        fullyObservable = (viewDistance == Integer.MAX_VALUE);
+        this.viewDistance = viewDistance;
     }
 
 }

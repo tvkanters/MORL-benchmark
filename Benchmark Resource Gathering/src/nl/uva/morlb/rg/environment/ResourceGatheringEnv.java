@@ -50,7 +50,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         mNumObservations = 4 + mParameters.numResources * 3;
         mNumRewards = 1 + mParameters.numResourceTypes;
 
-        // Initialize the problem
+        // Initialise the problem
         mProblem = new ResourceGathering(mParameters);
     }
 
@@ -113,20 +113,21 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
      */
     @Override
     public Reward_observation_terminal env_step(final Action action) {
-        final State state = mProblem.performAction(DiscreteAction.values()[action.getInt(0)]);
+        final double[] rewardValues = mProblem.performAction(DiscreteAction.values()[action.getInt(0)]);
+        final State newState = mProblem.getCurrentState();
 
         final Reward_observation_terminal rewObsTer = new Reward_observation_terminal();
 
         // Get the reward given
         final Reward reward = new Reward(0, mNumRewards, 0);
-        reward.doubleArray = state.getReward();
+        reward.doubleArray = rewardValues;
         rewObsTer.setReward(reward);
 
         // Get the observation of the new state that the action transitioned to
-        rewObsTer.setObservation(getObservation(state));
+        rewObsTer.setObservation(getObservation(newState));
 
         // Check if the resulting state is terminal
-        rewObsTer.setTerminal(state.isTerminal());
+        rewObsTer.setTerminal(newState.isTerminal());
 
         return rewObsTer;
     }
@@ -169,22 +170,34 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
         // Specify the location of the goal
         final Location goal = mProblem.getGoal();
-        observation.setDouble(i++, goal.x);
-        observation.setDouble(i++, goal.y);
+        final boolean showGoal = (Location.distance(agent, goal) <= mParameters.viewDistance);
+        observation.setDouble(i++, (showGoal ? goal.x : Double.NaN));
+        observation.setDouble(i++, (showGoal ? goal.y : Double.NaN));
 
         // Specify the locations of the resources
         final List<Resource> resources = mProblem.getResources();
         int resourceIndex = 0;
         for (final Resource resource : resources) {
-            if (state.isPickedUp(resourceIndex++)) {
-                observation.setDouble(i++, -1);
-                observation.setDouble(i++, -1);
-            } else {
-                final Location location = resource.getLocation();
-                observation.setDouble(i++, location.x);
-                observation.setDouble(i++, location.y);
+            // Determine what resource information to show in the observation
+            final boolean showResource = (!state.isPickedUp(resourceIndex++) && Location.distance(agent,
+                    resource.getLocation()) <= mParameters.viewDistance);
+
+            // Add the available resource information
+            final Location location = resource.getLocation();
+            observation.setDouble(i++, (showResource ? location.x : Double.NaN));
+            observation.setDouble(i++, (showResource ? location.y : Double.NaN));
+            observation.setDouble(i++, (showResource ? resource.getType() : Double.NaN));
+        }
+
+        // Make locations relative to agent in case of partial observability
+        if (!mParameters.fullyObservable) {
+            boolean setX = true;
+            for (i = 0; i < mNumObservations; ++i) {
+                if (i < 4 || (i - 3) % 3 != 0) {
+                    observation.setDouble(i, observation.getDouble(i) - (setX ? agent.x : agent.y));
+                    setX = !setX;
+                }
             }
-            observation.setDouble(i++, resource.getType());
         }
 
         return observation;

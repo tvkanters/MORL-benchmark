@@ -17,8 +17,6 @@ public class State {
     private final Location mAgent;
     /** A value for each resource indicating whether it has been picked up */
     private final boolean[] mPickedUp;
-    /** The reward for each objective given when the problem transitioned to this state */
-    private final double[] mReward;
     /** Whether or not the state is a terminal state */
     private final boolean mTerminal;
 
@@ -31,7 +29,7 @@ public class State {
      *            The amount of resources in the problem
      */
     public State(final Location agent, final int numResources) {
-        this(agent, new boolean[numResources], new double[] {}, false);
+        this(agent, new boolean[numResources], false);
     }
 
     /**
@@ -41,15 +39,12 @@ public class State {
      *            The agent's location
      * @param pickedUp
      *            A value for each resource indicating whether it has been picked up
-     * @param reward
-     *            The reward for each objective given when the problem transitioned to this state
      * @param terminal
      *            Whether or not the state is a terminal state
      */
-    public State(final Location agent, final boolean[] pickedUp, final double[] reward, final boolean terminal) {
+    public State(final Location agent, final boolean[] pickedUp, final boolean terminal) {
         mAgent = agent;
         mPickedUp = pickedUp;
-        mReward = reward;
         mTerminal = terminal;
     }
 
@@ -80,13 +75,6 @@ public class State {
     }
 
     /**
-     * @return The reward for each objective given when the problem transitioned to this state
-     */
-    public double[] getReward() {
-        return mReward.clone();
-    }
-
-    /**
      * @return Whether or not the state is a terminal state
      */
     public boolean isTerminal() {
@@ -108,8 +96,7 @@ public class State {
         }
 
         final State state = (State) other;
-        return mAgent.equals(state.mAgent) && Arrays.equals(mPickedUp, state.mPickedUp)
-                && Arrays.equals(mReward, state.mReward);
+        return mAgent.equals(state.mAgent) && Arrays.equals(mPickedUp, state.mPickedUp);
     }
 
     /**
@@ -121,8 +108,7 @@ public class State {
     public int hashCode() {
         int intHash = HASH_SEED;
         intHash = intHash * HASH_OFFSET + mAgent.hashCode();
-        intHash = intHash * HASH_OFFSET + mPickedUp.hashCode();
-        intHash = intHash * HASH_OFFSET + mReward.hashCode();
+        intHash = intHash * HASH_OFFSET + Arrays.hashCode(mPickedUp);
         return intHash;
     }
 

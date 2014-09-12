@@ -2,8 +2,6 @@ package nl.uva.morlb.rg.environment.model;
 
 import java.security.InvalidParameterException;
 
-import nl.uva.morlb.util.Util;
-
 /**
  * A resource placed in a resource gathering problem.
  */
@@ -11,16 +9,13 @@ public class Resource {
 
     /** The type of resource */
     private final int mType;
-    /** The minimum possible reward for collecting this resource */
-    private final double mMinReward;
-    /** The maximum possible reward for collecting this resource */
-    private final double mMaxReward;
-
+    /** The reward for collecting this resource */
+    private final RewardRange mReward;
     /** The location of the resource */
     private final Location mLocation;
 
     /**
-     * Creates a resource to place in a problem
+     * Creates a resource to place in a problem.
      *
      * @param type
      *            The type of resource
@@ -30,11 +25,11 @@ public class Resource {
      *            The location's y-coordinate
      */
     public Resource(final int type, final double x, final double y) {
-        this(type, x, type, 1, 1);
+        this(type, x, y, 1, 1);
     }
 
     /**
-     * Creates a resource to place in a problem
+     * Creates a resource to place in a problem.
      *
      * @param type
      *            The type of resource
@@ -51,15 +46,17 @@ public class Resource {
         if (type < 0) {
             throw new InvalidParameterException("Resource types must be 0 or higher");
         }
+
         mType = type;
-
-        if (minReward > maxReward) {
-            throw new InvalidParameterException("Minimum reward may now exceed maximum reward");
-        }
-        mMinReward = minReward;
-        mMaxReward = maxReward;
-
+        mReward = new RewardRange(minReward, maxReward);
         mLocation = new Location(x, y);
+    }
+
+    /**
+     * @return The reward for collecting this resource
+     */
+    public RewardRange getReward() {
+        return mReward;
     }
 
     /**
@@ -67,16 +64,6 @@ public class Resource {
      */
     public int getType() {
         return mType;
-    }
-
-    /**
-     * Calculates the reward that should be given when the resource is collected. When the minimal reward is different
-     * from the maximum reward, a uniformly chosen random reward will be returned.
-     *
-     * @return A reward for collecting this resource
-     */
-    public double calculateReward() {
-        return Util.RNG.nextDouble() * (mMaxReward - mMinReward) + mMinReward;
     }
 
     /**
