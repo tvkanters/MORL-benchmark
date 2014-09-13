@@ -18,8 +18,8 @@ public class SdpCollection {
      */
     public static Parameters getSimpleProblem() {
         final List<Resource> resources = new LinkedList<>();
-        resources.add(new Resource(0, 1, 2));
-        resources.add(new Resource(1, 2, 1));
+        //        resources.add(new Resource(0, 1, 2));
+        //        resources.add(new Resource(1, 2, 1));
 
         return new Parameters(3, 3, resources, false, 1, 0, Parameters.FULLY_OBSERVABLE);
     }

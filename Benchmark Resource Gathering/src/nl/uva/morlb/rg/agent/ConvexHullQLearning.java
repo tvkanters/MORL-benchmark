@@ -75,7 +75,14 @@ public class ConvexHullQLearning implements AgentInterface {
 
     @Override
     public Action agent_step(final Reward reward, final Observation observation) {
+        for(int i = 1; i < reward.doubleArray.length; ++i) {
+            if(reward.doubleArray[i] != 0) {
+                inventory[i-1] = true;
+            }
+        }
         State state = generateState(observation);
+        System.out.println(state.hashCode());
+
 
         double[] adjacentQValues = new double[3];
         for(int i = 0; i < 5; ++i) {
@@ -100,13 +107,13 @@ public class ConvexHullQLearning implements AgentInterface {
     @Override
     public void agent_end(final Reward reward) {
 
-        for(int x = 0; x < 4; ++x) {
-            for(int y = 0; y < 4; ++y) {
+        for(int y = 3; y >= 0; --y) {
+            for(int x = 0; x < 4; ++x) {
 
                 Location location = new Location(x, y);
 
-                State state = new State(location, inventory);
-                System.out.print(mQTable.get(new QTableEntry(state, DiscreteAction.values()[1]))[0] +" ");
+                State state = new State(location, inventoryHack[3]);
+                System.out.print(mQTable.get(new QTableEntry(state, DiscreteAction.values()[2]))[0] +" ");
 
             }
             System.out.println();

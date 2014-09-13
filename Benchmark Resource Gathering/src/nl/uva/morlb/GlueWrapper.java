@@ -1,6 +1,6 @@
 package nl.uva.morlb;
 
-import nl.uva.morlb.rg.agent.DumbAgent;
+import nl.uva.morlb.rg.agent.ConvexHullQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 
@@ -15,7 +15,7 @@ public class GlueWrapper {
     public static void main(final String[] args) {
         // Prepare the environment and agent
         final ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
-        final DumbAgent agent = new DumbAgent();
+        final ConvexHullQLearning agent = new ConvexHullQLearning();
         agent.agent_init(environment.env_init());
 
         // Start the episode until a terminal state is reached
