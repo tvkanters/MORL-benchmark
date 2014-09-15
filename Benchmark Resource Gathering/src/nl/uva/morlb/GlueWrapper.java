@@ -5,7 +5,6 @@ import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
-import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 
@@ -16,7 +15,7 @@ public class GlueWrapper {
 
     public static void main(final String[] args) {
         // Prepare the environment and agent
-        final EnvironmentInterface environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
+        final ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
         final AgentInterface agent = new DumbAgent();
         agent.agent_init(environment.env_init());
 

@@ -17,35 +17,30 @@ public class State {
     private final Location mAgent;
     /** A value for each resource indicating whether it has been picked up */
     private final boolean[] mPickedUp;
-    /** Whether or not the state is a terminal state */
-    private final boolean mTerminal;
 
     /**
      * Creates a new state with the given variables.
-     *
+     * 
      * @param agent
      *            The agent's location
      * @param numResources
      *            The amount of resources in the problem
      */
     public State(final Location agent, final int numResources) {
-        this(agent, new boolean[numResources], false);
+        this(agent, new boolean[numResources]);
     }
 
     /**
      * Creates a new state with the given variables.
-     *
+     * 
      * @param agent
      *            The agent's location
      * @param pickedUp
      *            A value for each resource indicating whether it has been picked up
-     * @param terminal
-     *            Whether or not the state is a terminal state
      */
-    public State(final Location agent, final boolean[] pickedUp, final boolean terminal) {
+    public State(final Location agent, final boolean[] pickedUp) {
         mAgent = agent;
         mPickedUp = pickedUp;
-        mTerminal = terminal;
     }
 
     /**
@@ -57,10 +52,10 @@ public class State {
 
     /**
      * Checks if the resource at a given index has been picked up.
-     *
+     * 
      * @param index
      *            The resource index
-     *
+     * 
      * @return True iff the resource has been picked up
      */
     public boolean isPickedUp(final int index) {
@@ -75,18 +70,11 @@ public class State {
     }
 
     /**
-     * @return Whether or not the state is a terminal state
-     */
-    public boolean isTerminal() {
-        return mTerminal;
-    }
-
-    /**
      * Checks if this state has the same contents as the given one.
-     *
+     * 
      * @param other
      *            The state to compare
-     *
+     * 
      * @return True iff the contents are the same
      */
     @Override
@@ -101,7 +89,7 @@ public class State {
 
     /**
      * Hashes the state based on the contents.
-     *
+     * 
      * @return The hash code for the state
      */
     @Override
@@ -124,5 +112,33 @@ public class State {
         str += ")";
 
         return str;
+    }
+
+    /**
+     * Creates a state from a string representation of a state.
+     * 
+     * @param str
+     *            The string representation of a state
+     * 
+     * @return The state
+     */
+    public static State fromString(final String str) {
+        int prevComma = 0;
+        int nextComma;
+
+        nextComma = str.indexOf(',');
+        final double x = Double.parseDouble(str.substring(prevComma + 1, nextComma));
+
+        prevComma = nextComma;
+        nextComma = str.indexOf(',', nextComma + 1);
+        final double y = Double.parseDouble(str.substring(prevComma + 1, nextComma));
+
+        final String[] pickedUpStr = str.substring(nextComma + 1, str.length() - 1).split(",");
+        final boolean[] pickedUp = new boolean[pickedUpStr.length];
+        for (int i = 0; i < pickedUp.length; ++i) {
+            pickedUp[i] = pickedUpStr[i].equals("1");
+        }
+
+        return new State(new Location(x, y), pickedUp);
     }
 }
