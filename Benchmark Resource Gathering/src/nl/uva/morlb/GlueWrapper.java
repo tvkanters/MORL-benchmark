@@ -15,9 +15,11 @@ public class GlueWrapper {
 
     public static void main(final String[] args) {
         // Prepare the environment and agent
+
         ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
         final AgentInterface agent = new ScalarizedQLearning();
         //        final AgentInterface agent = new DumbAgent();
+
         agent.agent_init(environment.env_init());
 
         for(int episodeCounter = 0; episodeCounter < 100000; ++episodeCounter) {

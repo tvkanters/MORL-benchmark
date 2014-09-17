@@ -39,7 +39,7 @@ public class ResourceGathering {
 
     /**
      * Creates a new resource gathering problem based on the given parameters.
-     *
+     * 
      * @param parameters
      *            The parameters that define the shape of the problem
      */
@@ -64,10 +64,10 @@ public class ResourceGathering {
     /**
      * Lets the agent perform a certain action to transition to the next state and collect a reward. This method may
      * contain stochasticity. The action must follow the parameter's action space size restrictions.
-     *
+     * 
      * @param action
      *            The action to perform
-     *
+     * 
      * @return The discounted reward resulting from performing the action
      */
     public double[] performAction(final DiscreteAction action) {
@@ -93,10 +93,10 @@ public class ResourceGathering {
     /**
      * Lets the agent perform a certain action to transition to the next state and collect a reward. This method may
      * contain stochasticity. The action must follow the parameter's action space size restrictions.
-     *
+     * 
      * @param action
      *            The action to perform
-     *
+     * 
      * @return The discounted reward resulting from performing the action
      */
     public double[] performAction(final Location action) {
@@ -137,12 +137,12 @@ public class ResourceGathering {
     /**
      * Determines all possible outcomes given a state and discrete action. The states contain the reward that was
      * achieved through the transition.
-     *
+     * 
      * @param state
      *            The current state
      * @param action
      *            The action performed by the agent
-     *
+     * 
      * @return All possible resulting states mapped to their probabilities
      */
     public Map<State, Double> getPossibleTransitions(final State state, final DiscreteAction action) {
@@ -176,14 +176,14 @@ public class ResourceGathering {
     /**
      * Determines the state resulting of performing an agent action and applying the failure action. Does not contain
      * any stochasticity.
-     *
+     * 
      * @param state
      *            The current state
      * @param agentAction
      *            The action chosen by the agent
      * @param failAction
      *            The action added as a failure
-     *
+     * 
      * @return The resulting next state
      */
     private State getNextState(final State state, final Location agentAction, final Location failAction) {
@@ -204,18 +204,18 @@ public class ResourceGathering {
         }
 
         // Add the state and probability to the possible outcomes
-        return new State(nextAgent, pickedUp, nextAgent.equals(mGoal));
+        return new State(nextAgent, pickedUp);
     }
 
     /**
      * Determines the reward ranges that can be given for a state transition for every objective. Does NOT take discount
      * factors into account.
-     *
+     * 
      * @param initialState
      *            The state before transitioning
      * @param resultingState
      *            The state after transitioning
-     *
+     * 
      * @return The reward ranges for every objective
      */
     public RewardRange[] getRewardRanges(final State initialState, final State resultingState) {
@@ -237,6 +237,18 @@ public class ResourceGathering {
         }
 
         return reward;
+    }
+
+    /**
+     * Checks if the given state is terminal.
+     * 
+     * @param state
+     *            The state to check
+     * 
+     * @return True iff the state is terminal
+     */
+    public boolean isTerminal(final State state) {
+        return state.getAgent().equals(mGoal);
     }
 
     /**
