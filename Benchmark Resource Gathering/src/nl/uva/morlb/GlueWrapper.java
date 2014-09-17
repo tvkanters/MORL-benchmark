@@ -1,11 +1,10 @@
 package nl.uva.morlb;
 
-import nl.uva.morlb.rg.agent.DumbAgent;
+import nl.uva.morlb.rg.agent.ScalarizedQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
-import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 
@@ -16,20 +15,29 @@ public class GlueWrapper {
 
     public static void main(final String[] args) {
         // Prepare the environment and agent
-        final EnvironmentInterface environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
-        final AgentInterface agent = new DumbAgent();
+
+        ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
+        final AgentInterface agent = new ScalarizedQLearning();
+        //        final AgentInterface agent = new DumbAgent();
+
         agent.agent_init(environment.env_init());
 
-        // Start the episode until a terminal state is reached
-        Action performedAction = agent.agent_start(environment.env_start());
-        Reward_observation_terminal currentStep = environment.env_step(performedAction);
+        for(int episodeCounter = 0; episodeCounter < 100000; ++episodeCounter) {
+            environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
 
-        while (!currentStep.isTerminal()) {
-            performedAction = agent.agent_step(currentStep.r, currentStep.o);
-            currentStep = environment.env_step(performedAction);
+            // Start the episode until a terminal state is reached
+            Action performedAction = agent.agent_start(environment.env_start());
+            Reward_observation_terminal currentStep = environment.env_step(performedAction);
+
+            while (!currentStep.isTerminal()) {
+                performedAction = agent.agent_step(currentStep.r, currentStep.o);
+                currentStep = environment.env_step(performedAction);
+            }
+
+            agent.agent_end(currentStep.r);
         }
 
-        agent.agent_end(currentStep.r);
+        agent.agent_cleanup();
     }
 
 }

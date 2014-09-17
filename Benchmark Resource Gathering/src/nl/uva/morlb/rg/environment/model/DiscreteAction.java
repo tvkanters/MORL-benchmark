@@ -1,5 +1,7 @@
 package nl.uva.morlb.rg.environment.model;
 
+import org.rlcommunity.rlglue.codec.types.Action;
+
 /**
  * Denotes the different possible actions an agent can perform.
  */
@@ -35,6 +37,18 @@ public enum DiscreteAction {
      */
     public Location getLocation() {
         return mLocation;
+    }
+
+    /**
+     * Converts this action into the appropriate rl-glue action
+     * 
+     * @return The rl-glue action
+     */
+    public Action convertToRLGlueAction() {
+        Action action = new Action(1, 0);
+        action.intArray[0] = this.ordinal();
+
+        return action;
     }
 
 }

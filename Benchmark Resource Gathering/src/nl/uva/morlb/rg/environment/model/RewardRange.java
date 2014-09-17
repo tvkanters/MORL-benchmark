@@ -16,7 +16,7 @@ public class RewardRange {
 
     /**
      * Creates reward specification for a resource
-     *
+     * 
      * @param min
      *            The minimum possible reward for collecting a resource
      * @param max
@@ -33,7 +33,7 @@ public class RewardRange {
     /**
      * Calculates the reward that should be given when a resource is collected. When the minimal reward is different
      * from a maximum reward, a uniformly chosen random reward will be returned.
-     *
+     * 
      * @return A reward for collecting a resource
      */
     public double calculateReward() {
@@ -42,14 +42,22 @@ public class RewardRange {
 
     /**
      * Sums the range of this reward and another to create a new reward specification.
-     *
+     * 
      * @param other
      *            The reward to sum the range with
-     *
+     * 
      * @return The new reward
      */
     public RewardRange sum(final RewardRange other) {
         return new RewardRange(min + other.min, max + other.max);
+    }
+
+    /**
+     * @return The reward range in [min,max] format
+     */
+    @Override
+    public String toString() {
+        return "[" + min + "," + max + "]";
     }
 
 }
