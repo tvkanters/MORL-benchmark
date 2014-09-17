@@ -1,5 +1,6 @@
 package nl.uva.morlb.rg.environment;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
@@ -61,7 +62,6 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
     public String env_init() {
         // Task specification
         final TaskSpecVRLGLUE3 taskSpec = new TaskSpecVRLGLUE3();
-        taskSpec.setEpisodic();
 
         // Specify x and y observations for the agent position and the goal position
         taskSpec.addContinuousObservation(new DoubleRange(0, mParameters.maxX));
@@ -76,17 +76,24 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
             taskSpec.addContinuousObservation(new DoubleRange(0, mParameters.numResourceTypes));
         }
 
-        // Specify the action space size
-        taskSpec.addDiscreteAction(new IntRange(0, (mParameters.actionsExpanded ? 8 : 4)));
-
         // Specify the number of objectives as the amount of resource types and time taken
         taskSpec.setNumOfObjectives(mParameters.numResourceTypes + 1);
 
-        // Specify the map dimensions
-        taskSpec.setExtra(mParameters.maxX + "," + mParameters.maxY);
+        // Specify the action space
+        if (mParameters.continuousStatesActions) {
+            taskSpec.addContinuousAction(new DoubleRange(-mParameters.maxStepSize, mParameters.maxStepSize));
+            taskSpec.addContinuousAction(new DoubleRange(-mParameters.maxStepSize, mParameters.maxStepSize));
+        } else {
+            taskSpec.addDiscreteAction(new IntRange(0, (mParameters.actionsExpanded ? 8 : 4)));
+        }
 
-        // Set the discount factor
-        taskSpec.setDiscountFactor(mParameters.discountFactor);
+        // Set the (in)finite horizon property
+        if (mParameters.finiteHorizon) {
+            taskSpec.setEpisodic();
+        } else {
+            taskSpec.setContinuing();
+            taskSpec.setDiscountFactor(mParameters.discountFactor);
+        }
 
         // Convert specification object to a string
         final String taskSpecString = taskSpec.toTaskSpec();
@@ -113,7 +120,18 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
      */
     @Override
     public Reward_observation_terminal env_step(final Action action) {
-        final double[] rewardValues = mProblem.performAction(DiscreteAction.values()[action.getInt(0)]);
+        final double[] rewardValues;
+        if (mParameters.continuousStatesActions) {
+            final double x = action.getDouble(0);
+            final double y = action.getDouble(1);
+            if (Math.abs(x) > mParameters.maxStepSize || Math.abs(y) > mParameters.maxStepSize) {
+                throw new InvalidParameterException("Actions may not exceed " + mParameters.maxStepSize);
+            }
+            rewardValues = mProblem.performAction(new Location(x, y));
+        } else {
+            rewardValues = mProblem.performAction(DiscreteAction.values()[action.getInt(0)]);
+        }
+
         final State newState = mProblem.getCurrentState();
 
         final Reward_observation_terminal rewObsTer = new Reward_observation_terminal();

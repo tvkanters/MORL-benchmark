@@ -76,7 +76,7 @@ public class ResourceGathering {
         }
 
         // Log possible next states for debugging purposes
-        if (Log.D) {
+        if (Log.D && !mParameters.fullyObservable) {
             Log.d("");
             Log.d("ENV: Performing action " + action);
             Log.d("ENV: Possible results");
@@ -87,14 +87,33 @@ public class ResourceGathering {
             Log.d("");
         }
 
+        return performAction(action.getLocation());
+    }
+
+    /**
+     * Lets the agent perform a certain action to transition to the next state and collect a reward. This method may
+     * contain stochasticity. The action must follow the parameter's action space size restrictions.
+     *
+     * @param action
+     *            The action to perform
+     *
+     * @return The discounted reward resulting from performing the action
+     */
+    public double[] performAction(final Location action) {
         // Determine which failure action to add to the agent's action
-        final DiscreteAction failAction;
+        final Location failAction;
         if (Util.RNG.nextDouble() < mParameters.actionFailProb) {
-            // Determine which action from 1 to 8 is the failure that altered the next state outcome
-            final int failureIndex = Util.RNG.nextInt(mParameters.actionsExpanded ? 7 : 3) + 1;
-            failAction = DiscreteAction.values()[failureIndex];
+            // Determine which action to modify the requested action with
+            if (mParameters.continuousStatesActions) {
+                final double xFail = Util.RNG.nextDouble() * mParameters.maxStepSize * 2 - mParameters.maxStepSize;
+                final double yFail = Util.RNG.nextDouble() * mParameters.maxStepSize * 2 - mParameters.maxStepSize;
+                failAction = new Location(xFail, yFail);
+            } else {
+                final int failureIndex = Util.RNG.nextInt(mParameters.actionsExpanded ? 7 : 3) + 1;
+                failAction = DiscreteAction.values()[failureIndex].getLocation();
+            }
         } else {
-            failAction = DiscreteAction.WAIT;
+            failAction = new Location(0, 0);
         }
 
         // Determine the next state
@@ -116,8 +135,8 @@ public class ResourceGathering {
     }
 
     /**
-     * Determines all possible outcomes given an state and action. The states contain the reward that was achieved
-     * through the transition.
+     * Determines all possible outcomes given a state and discrete action. The states contain the reward that was
+     * achieved through the transition.
      *
      * @param state
      *            The current state
@@ -132,7 +151,8 @@ public class ResourceGathering {
         // Add a second fail step (handles no failure with the WAIT action)
         final int numSecondActions = (mParameters.actionFailProb > 0 ? (mParameters.actionsExpanded ? 8 : 4) : 1);
         for (int actionIndex = 0; actionIndex < numSecondActions; ++actionIndex) {
-            final State nextState = getNextState(state, action, DiscreteAction.values()[actionIndex]);
+            final State nextState = getNextState(state, action.getLocation(),
+                    DiscreteAction.values()[actionIndex].getLocation());
 
             // Calculate the probability of transitioning to this state
             double probability;
@@ -166,22 +186,21 @@ public class ResourceGathering {
      *
      * @return The resulting next state
      */
-    private State getNextState(final State state, final DiscreteAction agentAction, final DiscreteAction failAction) {
+    private State getNextState(final State state, final Location agentAction, final Location failAction) {
         // Set the agent's new location bound within the problem size
-        Location nextAgent = Location.sum(state.getAgent(),
-                Location.sum(agentAction.getLocation(), failAction.getLocation()));
+        Location nextAgent = Location.sum(state.getAgent(), Location.sum(agentAction, failAction));
         nextAgent = nextAgent.bound(0, mParameters.maxX, 0, mParameters.maxY);
 
         // Calculate the reward for this state and picks items up if needed
-        int resourceIndex = 0;
         final boolean[] pickedUp = state.getPickedUp();
-        for (final Resource resource : mResources) {
-            if (!pickedUp[resourceIndex] && nextAgent.equals(resource.getLocation())) {
-                if (mParameters.finiteHorizon) {
+        if (mParameters.finiteHorizon) {
+            int resourceIndex = 0;
+            for (final Resource resource : mResources) {
+                if (!pickedUp[resourceIndex] && resource.isCollected(nextAgent)) {
                     pickedUp[resourceIndex] = true;
                 }
+                ++resourceIndex;
             }
-            ++resourceIndex;
         }
 
         // Add the state and probability to the possible outcomes
@@ -210,7 +229,7 @@ public class ResourceGathering {
         // Sum the reward ranges of every picked up resource in their respective objective
         int resourceIndex = 0;
         for (final Resource resource : mResources) {
-            if (!initialState.isPickedUp(resourceIndex) && resultingState.getAgent().equals(resource.getLocation())) {
+            if (!initialState.isPickedUp(resourceIndex) && resource.isCollected(resultingState.getAgent())) {
                 final int rewardIndex = resource.getType() + 1;
                 reward[rewardIndex] = reward[rewardIndex].sum(resource.getReward());
             }

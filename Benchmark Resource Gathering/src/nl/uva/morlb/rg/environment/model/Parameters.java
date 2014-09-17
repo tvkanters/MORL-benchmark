@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class Parameters {
 
+    /** The value indicating a fully observable state */
     public static final double FULLY_OBSERVABLE = Double.POSITIVE_INFINITY;
 
     /** The highest possible x value of a location */
@@ -38,6 +39,11 @@ public class Parameters {
     /** The maximum Manhattan distance that an agent can see in a partial observable setting */
     public final double viewDistance;
 
+    /** Whether or not the state and actions are continuous */
+    public final boolean continuousStatesActions;
+    /** The maximum distance an agent can move in a direction */
+    public final double maxStepSize = 1;
+
     /**
      * Creates a new parameter set for a discrete problem.
      *
@@ -59,12 +65,12 @@ public class Parameters {
      */
     public Parameters(final double maxX, final double maxY, final List<Resource> resources,
             final boolean actionsExpanded, final double discountFactor, final double actionFailProb,
-            final double viewDistance) {
+            final double viewDistance, final boolean continuousStatesActions) {
         // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
 
-        // Sets the resources and some cached values
+        // Define the resources and some cached values
         this.resources = Collections.unmodifiableList(resources);
         numResources = resources.size();
         int maxType = 0;
@@ -91,8 +97,11 @@ public class Parameters {
         this.actionFailProb = actionFailProb;
 
         // Define the observability of the problem
-        fullyObservable = (viewDistance == Integer.MAX_VALUE);
+        fullyObservable = (viewDistance == FULLY_OBSERVABLE);
         this.viewDistance = viewDistance;
+
+        // Define the continuity of the states and actions
+        this.continuousStatesActions = continuousStatesActions;
     }
 
 }
