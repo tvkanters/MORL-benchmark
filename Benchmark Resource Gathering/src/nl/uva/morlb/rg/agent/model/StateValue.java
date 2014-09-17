@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Represents the reward array
  */
-public class StateValue{
+public class StateValue {
 
     private final double[] mReward;
 
@@ -15,7 +15,7 @@ public class StateValue{
 
     /**
      * Adds another reward to this reward
-     * 
+     *
      * @param other
      * @return this
      */
@@ -25,7 +25,7 @@ public class StateValue{
 
     /**
      * Subtracts another reward from this reward
-     * 
+     *
      * @param other
      * @return this
      */
@@ -35,19 +35,19 @@ public class StateValue{
 
     /**
      * Adds another discounted reward to this reward
-     * 
+     *
      * @param other
      * @return this
      */
     public StateValue add(final StateValue other, final double discount) {
-        if(other.getDimension() != this.getDimension()) {
-            throw new RuntimeException("Dimensions are not alligned");
+        if (other.getDimension() != getDimension()) {
+            throw new RuntimeException("Dimensions are not aligned");
         }
 
-        double[] newReward = Arrays.copyOf(mReward, mReward.length);
+        final double[] newReward = Arrays.copyOf(mReward, mReward.length);
 
-        for(int i = 0; i < mReward.length; ++i) {
-            newReward[i] += discount* other.mReward[i];
+        for (int i = 0; i < mReward.length; ++i) {
+            newReward[i] += discount * other.mReward[i];
         }
 
         return new StateValue(newReward);
@@ -55,32 +55,32 @@ public class StateValue{
 
     /**
      * Subtracts another discounted reward from this reward
-     * 
+     *
      * @param other
      * @return this
      */
     public StateValue sub(final StateValue other, final double discount) {
-        if(other.getDimension() != this.getDimension()) {
-            throw new RuntimeException("Dimensions are not alligned");
+        if (other.getDimension() != getDimension()) {
+            throw new RuntimeException("Dimensions are not aligned");
         }
 
-        double[] newReward = Arrays.copyOf(mReward, mReward.length);
+        final double[] newReward = Arrays.copyOf(mReward, mReward.length);
 
-        for(int i = 0; i < mReward.length; ++i) {
-            newReward[i] -= discount* other.mReward[i];
+        for (int i = 0; i < mReward.length; ++i) {
+            newReward[i] -= discount * other.mReward[i];
         }
 
         return new StateValue(newReward);
     }
 
     public StateValue scalarise(final double[] scalar) {
-        if(scalar.length != mReward.length) {
-            throw new RuntimeException("Dimensions do not allign");
+        if (scalar.length != mReward.length) {
+            throw new RuntimeException("Dimensions do not align");
         }
 
-        double[] scalarisedReward = Arrays.copyOf(mReward, mReward.length);
+        final double[] scalarisedReward = Arrays.copyOf(mReward, mReward.length);
 
-        for(int i = 0; i < scalar.length; ++i) {
+        for (int i = 0; i < scalar.length; ++i) {
             scalarisedReward[i] *= scalar[i];
         }
 
@@ -89,7 +89,7 @@ public class StateValue{
 
     public double getSum() {
         double result = 0;
-        for(double d : mReward) {
+        for (final double d : mReward) {
             result += d;
         }
 
@@ -98,6 +98,7 @@ public class StateValue{
 
     /**
      * Get the dimensionality of this reward
+     * 
      * @return The dimensionality of this reward
      */
     public int getDimension() {
