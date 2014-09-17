@@ -1,6 +1,6 @@
 package nl.uva.morlb;
 
-import nl.uva.morlb.rg.agent.ScalarizedQLearning;
+import nl.uva.morlb.rg.agent.ScalarisedQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 
@@ -17,7 +17,7 @@ public class GlueWrapper {
         // Prepare the environment and agent
 
         ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
-        final AgentInterface agent = new ScalarizedQLearning();
+        final AgentInterface agent = new ScalarisedQLearning();
         //        final AgentInterface agent = new DumbAgent();
 
         agent.agent_init(environment.env_init());

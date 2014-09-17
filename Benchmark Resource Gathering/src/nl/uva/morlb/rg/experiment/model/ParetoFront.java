@@ -1,4 +1,4 @@
-package nl.uva.morlb.rg.experiment;
+package nl.uva.morlb.rg.experiment.model;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;

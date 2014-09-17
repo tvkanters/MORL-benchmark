@@ -1,4 +1,4 @@
-package nl.uva.morlb.rg.experiment;
+package nl.uva.morlb.rg.experiment.model;
 
 /**
  * A policy within a Pareto front. Represented by its coordinates. I.e., the value for each objective.

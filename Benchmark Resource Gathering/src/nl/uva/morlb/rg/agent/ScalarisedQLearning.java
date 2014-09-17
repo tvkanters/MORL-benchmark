@@ -15,7 +15,7 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
 
-public class ScalarizedQLearning implements AgentInterface {
+public class ScalarisedQLearning implements AgentInterface {
 
     private final double INITIAL_Q_VALUE = -9.0d;
     private final double INITIAL_V_VALUE = INITIAL_Q_VALUE ;
@@ -103,7 +103,7 @@ public class ScalarizedQLearning implements AgentInterface {
 
             QTableEntry g = new QTableEntry(state, currentAction);
             StateValue qTableReward = mQTable.get(g);
-            double currentValue = qTableReward.scalarize(SCALAR).getSum();
+            double currentValue = qTableReward.scalarise(SCALAR).getSum();
 
             if(currentValue >= bestActionValue) {
                 bestActionValue = currentValue;
@@ -148,7 +148,7 @@ public class ScalarizedQLearning implements AgentInterface {
                     Location location = new Location(x, y);
 
                     State state = new State(location, desiredInventory);
-                    System.out.print("\t"+twoDForm.format(mQTable.get(new QTableEntry(state, DiscreteAction.values()[action])).scalarize(SCALAR).getSum()) +"\t");
+                    System.out.print("\t"+twoDForm.format(mQTable.get(new QTableEntry(state, DiscreteAction.values()[action])).scalarise(SCALAR).getSum()) +"\t");
 
                 }
                 System.out.println();
@@ -169,7 +169,7 @@ public class ScalarizedQLearning implements AgentInterface {
                 DiscreteAction bestAction = null;
                 for(int i = 0; i < 5; ++i) {
                     DiscreteAction currentAction = DiscreteAction.values()[i];
-                    double currentActionValue = mQTable.get(new QTableEntry(state, currentAction)).scalarize(SCALAR).getSum();
+                    double currentActionValue = mQTable.get(new QTableEntry(state, currentAction)).scalarise(SCALAR).getSum();
 
                     if(currentActionValue > bestActionValue) {
                         bestActionValue = currentActionValue;

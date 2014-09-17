@@ -73,18 +73,18 @@ public class StateValue{
         return new StateValue(newReward);
     }
 
-    public StateValue scalarize(final double[] scalar) {
+    public StateValue scalarise(final double[] scalar) {
         if(scalar.length != mReward.length) {
             throw new RuntimeException("Dimensions do not allign");
         }
 
-        double[] scalarizedReward = Arrays.copyOf(mReward, mReward.length);
+        double[] scalarisedReward = Arrays.copyOf(mReward, mReward.length);
 
         for(int i = 0; i < scalar.length; ++i) {
-            scalarizedReward[i] *= scalar[i];
+            scalarisedReward[i] *= scalar[i];
         }
 
-        return new StateValue(scalarizedReward);
+        return new StateValue(scalarisedReward);
     }
 
     public double getSum() {
