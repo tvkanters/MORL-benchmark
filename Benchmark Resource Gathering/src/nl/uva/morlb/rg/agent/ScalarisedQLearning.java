@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import nl.uva.morlb.rg.agent.model.State;
+import nl.uva.morlb.rg.agent.model.StateValue;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.util.QTableEntry;
