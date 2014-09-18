@@ -140,6 +140,7 @@ public class MOQLeaning implements AgentInterface {
     @Override
     public void agent_cleanup() {
 
+        //Just used to print the found policies
         boolean[] desiredInventory = inventoryHack[1];
         mCurrentObjective = 0;
 
@@ -177,10 +178,18 @@ public class MOQLeaning implements AgentInterface {
         return null;
     }
 
+    /**
+     * Get the current Q-Table for the active objective
+     * @return The current Q-Table
+     */
     private HashMap<QTableEntry, StateValue> getCurrentQTable() {
         return mQTable[mCurrentObjective];
     }
 
+    /**
+     * Get the scalar for the current objective to maximise
+     * @return The scalar for the objective to maximise
+     */
     private double[] getCurrentScalar() {
         double[] scalar = new double[mTaskSpec.getNumOfObjectives()];
         for(int i = 0; i < scalar.length; ++i) {
@@ -194,6 +203,12 @@ public class MOQLeaning implements AgentInterface {
         return scalar;
     }
 
+    /**
+     * Generate the current state from the observation and the current inventory
+     * 
+     * @param observation The current observation
+     * @return The current state
+     */
     public State generateState(final Observation observation) {
         double[] observationArray = observation.doubleArray;
 
@@ -201,10 +216,18 @@ public class MOQLeaning implements AgentInterface {
         return new State(currentLocation, Arrays.copyOf(inventory, inventory.length));
     }
 
+    /**
+     * The next action form our random policy
+     * @return The next action
+     */
     public DiscreteAction getRandomAction() {
         return DiscreteAction.values()[Util.RNG.nextInt(5)];
     }
 
+    /**
+     * Prints the reward
+     * @param reward The reward to be printed
+     */
     public void printReward(final Reward reward) {
         for (final double d : reward.doubleArray) {
             System.out.print(d + " ");

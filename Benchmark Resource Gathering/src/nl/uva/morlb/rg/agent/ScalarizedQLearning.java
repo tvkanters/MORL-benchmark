@@ -188,10 +188,16 @@ public class ScalarizedQLearning implements AgentInterface {
 
     @Override
     public String agent_message(final String arg0) {
-        // TODO Auto-generated method stub
         return null;
     }
 
+
+    /**
+     * Generate the current state from the observation and the current inventory
+     * 
+     * @param observation The current observation
+     * @return The current state
+     */
     public State generateState(final Observation observation) {
         double[] observationArray = observation.doubleArray;
 
@@ -199,15 +205,22 @@ public class ScalarizedQLearning implements AgentInterface {
         return new State(currentLocation, Arrays.copyOf(inventory, inventory.length));
     }
 
+    /**
+     * The next action form our random policy
+     * @return The next action
+     */
     public DiscreteAction getRandomAction() {
         return DiscreteAction.values()[Util.RNG.nextInt(5)];
     }
 
+    /**
+     * Prints the reward
+     * @param reward The reward to be printed
+     */
     public void printReward(final Reward reward) {
         for (final double d : reward.doubleArray) {
             System.out.print(d + " ");
         }
         System.out.println();
-
     }
 }
