@@ -1,4 +1,4 @@
-package nl.uva.morlb.rg.agent;
+package nl.uva.morlb.rg.agent.model;
 
 import java.util.Arrays;
 

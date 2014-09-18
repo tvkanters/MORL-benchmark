@@ -3,6 +3,8 @@ package nl.uva.morlb.rg.agent;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import nl.uva.morlb.rg.agent.model.State;
+import nl.uva.morlb.rg.agent.model.StateValue;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.util.QTableEntry;
@@ -103,7 +105,7 @@ public class MOQLeaning implements AgentInterface {
 
             QTableEntry g = new QTableEntry(state, currentAction);
             StateValue qTableReward = getCurrentQTable().get(g);
-            double currentValue = qTableReward.scalarize(getCurrentScalar()).getSum();
+            double currentValue = qTableReward.scalarise(getCurrentScalar()).getSum();
 
             if(currentValue >= bestActionValue) {
                 bestActionValue = currentValue;
@@ -156,7 +158,7 @@ public class MOQLeaning implements AgentInterface {
                     DiscreteAction bestAction = null;
                     for(int i = 0; i < 5; ++i) {
                         DiscreteAction currentAction = DiscreteAction.values()[i];
-                        double currentActionValue = getCurrentQTable().get(new QTableEntry(state, currentAction)).scalarize(getCurrentScalar()).getSum();
+                        double currentActionValue = getCurrentQTable().get(new QTableEntry(state, currentAction)).scalarise(getCurrentScalar()).getSum();
 
                         if(currentActionValue > bestActionValue) {
                             bestActionValue = currentActionValue;

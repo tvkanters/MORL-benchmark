@@ -1,6 +1,6 @@
 package nl.uva.morlb.util;
 
-import nl.uva.morlb.rg.agent.State;
+import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 
 public class QTableEntry {
