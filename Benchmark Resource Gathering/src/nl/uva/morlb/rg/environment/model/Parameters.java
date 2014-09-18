@@ -11,6 +11,14 @@ public class Parameters {
 
     /** The value indicating a fully observable state */
     public static final double FULLY_OBSERVABLE = Double.POSITIVE_INFINITY;
+    /** The value indicating only 5 actions */
+    public static final boolean ACTIONS_LIMITED = false;
+    /** The value indicating 9 actions */
+    public static final boolean ACTIONS_EXPANDED = true;
+    /** The value indicating a discrete state and action space */
+    public static final boolean STATES_DISCRETE = false;
+    /** The value indicating a continuous action and action space */
+    public static final boolean STATES_CONTINUOUS = true;
 
     /** The highest possible x value of a location */
     public final double maxX;
