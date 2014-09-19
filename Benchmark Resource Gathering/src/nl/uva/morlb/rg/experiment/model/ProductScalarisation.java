@@ -18,7 +18,7 @@ public class ProductScalarisation implements Scalarisation {
             throw new InvalidParameterException("Values must have the same length as the weights");
         }
 
-        double scalar = 0;
+        double scalar = 1;
         for (int i = 0; i < values.length; ++i) {
             scalar *= values[i] * weights[i];
         }
