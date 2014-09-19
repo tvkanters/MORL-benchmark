@@ -2,6 +2,7 @@ package nl.uva.morlb.rg.environment.model;
 
 import java.security.InvalidParameterException;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -112,4 +113,39 @@ public class Parameters {
         this.continuousStatesActions = continuousStatesActions;
     }
 
+    /**
+     * @return The parameters in the format: maxX maxY actionsExpanded discountFactor actionFailProb viewDistance
+     *         continuousStatesActions resource...
+     */
+    @Override
+    public String toString() {
+        String str = maxX + " " + maxY + " " + actionsExpanded + " " + discountFactor + " " + actionFailProb + " "
+                + viewDistance + " " + continuousStatesActions;
+        for (final Resource resource : resources) {
+            str += " " + resource;
+        }
+        return str;
+    }
+
+    /**
+     * Converts a string representation of parameters to an object.
+     *
+     * @param str
+     *            The string in the toString format
+     *
+     * @return The parameters
+     */
+    public static Parameters fromString(final String str) {
+        final String[] values = str.split(" ");
+
+        final List<Resource> resources = new LinkedList<>();
+        for (int i = 7; i < values.length; i += 5) {
+            resources.add(Resource.fromString(values[i] + " " + values[i + 1] + " " + values[i + 2] + " "
+                    + values[i + 3] + " " + values[i + 4]));
+        }
+
+        return new Parameters(Double.parseDouble(values[0]), Double.parseDouble(values[1]), resources,
+                Boolean.parseBoolean(values[2]), Double.parseDouble(values[3]), Double.parseDouble(values[4]),
+                Double.parseDouble(values[5]), Boolean.parseBoolean(values[6]));
+    }
 }
