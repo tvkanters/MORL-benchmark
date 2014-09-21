@@ -1,6 +1,5 @@
 package nl.uva.morlb.rg.agent;
 
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -17,23 +16,21 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
 
-public class ScalarisedQLearning implements AgentInterface {
+public class MOQLeaning implements AgentInterface {
 
     private final double INITIAL_Q_VALUE = -9.0d;
-    private final double INITIAL_V_VALUE = INITIAL_Q_VALUE ;
 
     private static final double GAMMA = 0.9d;
     private static final double ALPHA = 0.5d;
 
-    private final HashMap<QTableEntry, StateValue> mQTable = new HashMap<>();
-    private final HashMap<State, StateValue> mVTable = new HashMap<>();
+    private HashMap<QTableEntry, StateValue>[] mQTable;
 
+    private int mCurrentObjective = 0;
     private QTableEntry mLastEntry;
     private boolean[] inventory;
 
     private TaskSpecVRLGLUE3 mTaskSpec;
 
-    private final double[] SCALAR = new double[] {0.01,0.4,1};
 
     private static boolean[][] inventoryHack =
         {
@@ -46,6 +43,7 @@ public class ScalarisedQLearning implements AgentInterface {
     @Override
     public void agent_init(final String taskSpec) {
         mTaskSpec = new TaskSpecVRLGLUE3(taskSpec);
+        mQTable = new HashMap[mTaskSpec.getNumOfObjectives()];
 
         inventory = new boolean[mTaskSpec.getNumOfObjectives() -1];
         for(int i = 0; i < inventory.length; ++i) {
@@ -56,17 +54,19 @@ public class ScalarisedQLearning implements AgentInterface {
         int maxX = 4;
         int maxY = 4;
 
-        for(int x = 0; x < maxX; ++x) {
-            for(int y = 0; y < maxY; ++y) {
+        for(int objective = 0; objective < mTaskSpec.getNumOfObjectives(); ++objective) {
+            mQTable[objective] = new HashMap<QTableEntry, StateValue>();
+            for(int x = 0; x < maxX; ++x) {
+                for(int y = 0; y < maxY; ++y) {
 
-                Location location = new Location(x, y);
+                    Location location = new Location(x, y);
 
-                for(boolean[] inventory : inventoryHack) {
+                    for(boolean[] inventory : inventoryHack) {
 
-                    State state = new State(location, inventory);
-                    mVTable.put(state, new StateValue(new double[]{INITIAL_V_VALUE ,INITIAL_V_VALUE ,INITIAL_V_VALUE }));
-                    for(int actionCounter = 0; actionCounter < actionDim; ++actionCounter) {
-                        mQTable.put(new QTableEntry(state, DiscreteAction.values()[actionCounter]), new StateValue( new double[]{INITIAL_Q_VALUE,INITIAL_Q_VALUE,INITIAL_Q_VALUE}));
+                        State state = new State(location, inventory);
+                        for(int actionCounter = 0; actionCounter < actionDim; ++actionCounter) {
+                            mQTable[objective].put(new QTableEntry(state, DiscreteAction.values()[actionCounter]), new StateValue( new double[]{INITIAL_Q_VALUE,INITIAL_Q_VALUE,INITIAL_Q_VALUE}));
+                        }
                     }
                 }
             }
@@ -104,8 +104,8 @@ public class ScalarisedQLearning implements AgentInterface {
             DiscreteAction currentAction = DiscreteAction.values()[i];
 
             QTableEntry g = new QTableEntry(state, currentAction);
-            StateValue qTableReward = mQTable.get(g);
-            double currentValue = qTableReward.scalarise(SCALAR).getSum();
+            StateValue qTableReward = getCurrentQTable().get(g);
+            double currentValue = qTableReward.scalarise(getCurrentScalar()).getSum();
 
             if(currentValue >= bestActionValue) {
                 bestActionValue = currentValue;
@@ -113,9 +113,9 @@ public class ScalarisedQLearning implements AgentInterface {
             }
         }
 
-        StateValue lastStateValue = mQTable.get(mLastEntry);
+        StateValue lastStateValue = getCurrentQTable().get(mLastEntry);
         lastStateValue = lastStateValue.add(convertedReward.add(bestActionReward, GAMMA).sub(lastStateValue), ALPHA);
-        mQTable.put(mLastEntry, lastStateValue);
+        getCurrentQTable().put(mLastEntry, lastStateValue);
 
 
         //Define the next action
@@ -130,62 +130,49 @@ public class ScalarisedQLearning implements AgentInterface {
         StateValue convertedReward = new StateValue(reward.doubleArray);
         StateValue nextReward = new StateValue(new double[reward.doubleArray.length]);
 
-        StateValue lastStateValue = mQTable.get(mLastEntry);
+        StateValue lastStateValue = getCurrentQTable().get(mLastEntry);
         lastStateValue = lastStateValue.add(convertedReward.add(nextReward, GAMMA).sub(lastStateValue), ALPHA);
-        mQTable.put(mLastEntry, lastStateValue);
+        getCurrentQTable().put(mLastEntry, lastStateValue);
 
+        if(++mCurrentObjective == mTaskSpec.getNumOfObjectives()) {
+            mCurrentObjective = 0;
+        }
     }
 
     @Override
     public void agent_cleanup() {
-        DecimalFormat twoDForm = new DecimalFormat("####.##");
+
+        //Just used to print the found policies
         boolean[] desiredInventory = inventoryHack[1];
+        mCurrentObjective = 0;
 
-        for(int action = 0; action < 5; ++action) {
-            System.out.println(DiscreteAction.values()[action].name());
-
+        while(mCurrentObjective != mTaskSpec.getNumOfObjectives()) {
+            System.out.println("Objective: " +mCurrentObjective);
             for(int y = 3; y >= 0; --y) {
                 for(int x = 0; x < 4; ++x) {
 
                     Location location = new Location(x, y);
-
                     State state = new State(location, desiredInventory);
-                    System.out.print("\t"+twoDForm.format(mQTable.get(new QTableEntry(state, DiscreteAction.values()[action])).scalarise(SCALAR).getSum()) +"\t");
+
+                    double bestActionValue = Double.NEGATIVE_INFINITY;
+                    DiscreteAction bestAction = null;
+                    for(int i = 0; i < 5; ++i) {
+                        DiscreteAction currentAction = DiscreteAction.values()[i];
+                        double currentActionValue = getCurrentQTable().get(new QTableEntry(state, currentAction)).scalarise(getCurrentScalar()).getSum();
+
+                        if(currentActionValue > bestActionValue) {
+                            bestActionValue = currentActionValue;
+                            bestAction = currentAction;
+                        }
+                    }
+
+                    System.out.print("\t"+bestAction.name() +"\t");
 
                 }
                 System.out.println();
             }
-            System.out.println();
+            mCurrentObjective++;
         }
-
-        //        for(int action = 0; action < 5; ++action) {
-        //            System.out.println(DiscreteAction.values()[action].name());
-
-        for(int y = 3; y >= 0; --y) {
-            for(int x = 0; x < 4; ++x) {
-
-                Location location = new Location(x, y);
-                State state = new State(location, desiredInventory);
-
-                double bestActionValue = Double.NEGATIVE_INFINITY;
-                DiscreteAction bestAction = null;
-                for(int i = 0; i < 5; ++i) {
-                    DiscreteAction currentAction = DiscreteAction.values()[i];
-                    double currentActionValue = mQTable.get(new QTableEntry(state, currentAction)).scalarise(SCALAR).getSum();
-
-                    if(currentActionValue > bestActionValue) {
-                        bestActionValue = currentActionValue;
-                        bestAction = currentAction;
-                    }
-                }
-
-                System.out.print("\t"+bestAction.name() +"\t");
-
-            }
-            System.out.println();
-        }
-        System.out.println();
-        //        }
     }
 
     @Override
@@ -193,6 +180,30 @@ public class ScalarisedQLearning implements AgentInterface {
         return null;
     }
 
+    /**
+     * Get the current Q-Table for the active objective
+     * @return The current Q-Table
+     */
+    private HashMap<QTableEntry, StateValue> getCurrentQTable() {
+        return mQTable[mCurrentObjective];
+    }
+
+    /**
+     * Get the scalar for the current objective to maximise
+     * @return The scalar for the objective to maximise
+     */
+    private double[] getCurrentScalar() {
+        double[] scalar = new double[mTaskSpec.getNumOfObjectives()];
+        for(int i = 0; i < scalar.length; ++i) {
+            if (i == mCurrentObjective) {
+                scalar[i] = 1000;
+            } else {
+                scalar[i] = 0.01;
+            }
+        }
+
+        return scalar;
+    }
 
     /**
      * Generate the current state from the observation and the current inventory
@@ -224,5 +235,6 @@ public class ScalarisedQLearning implements AgentInterface {
             System.out.print(d + " ");
         }
         System.out.println();
+
     }
 }

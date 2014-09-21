@@ -85,4 +85,26 @@ public class Resource {
         return mLocation;
     }
 
+    /**
+     * @return The resource in the format: mType mLocation.x mLocation.y mReward.min mReward.max
+     */
+    @Override
+    public String toString() {
+        return mType + " " + mLocation.x + " " + mLocation.y + " " + mReward.min + " " + mReward.max;
+    }
+
+    /**
+     * Converts a string representation of a resource to an object.
+     *
+     * @param str
+     *            The string in the toString format
+     *
+     * @return The resource
+     */
+    public static Resource fromString(final String str) {
+        final String[] values = str.split(" ");
+        return new Resource(Integer.parseInt(values[0]), Double.parseDouble(values[1]), Double.parseDouble(values[2]),
+                Double.parseDouble(values[3]), Double.parseDouble(values[4]));
+    }
+
 }
