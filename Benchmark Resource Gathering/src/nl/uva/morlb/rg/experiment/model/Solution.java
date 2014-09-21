@@ -1,32 +1,33 @@
 package nl.uva.morlb.rg.experiment.model;
 
 /**
- * A policy within a Pareto front. Represented by its coordinates. I.e., the value for each objective.
+ * A solution within a solution set. Represented by its coordinates. I.e., the value for each objective.
  */
-public class ParetoPolicy {
+public class Solution {
 
-    /** The coordinates of the policy in the Pareto front */
+    /** The coordinates of the solution in the solution set */
     private final double[] mValues;
 
     /**
-     * Creates a new policy at the given coordinates in the Pareto front.
+     * Creates a new solution at the given coordinates in the solution set.
      *
      * @param values
      *            The coordinates
      */
-    public ParetoPolicy(final double... values) {
+    public Solution(final double... values) {
         mValues = values;
     }
 
     /**
-     * @return The coordinates of the policy in the Pareto front as a clone so that modifications don't alter the policy
+     * @return The coordinates of the solution in the solution set as a clone so that modifications don't alter the
+     *         solution
      */
     public double[] getValues() {
         return mValues.clone();
     }
 
     /**
-     * @return The amount of objectives the policy has a value for
+     * @return The amount of objectives the solution has a value for
      */
     public int getNumObjectives() {
         return mValues.length;
