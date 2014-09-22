@@ -1,6 +1,6 @@
 package nl.uva.morlb;
 
-import nl.uva.morlb.rg.agent.MOQLeaning;
+import nl.uva.morlb.rg.agent.MOQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 
@@ -16,7 +16,7 @@ public class GlueWrapper {
     public static void main(final String[] args) {
         // Prepare the environment and agent
         ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
-        final AgentInterface agent = new MOQLeaning();
+        final AgentInterface agent = new MOQLearning();
         // final AgentInterface agent = new DumbAgent();
 
         agent.agent_init(environment.env_init());
