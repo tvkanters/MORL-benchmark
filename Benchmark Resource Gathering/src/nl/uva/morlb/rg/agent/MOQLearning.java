@@ -16,7 +16,7 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
 
-public class MOQLeaning implements AgentInterface {
+public class MOQLearning implements AgentInterface {
 
     private final double INITIAL_Q_VALUE = -9.0d;
 
