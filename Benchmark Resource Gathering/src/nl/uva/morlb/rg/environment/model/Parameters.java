@@ -20,6 +20,8 @@ public class Parameters {
     public static final boolean STATES_DISCRETE = false;
     /** The value indicating a continuous action and action space */
     public static final boolean STATES_CONTINUOUS = true;
+    /** The value indicating a continuous action and action space */
+    public static final int MAX_PICKED_UP_UNLIMITED = Integer.MAX_VALUE;
 
     /** The highest possible x value of a location */
     public final double maxX;
@@ -53,6 +55,9 @@ public class Parameters {
     /** The maximum distance an agent can move in a direction */
     public final double maxStepSize = 1;
 
+    /** The amount of resources an agent can pick up */
+    public final int maxPickedUp;
+
     /**
      * Creates a new parameter set for a discrete problem.
      *
@@ -71,10 +76,14 @@ public class Parameters {
      * @param viewDistance
      *            The maximum Manhattan distance that an agent can see, {@link #FULLY_OBSERVABLE} indicates full
      *            observability
+     * @param continuousStatesActions
+     *            Whether or not the state and actions are continuous
+     * @param maxPickedUp
+     *            The amount of resources an agent can pick up
      */
     public Parameters(final double maxX, final double maxY, final List<Resource> resources,
             final boolean actionsExpanded, final double discountFactor, final double actionFailProb,
-            final double viewDistance, final boolean continuousStatesActions) {
+            final double viewDistance, final boolean continuousStatesActions, final int maxPickedUp) {
         // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
@@ -111,16 +120,19 @@ public class Parameters {
 
         // Define the continuity of the states and actions
         this.continuousStatesActions = continuousStatesActions;
+
+        // Define the amount of resources an agent can pick up
+        this.maxPickedUp = maxPickedUp;
     }
 
     /**
      * @return The parameters in the format: maxX maxY actionsExpanded discountFactor actionFailProb viewDistance
-     *         continuousStatesActions resource...
+     *         continuousStatesActions maxPickedUp resource...
      */
     @Override
     public String toString() {
         String str = maxX + " " + maxY + " " + actionsExpanded + " " + discountFactor + " " + actionFailProb + " "
-                + viewDistance + " " + continuousStatesActions;
+                + viewDistance + " " + continuousStatesActions + " " + maxPickedUp;
         for (final Resource resource : resources) {
             str += " " + resource;
         }
@@ -139,13 +151,13 @@ public class Parameters {
         final String[] values = str.split(" ");
 
         final List<Resource> resources = new LinkedList<>();
-        for (int i = 7; i < values.length; i += 5) {
+        for (int i = 8; i < values.length; i += 5) {
             resources.add(Resource.fromString(values[i] + " " + values[i + 1] + " " + values[i + 2] + " "
                     + values[i + 3] + " " + values[i + 4]));
         }
 
         return new Parameters(Double.parseDouble(values[0]), Double.parseDouble(values[1]), resources,
                 Boolean.parseBoolean(values[2]), Double.parseDouble(values[3]), Double.parseDouble(values[4]),
-                Double.parseDouble(values[5]), Boolean.parseBoolean(values[6]));
+                Double.parseDouble(values[5]), Boolean.parseBoolean(values[6]), Integer.parseInt(values[7]));
     }
 }

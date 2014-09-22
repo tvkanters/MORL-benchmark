@@ -39,7 +39,7 @@ public class ResourceGathering {
 
     /**
      * Creates a new resource gathering problem based on the given parameters.
-     * 
+     *
      * @param parameters
      *            The parameters that define the shape of the problem
      */
@@ -64,10 +64,10 @@ public class ResourceGathering {
     /**
      * Lets the agent perform a certain action to transition to the next state and collect a reward. This method may
      * contain stochasticity. The action must follow the parameter's action space size restrictions.
-     * 
+     *
      * @param action
      *            The action to perform
-     * 
+     *
      * @return The discounted reward resulting from performing the action
      */
     public double[] performAction(final DiscreteAction action) {
@@ -93,10 +93,10 @@ public class ResourceGathering {
     /**
      * Lets the agent perform a certain action to transition to the next state and collect a reward. This method may
      * contain stochasticity. The action must follow the parameter's action space size restrictions.
-     * 
+     *
      * @param action
      *            The action to perform
-     * 
+     *
      * @return The discounted reward resulting from performing the action
      */
     public double[] performAction(final Location action) {
@@ -137,12 +137,12 @@ public class ResourceGathering {
     /**
      * Determines all possible outcomes given a state and discrete action. The states contain the reward that was
      * achieved through the transition.
-     * 
+     *
      * @param state
      *            The current state
      * @param action
      *            The action performed by the agent
-     * 
+     *
      * @return All possible resulting states mapped to their probabilities
      */
     public Map<State, Double> getPossibleTransitions(final State state, final DiscreteAction action) {
@@ -176,14 +176,14 @@ public class ResourceGathering {
     /**
      * Determines the state resulting of performing an agent action and applying the failure action. Does not contain
      * any stochasticity.
-     * 
+     *
      * @param state
      *            The current state
      * @param agentAction
      *            The action chosen by the agent
      * @param failAction
      *            The action added as a failure
-     * 
+     *
      * @return The resulting next state
      */
     private State getNextState(final State state, final Location agentAction, final Location failAction) {
@@ -193,11 +193,16 @@ public class ResourceGathering {
 
         // Calculate the reward for this state and picks items up if needed
         final boolean[] pickedUp = state.getPickedUp();
-        if (mParameters.finiteHorizon) {
+        int numPickedUp = state.getNumPickedUp();
+        if (mParameters.finiteHorizon && numPickedUp < mParameters.maxPickedUp) {
             int resourceIndex = 0;
             for (final Resource resource : mResources) {
                 if (!pickedUp[resourceIndex] && resource.isCollected(nextAgent)) {
                     pickedUp[resourceIndex] = true;
+                    ++numPickedUp;
+                    if (numPickedUp == mParameters.maxPickedUp) {
+                        break;
+                    }
                 }
                 ++resourceIndex;
             }
@@ -210,12 +215,12 @@ public class ResourceGathering {
     /**
      * Determines the reward ranges that can be given for a state transition for every objective. Does NOT take discount
      * factors into account.
-     * 
+     *
      * @param initialState
      *            The state before transitioning
      * @param resultingState
      *            The state after transitioning
-     * 
+     *
      * @return The reward ranges for every objective
      */
     public RewardRange[] getRewardRanges(final State initialState, final State resultingState) {
@@ -228,12 +233,19 @@ public class ResourceGathering {
 
         // Sum the reward ranges of every picked up resource in their respective objective
         int resourceIndex = 0;
-        for (final Resource resource : mResources) {
-            if (!initialState.isPickedUp(resourceIndex) && resource.isCollected(resultingState.getAgent())) {
-                final int rewardIndex = resource.getType() + 1;
-                reward[rewardIndex] = reward[rewardIndex].sum(resource.getReward());
+        int numPickedUp = initialState.getNumPickedUp();
+        if (numPickedUp < mParameters.maxPickedUp) {
+            for (final Resource resource : mResources) {
+                if (!initialState.isPickedUp(resourceIndex) && resource.isCollected(resultingState.getAgent())) {
+                    final int rewardIndex = resource.getType() + 1;
+                    reward[rewardIndex] = reward[rewardIndex].sum(resource.getReward());
+                    ++numPickedUp;
+                    if (numPickedUp == mParameters.maxPickedUp) {
+                        break;
+                    }
+                }
+                ++resourceIndex;
             }
-            ++resourceIndex;
         }
 
         return reward;
@@ -241,10 +253,10 @@ public class ResourceGathering {
 
     /**
      * Checks if the given state is terminal.
-     * 
+     *
      * @param state
      *            The state to check
-     * 
+     *
      * @return True iff the state is terminal
      */
     public boolean isTerminal(final State state) {
