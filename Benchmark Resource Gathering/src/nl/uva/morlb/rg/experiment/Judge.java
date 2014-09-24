@@ -101,6 +101,9 @@ public class Judge {
      * @return The additive epsilon indicator
      */
     public double additiveEpsilonIndicator(final SolutionSet referenceSet) {
+        if (referenceSet.getNumObjectives() != mNumObjectives) {
+            System.err.println("Reference and solution set must have same number of objectives");
+        }
         Solution ref;
         Solution sol;
         // the smallest epsilon for which it is true that for all values v from the reference set there exists one value
@@ -140,6 +143,9 @@ public class Judge {
      * @return The multiplicative epsilon indicator
      */
     public double multiplicativeEpsilonIndicator(final SolutionSet referenceSet) {
+        if (referenceSet.getNumObjectives() != mNumObjectives) {
+            System.err.println("Reference and solution set must have same number of objectives");
+        }
         Solution sol;
         Solution ref;
         // the smallest epsilon for which it is true that for all values v from the reference set there exists one value
@@ -284,7 +290,7 @@ public class Judge {
 
         // test set
         final SolutionSet testSolutionSet01 = new SolutionSet("(1,1),(0.5,3)");
-        final SolutionSet testSolutionSet02 = new SolutionSet("(1,1,1,1)");
+        final SolutionSet testSolutionSet02 = new SolutionSet("(1,1,6,1)");
 
         // create a scalarization function
         final LinearScalarisation linearScalarisation = new LinearScalarisation();
