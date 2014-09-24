@@ -91,50 +91,78 @@ public class Judge {
 
     /**
      * Estimates the additive epsilon indicator, i.e. the smallest epsilon which has to be added to the solution set so
-     * that it weakly dominates the reference set
+     * that it weakly dominates the reference set. (See E. Zitzler, L. Thiele, M. Laumanns, C.M. Fonesca, V. Grunert da
+     * Fonseca: Performance Assessment of Multiobjective Optimizers: An Analysis and Review. IEEE Transactions on
+     * Evolutionary Computation 7(2), 117-132 (2003))
      * 
      * @param referenceSet
      *            The true Pareto front or a good approximation to which the solution can be compared
      * @return The additive epsilon indicator
      */
     public double additiveEpsilonIndicator(final SolutionSet referenceSet) {
-        double epsilon = Double.NEGATIVE_INFINITY;
-        Solution sol;
         Solution ref;
-        for (int solIndex = 0; solIndex < mSolutionSet.getNumSolutions(); solIndex++) {
-            sol = mSolutionSet.getSolutions().get(solIndex);
-            for (int refIndex = 0; refIndex < referenceSet.getNumSolutions(); refIndex++) {
-                ref = referenceSet.getSolutions().get(refIndex);
+        Solution sol;
+        // the smallest epsilon for which it is true that for all values v from the reference set there exists one value
+        // v' from the solution set that weakly epsilon-dominates v
+        double epsilon = Double.NEGATIVE_INFINITY;
+        for (int refIndex = 0; refIndex < referenceSet.getNumSolutions(); refIndex++) {
+            ref = referenceSet.getSolutions().get(refIndex);
+            // singleEpsilon is the smallest epsilon so that there exists one (!) solution in the solution set that
+            // weakly epsilon-dominates the current reference point ref
+            double singleEpsilon = Double.POSITIVE_INFINITY;
+            for (int solIndex = 0; solIndex < mSolutionSet.getNumSolutions(); solIndex++) {
+                sol = mSolutionSet.getSolutions().get(solIndex);
+                // maxEpsilonPerSingleDim is the smallest epsilon for which the current solution sol weakly
+                // epsilon-dominates the currect reference point ref
+                double maxEpsilonPerSingleDim = Double.NEGATIVE_INFINITY;
                 for (int dim = 0; dim < mNumObjectives; dim++) {
                     double distance = ref.getValues()[dim] - sol.getValues()[dim];
-                    epsilon = Math.max(distance, epsilon);
+                    maxEpsilonPerSingleDim = Math.max(distance, maxEpsilonPerSingleDim);
                 }
+                singleEpsilon = Math.min(singleEpsilon, maxEpsilonPerSingleDim);
             }
+            // pick the epsilon that's smallest but satisfies the epsilon-condition across all points from the reference
+            // set
+            epsilon = Math.max(singleEpsilon, epsilon);
         }
         return epsilon;
     }
 
     /**
      * Estimates the multiplicative epsilon indicator, i.e. the smallest epsilon so that to the solution weakly
-     * dominates the reference set if multiplied with the factor epsilon
+     * dominates the reference set if multiplied with the factor epsilon. (See E. Zitzler, L. Thiele, M. Laumanns, C.M.
+     * Fonesca, V. Grunert da Fonseca: Performance Assessment of Multiobjective Optimizers: An Analysis and Review. IEEE
+     * Transactions on Evolutionary Computation 7(2), 117-132 (2003))
      * 
      * @param referenceSet
      *            The true Pareto front or a good approximation to which the solution can be compared
      * @return The multiplicative epsilon indicator
      */
     public double multiplicativeEpsilonIndicator(final SolutionSet referenceSet) {
-        double epsilon = Double.NEGATIVE_INFINITY;
         Solution sol;
         Solution ref;
-        for (int solIndex = 0; solIndex < mSolutionSet.getNumSolutions(); solIndex++) {
-            sol = mSolutionSet.getSolutions().get(solIndex);
-            for (int refIndex = 0; refIndex < referenceSet.getNumSolutions(); refIndex++) {
-                ref = referenceSet.getSolutions().get(refIndex);
+        // the smallest epsilon for which it is true that for all values v from the reference set there exists one value
+        // v' from the solution set that weakly epsilon-dominates v
+        double epsilon = Double.NEGATIVE_INFINITY;
+        for (int refIndex = 0; refIndex < referenceSet.getNumSolutions(); refIndex++) {
+            ref = referenceSet.getSolutions().get(refIndex);
+            // singleEpsilon is the smallest epsilon so that there exists one (!) solution in the solution set that
+            // weakly epsilon-dominates the current reference point ref
+            double singleEpsilon = Double.POSITIVE_INFINITY;
+            for (int solIndex = 0; solIndex < mSolutionSet.getNumSolutions(); solIndex++) {
+                sol = mSolutionSet.getSolutions().get(solIndex);
+                // maxEpsilonPerSingleDim is the smallest epsilon for which the current solution sol weakly
+                // epsilon-dominates the currect reference point ref
+                double maxEpsilonPerSingleDim = Double.NEGATIVE_INFINITY;
                 for (int dim = 0; dim < mNumObjectives; dim++) {
                     double distance = ref.getValues()[dim] / sol.getValues()[dim];
-                    epsilon = Math.max(distance, epsilon);
+                    maxEpsilonPerSingleDim = Math.max(distance, maxEpsilonPerSingleDim);
                 }
+                singleEpsilon = Math.min(singleEpsilon, maxEpsilonPerSingleDim);
             }
+            // pick the epsilon that's smallest but satisfies the epsilon-condition across all points from the reference
+            // set
+            epsilon = Math.max(singleEpsilon, epsilon);
         }
         return epsilon;
     }
@@ -142,7 +170,9 @@ public class Judge {
     /**
      * Overall Nondominated Vector Generation (ONVG) gives an indication of convergence. It is literally just the number
      * of solutions the algorithm found. It should neither be too high nor too low, and is only useful in combination
-     * with other quality indicators, or in comparison with the ONVG of a reference set.
+     * with other quality indicators, or in comparison with the ONVG of a reference set. (See J. R. Schott: Fault
+     * tolerant design using single and multicriteria genetic algorithm optimization, M.S. thesis, Dept. Aeronautics
+     * Astronautics, Massachusetts Instit. Technology, Cambridge, MA, USA, 1995)
      * 
      * @return The number of solutions the algorithm found
      */
@@ -152,7 +182,9 @@ public class Judge {
 
     /**
      * This metric gives an indication to how uniformly the solution set is distributed. The lower this value, the
-     * better. The runtime is quadratic in the number of objectives. (See Schott 1995)
+     * better. The runtime is quadratic in the number of objectives. (See J. R. Schott: Fault tolerant design using
+     * single and multicriteria genetic algorithm optimization, M.S. thesis, Dept. Aeronautics Astronautics,
+     * Massachusetts Instit. Technology, Cambridge, MA, USA, 1995)
      * 
      * @return The indicator of how evenly the solutions in the solution set are distributed. A lower value indicates a
      *         better(more uniform) distribution. Returns POSITIVE_INIFINITY if there exists no or only one solution.
@@ -200,7 +232,8 @@ public class Judge {
 
     /**
      * Estimates the maximum spread, which is an indicator for how well the solutions are spread. A higher value
-     * indicates a better spread of solutions. (See Zitzler et al. 2000)
+     * indicates a better spread of solutions. (E. Zitzler, K. Deb, and L. Thiele: Comparison of multiobjective
+     * evolutionary algorithms: Empirical results, Evol. Comput., vol. 8, no. 2, pp. 173-195, Jun. 2000)
      * 
      * @return The maximum spread. A higher value indicates a beter (larger) spread.
      */
@@ -228,8 +261,8 @@ public class Judge {
     public static void main(final String[] args) {
 
         // test set
-        final SolutionSet testSolutionSet01 = new SolutionSet("(1,7,-5),(1,444,6),(10,4,1)");
-        final SolutionSet testSolutionSet02 = new SolutionSet("(2,1.5,3),(4,2,0),(5,1,2)");
+        final SolutionSet testSolutionSet01 = new SolutionSet("(6,6),(5,5)");
+        final SolutionSet testSolutionSet02 = new SolutionSet("(3,4),(10,10)");
 
         // create a scalarization function
         final LinearScalarisation linearScalarisation = new LinearScalarisation();
