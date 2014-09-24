@@ -2,10 +2,10 @@ package nl.uva.morlb.rg.agent;
 
 import java.util.HashMap;
 
+import nl.uva.morlb.rg.agent.model.QTableEntry;
 import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
-import nl.uva.morlb.util.QTableEntry;
 import nl.uva.morlb.util.Util;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;

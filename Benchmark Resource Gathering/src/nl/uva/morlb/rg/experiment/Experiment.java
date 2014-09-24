@@ -1,11 +1,15 @@
 package nl.uva.morlb.rg.experiment;
 
 import java.util.Arrays;
+import java.util.Random;
 
+import nl.uva.morlb.rg.agent.DumbAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
+import nl.uva.morlb.rg.environment.model.Parameters;
 
 import org.rlcommunity.rlglue.codec.RLGlue;
 import org.rlcommunity.rlglue.codec.types.Reward;
+import org.rlcommunity.rlglue.codec.util.AgentLoader;
 import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
 
 /**
@@ -15,25 +19,32 @@ public class Experiment {
 
     /** The amount of episodes ran */
     private int mEpisodeCount = 0;
+    /** The resource gathering problem */
+    private static ResourceGatheringEnv sProblem;
+    /** The seeded random number generator */
+    private final static Random sRng = new Random(62434);
 
     /**
      * Runs the full experiment.
      */
     public void runExperiment() {
-        final String taskSpec = RLGlue.RL_init();
+        for (int test = 0; test < 10; ++test) {
+            RLGlue.RL_init();
 
-        runEpisode(100);
-        runEpisode(100);
-        runEpisode(100);
-        runEpisode(100);
-        runEpisode(100);
+            for (int episode = 0; episode < 20; ++episode) {
+                runEpisode(100);
+            }
 
-        RLGlue.RL_cleanup();
+            RLGlue.RL_cleanup();
+            sProblem.shuffleResources(sRng);
+        }
+
+        System.exit(0);
     }
 
     /**
      * Runs an episode of resource gathering.
-     *
+     * 
      * @param stepLimit
      *            The amount steps before terminating
      */
@@ -50,6 +61,12 @@ public class Experiment {
     }
 
     public static void main(final String[] args) {
+        if (args.length > 0) {
+            sProblem = new ResourceGatheringEnv(Parameters.fromString(args, sRng));
+        } else {
+            sProblem = new ResourceGatheringEnv();
+        }
+
         // Start the experiment
         new Thread(new Runnable() {
             @Override
@@ -62,7 +79,15 @@ public class Experiment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new EnvironmentLoader(new ResourceGatheringEnv()).run();
+                new EnvironmentLoader(sProblem).run();
+            }
+        }).start();
+
+        // Start the agent
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new AgentLoader(new DumbAgent()).run();
             }
         }).start();
     }

@@ -1,9 +1,11 @@
 package nl.uva.morlb.rg.environment.model;
 
 import java.security.InvalidParameterException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+
+import nl.uva.morlb.util.Util;
 
 /**
  * The parameters affecting the resource gathering problem.
@@ -60,7 +62,7 @@ public class Parameters {
 
     /**
      * Creates a new parameter set for a discrete problem.
-     *
+     * 
      * @param maxX
      *            The highest possible x value of a location
      * @param maxY
@@ -89,7 +91,7 @@ public class Parameters {
         this.maxY = maxY;
 
         // Define the resources and some cached values
-        this.resources = Collections.unmodifiableList(resources);
+        this.resources = resources;
         numResources = resources.size();
         int maxType = 0;
         for (final Resource resource : resources) {
@@ -126,6 +128,25 @@ public class Parameters {
     }
 
     /**
+     * Shuffles the locations of the resources to random locations.
+     * 
+     * @param rng
+     *            The random number generator to determine the new positions with
+     */
+    public void shuffleResources(final Random rng) {
+        for (int i = 0; i < resources.size(); ++i) {
+            final Resource resource = resources.get(i);
+
+            final double x = (continuousStatesActions ? rng.nextDouble() * maxX : rng.nextInt((int) maxX + 1));
+            final double y = (continuousStatesActions ? rng.nextDouble() * maxY : rng.nextInt((int) maxY + 1));
+            final RewardRange reward = resource.getReward();
+
+            resources.remove(i);
+            resources.add(i, new Resource(resource.getType(), x, y, reward.min, reward.max));
+        }
+    }
+
+    /**
      * @return The parameters in the format: maxX maxY actionsExpanded discountFactor actionFailProb viewDistance
      *         continuousStatesActions maxPickedUp resource...
      */
@@ -141,23 +162,52 @@ public class Parameters {
 
     /**
      * Converts a string representation of parameters to an object.
-     *
+     * 
      * @param str
      *            The string in the toString format
-     *
+     * @param rng
+     *            The random number generator to determine the new positions with
+     * 
      * @return The parameters
      */
-    public static Parameters fromString(final String str) {
-        final String[] values = str.split(" ");
+    public static Parameters fromString(final String str, final Random rng) {
+        return fromString(str.split(" "), rng);
+    }
+
+    /**
+     * Converts a string representation of parameters to an object.
+     * 
+     * @param values
+     *            The string in the toString format split on spaces
+     * @param rng
+     *            The random number generator to determine the new positions with
+     * 
+     * @return The parameters
+     */
+    public static Parameters fromString(final String[] values, final Random rng) {
+        final double maxX = Double.parseDouble(values[0]);
+        final double maxY = Double.parseDouble(values[1]);
+        final boolean continuousStatesActions = Boolean.parseBoolean(values[6]);
 
         final List<Resource> resources = new LinkedList<>();
-        for (int i = 8; i < values.length; i += 5) {
-            resources.add(Resource.fromString(values[i] + " " + values[i + 1] + " " + values[i + 2] + " "
-                    + values[i + 3] + " " + values[i + 4]));
+        if (values.length == 10) {
+            final int numObjectives = Integer.parseInt(values[8]);
+            final int numResources = Integer.parseInt(values[9]);
+            for (int i = 0; i < numResources; ++i) {
+                final int type = (i < numObjectives ? i : Util.RNG.nextInt(numObjectives));
+                final double x = (continuousStatesActions ? rng.nextDouble() * maxX : rng.nextInt((int) maxX + 1));
+                final double y = (continuousStatesActions ? rng.nextDouble() * maxY : rng.nextInt((int) maxY + 1));
+                resources.add(new Resource(type, x, y));
+            }
+        } else {
+            for (int i = 8; i < values.length; i += 5) {
+                resources.add(Resource.fromString(values[i] + " " + values[i + 1] + " " + values[i + 2] + " "
+                        + values[i + 3] + " " + values[i + 4]));
+            }
         }
 
-        return new Parameters(Double.parseDouble(values[0]), Double.parseDouble(values[1]), resources,
-                Boolean.parseBoolean(values[2]), Double.parseDouble(values[3]), Double.parseDouble(values[4]),
-                Double.parseDouble(values[5]), Boolean.parseBoolean(values[6]), Integer.parseInt(values[7]));
+        return new Parameters(maxX, maxY, resources, Boolean.parseBoolean(values[2]), Double.parseDouble(values[3]),
+                Double.parseDouble(values[4]), Double.parseDouble(values[5]), continuousStatesActions,
+                Integer.parseInt(values[7]));
     }
 }

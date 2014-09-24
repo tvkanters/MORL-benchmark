@@ -3,6 +3,7 @@ package nl.uva.morlb.rg.environment;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
@@ -55,6 +56,16 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
         // Initialise the problem
         mProblem = new ResourceGathering(mParameters);
+    }
+
+    /**
+     * Shuffles the locations of the resources to random locations.
+     * 
+     * @param rng
+     *            The random number generator to determine the new positions with
+     */
+    public void shuffleResources(final Random rng) {
+        mParameters.shuffleResources(rng);
     }
 
     /**

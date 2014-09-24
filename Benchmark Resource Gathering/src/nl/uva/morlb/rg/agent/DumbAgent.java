@@ -10,6 +10,7 @@ import org.rlcommunity.rlglue.codec.taskspec.TaskSpecVRLGLUE3;
 import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
+import org.rlcommunity.rlglue.codec.util.AgentLoader;
 
 /**
  * A sanity check agent that just runs to the top-right.
@@ -47,10 +48,10 @@ public class DumbAgent implements AgentInterface {
 
     /**
      * Called when the environment just started and returned the initial observation.
-     *
+     * 
      * @param observation
      *            The observation as given by the environment
-     *
+     * 
      * @return The action to perform next
      */
     @Override
@@ -62,12 +63,12 @@ public class DumbAgent implements AgentInterface {
 
     /**
      * Called after performing an action.
-     *
+     * 
      * @param reward
      *            The reward given by performing the previous action
      * @param observation
      *            The observation as given by the environment
-     *
+     * 
      * @return The action to perform next
      */
     @Override
@@ -81,7 +82,7 @@ public class DumbAgent implements AgentInterface {
 
     /**
      * Called when a terminal state has been reached or a time limit is reached.
-     *
+     * 
      * @param reward
      *            The reward given by performing the previous action
      */
@@ -98,13 +99,23 @@ public class DumbAgent implements AgentInterface {
 
     /**
      * Handles Glue messages, not implemented yet
-     *
+     * 
      * @param message
      *            The message to handle
      */
     @Override
     public String agent_message(final String arg0) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public static void main(final String[] args) {
+        // Start the agent
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new AgentLoader(new DumbAgent()).run();
+            }
+        }).start();
     }
 
 }
