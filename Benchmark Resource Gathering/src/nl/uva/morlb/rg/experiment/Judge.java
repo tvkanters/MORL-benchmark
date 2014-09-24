@@ -2,6 +2,7 @@ package nl.uva.morlb.rg.experiment;
 
 import java.util.Random;
 
+import jmetal.qualityIndicator.Hypervolume;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Solution;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
@@ -254,6 +255,27 @@ public class Judge {
     }
 
     /**
+     * Estimates the hypervolume of the soulution set. Note that the reference set is the origin. (See E. Zitzler and L.
+     * Thiele Multiobjective Evolutionary Algorithms: A Comparative Case Study and the Strength Pareto Approach, IEEE
+     * Transactions on Evolutionary Computation, vol. 3, no. 4, pp. 257-271, 1999)
+     * 
+     * @return the hypervolume of the solution set
+     */
+    public double hypervolume() {
+        // put the solution set into a double array of doubles
+        final double[][] solutionSetDoubleArray = new double[mNumSolutions][mNumObjectives];
+        for (int sol = 0; sol < mNumSolutions; sol++) {
+            double[] solutionValues = mSolutionSet.getSolutions().get(sol).getValues();
+            for (int dim = 0; dim < mNumObjectives; dim++) {
+                solutionSetDoubleArray[sol][dim] = solutionValues[dim];
+            }
+        }
+        // calculate hypervolume
+        Hypervolume hypervolume = new Hypervolume();
+        return hypervolume.calculateHypervolume(solutionSetDoubleArray, mNumSolutions, mNumObjectives);
+    }
+
+    /**
      * Performs some tests on this class
      * 
      * @param args
@@ -261,8 +283,8 @@ public class Judge {
     public static void main(final String[] args) {
 
         // test set
-        final SolutionSet testSolutionSet01 = new SolutionSet("(6,6),(5,5)");
-        final SolutionSet testSolutionSet02 = new SolutionSet("(3,4),(10,10)");
+        final SolutionSet testSolutionSet01 = new SolutionSet("(1,1),(0.5,3)");
+        final SolutionSet testSolutionSet02 = new SolutionSet("(1,1,1,1)");
 
         // create a scalarization function
         final LinearScalarisation linearScalarisation = new LinearScalarisation();
@@ -289,6 +311,9 @@ public class Judge {
 
         double spread = testJudge.maximumSpread();
         System.out.println("Spread measure: " + spread);
+
+        double hypervolume = testJudge.hypervolume();
+        System.out.println("Hypervolume: " + hypervolume);
 
     }
 }
