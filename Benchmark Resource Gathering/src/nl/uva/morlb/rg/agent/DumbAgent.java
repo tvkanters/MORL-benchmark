@@ -1,8 +1,11 @@
 package nl.uva.morlb.rg.agent;
 
+import java.security.InvalidParameterException;
 import java.util.Arrays;
 
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
+import nl.uva.morlb.rg.experiment.model.Solution;
+import nl.uva.morlb.rg.experiment.model.SolutionSet;
 import nl.uva.morlb.util.Log;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
@@ -21,6 +24,10 @@ public class DumbAgent implements AgentInterface {
     private int numActions;
     /** Whether the agent went up last term to enable diagonal walking */
     private boolean mWentUp;
+    /** The solution set found in this test */
+    private SolutionSet mSolutionSet;
+    /** The return this episode */
+    private double[] mReturn;
 
     /**
      * Called when preparing the problem.
@@ -29,6 +36,11 @@ public class DumbAgent implements AgentInterface {
     public void agent_init(final String taskSpecStr) {
         final TaskSpecVRLGLUE3 taskSpec = new TaskSpecVRLGLUE3(taskSpecStr);
         numActions = taskSpec.getDiscreteActionRange(0).getMax();
+        mReturn = new double[taskSpec.getNumOfObjectives()];
+
+        if (mSolutionSet == null) {
+            mSolutionSet = new SolutionSet(mReturn.length);
+        }
     }
 
     /**
@@ -48,14 +60,15 @@ public class DumbAgent implements AgentInterface {
 
     /**
      * Called when the environment just started and returned the initial observation.
-     * 
+     *
      * @param observation
      *            The observation as given by the environment
-     * 
+     *
      * @return The action to perform next
      */
     @Override
     public Action agent_start(final Observation observation) {
+        mReturn = new double[mReturn.length];
         final Action action = new Action(1, 0);
         action.setInt(0, getAction());
         return action;
@@ -63,17 +76,18 @@ public class DumbAgent implements AgentInterface {
 
     /**
      * Called after performing an action.
-     * 
+     *
      * @param reward
      *            The reward given by performing the previous action
      * @param observation
      *            The observation as given by the environment
-     * 
+     *
      * @return The action to perform next
      */
     @Override
     public Action agent_step(final Reward reward, final Observation observation) {
         Log.d("AGENT: Got a reward of " + Arrays.toString(reward.doubleArray));
+        incrementReturn(reward);
 
         final Action action = new Action(1, 0);
         action.setInt(0, getAction());
@@ -82,30 +96,51 @@ public class DumbAgent implements AgentInterface {
 
     /**
      * Called when a terminal state has been reached or a time limit is reached.
-     * 
+     *
      * @param reward
      *            The reward given by performing the previous action
      */
     @Override
     public void agent_end(final Reward reward) {
         Log.d("AGENT: Got a reward of " + Arrays.toString(reward.doubleArray));
+        incrementReturn(reward);
+        mSolutionSet.addSolution(new Solution(mReturn));
+    }
+
+    /**
+     * Increments the return with the received reward.
+     * 
+     * @param reward
+     *            The reward received
+     */
+    private void incrementReturn(final Reward reward) {
+        for (int i = 0; i < mReturn.length; ++i) {
+            mReturn[i] += reward.doubleArray[i];
+        }
     }
 
     /**
      * Resets the agent to the initial state.
      */
     @Override
-    public void agent_cleanup() {}
+    public void agent_cleanup() {
+        mSolutionSet = null;
+    }
 
     /**
      * Handles Glue messages, not implemented yet
-     * 
+     *
      * @param message
      *            The message to handle
      */
     @Override
-    public String agent_message(final String arg0) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public String agent_message(final String message) {
+        if (message.equals("getSolutionSet")) {
+            System.out.println(mSolutionSet.toString());
+            return mSolutionSet.toString();
+        }
+
+        throw new InvalidParameterException("Unknown message: " + message);
     }
 
     public static void main(final String[] args) {

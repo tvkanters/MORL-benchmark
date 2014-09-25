@@ -6,6 +6,8 @@ import java.util.Random;
 import nl.uva.morlb.rg.agent.DumbAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.model.Parameters;
+import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
+import nl.uva.morlb.rg.experiment.model.SolutionSet;
 
 import org.rlcommunity.rlglue.codec.RLGlue;
 import org.rlcommunity.rlglue.codec.types.Reward;
@@ -28,12 +30,31 @@ public class Experiment {
      * Runs the full experiment.
      */
     public void runExperiment() {
+
         for (int test = 0; test < 10; ++test) {
             RLGlue.RL_init();
 
             for (int episode = 0; episode < 20; ++episode) {
                 runEpisode(100);
             }
+
+            final Judge judge = new Judge(new SolutionSet(RLGlue.RL_agent_message("getSolutionSet")),
+                    new LinearScalarisation());
+
+            final double avgRew = judge.averageReward();
+            System.out.println("Average Reward: " + avgRew);
+
+            final int oNVG = judge.overallNondominatedVectorGeneration();
+            System.out.println("ONVG: " + oNVG);
+
+            final double unif = judge.schottSpacingMetric();
+            System.out.println("Uniformity measure: " + unif);
+
+            final double spread = judge.maximumSpread();
+            System.out.println("Spread measure: " + spread);
+
+            final double hypervolume = judge.hypervolume();
+            System.out.println("Hypervolume: " + hypervolume);
 
             RLGlue.RL_cleanup();
             sProblem.shuffleResources(sRng);
@@ -44,7 +65,7 @@ public class Experiment {
 
     /**
      * Runs an episode of resource gathering.
-     * 
+     *
      * @param stepLimit
      *            The amount steps before terminating
      */
@@ -54,8 +75,8 @@ public class Experiment {
         final int totalSteps = RLGlue.RL_num_steps();
         final Reward totalReward = RLGlue.RL_return();
 
-        System.out.println("Episode " + mEpisodeCount);
-        System.out.println("    Reward: " + Arrays.toString(totalReward.doubleArray));
+//        System.out.println("Episode " + mEpisodeCount);
+//        System.out.println("    Reward: " + Arrays.toString(totalReward.doubleArray));
 
         ++mEpisodeCount;
     }
