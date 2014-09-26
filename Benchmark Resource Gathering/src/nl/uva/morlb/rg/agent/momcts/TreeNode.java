@@ -20,6 +20,15 @@ public class TreeNode {
         mState = state;
     }
 
+    /**
+     * Add a child node
+     * 
+     * @param action The action resulting in that child
+     * @param treeNode The node resulting from that action
+     */
+    public void addChild(final DiscreteAction action, final TreeNode treeNode) {
+        mChildrens.put(action, treeNode);
+    }
 
     public int getVisitationCount() {
         return mVisitationCout;
@@ -55,6 +64,24 @@ public class TreeNode {
     @Override
     public int hashCode() {
         return mState.hashCode();
+    }
+
+    /**
+     * Evaluates if this node is a leaf
+     * 
+     * @return True if it is a leaf, false if not
+     */
+    public boolean isLeaf() {
+        return mChildrens.isEmpty();
+    }
+
+    /**
+     * Get the resulting tree node for the specific action
+     * @param action The action to take in this node
+     * @return The resulting tree node
+     */
+    public TreeNode getNextNodeForAction(final DiscreteAction action) {
+        return mChildrens.get(action);
     }
 
 }
