@@ -13,7 +13,7 @@ public class SearchTree {
 
     private final int mLevelCounter = 1;
 
-    private final List<Set<State>> mTree = new LinkedList<Set<State>>();
+    private final List<Set<TreeNode>> mTree = new LinkedList<Set<TreeNode>>();
 
     /**
      * Initialise the search tree with the root node
@@ -21,12 +21,13 @@ public class SearchTree {
      * @param initialState The root node
      */
     public void initialise(final State initialState) {
-        Set<State> initialSet = new HashSet<>();
-        initialSet.add(initialState);
-        mTree.add(initialSet);
+        Set<TreeNode> initialSet = new HashSet<>();
+        initialSet.add(new TreeNode(initialState));
 
+        mTree.add(initialSet);
         mInitialised = true;
     }
+
 
 
 
