@@ -21,7 +21,7 @@ public class SdpCollection {
         resources.add(new Resource(0, 1, 2));
         resources.add(new Resource(1, 2, 1));
 
-        return new Parameters(3, 3, resources, Parameters.ACTIONS_LIMITED, 1, 0, Parameters.FULLY_OBSERVABLE,
+        return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
                 Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
@@ -38,7 +38,21 @@ public class SdpCollection {
         resources.add(new Resource(0, 8, 4));
         resources.add(new Resource(2, 4, 1));
 
-        return new Parameters(9, 9, resources, Parameters.ACTIONS_LIMITED, 1, 0, Parameters.FULLY_OBSERVABLE,
+        return new Parameters(9, 9, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
+    }
+
+    /**
+     * Creates a small, discrete problem with 3 objectives and 3 actions.
+     *
+     * @return The parameters to pass to the resource gathering problem
+     */
+    public static Parameters getTinyActionsProblem() {
+        final List<Resource> resources = new LinkedList<>();
+        resources.add(new Resource(0, 1, 2));
+        resources.add(new Resource(1, 2, 1));
+
+        return new Parameters(3, 3, resources, Parameters.ACTIONS_TINY, 1, 0, Parameters.FULLY_OBSERVABLE,
                 Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
@@ -47,13 +61,13 @@ public class SdpCollection {
      *
      * @return The parameters to pass to the resource gathering problem
      */
-    public static Parameters getManyActionsProblem() {
+    public static Parameters getFullActionsProblem() {
         final List<Resource> resources = new LinkedList<>();
         resources.add(new Resource(0, 1, 2));
         resources.add(new Resource(1, 3, 1));
         resources.add(new Resource(1, 0, 4));
 
-        return new Parameters(5, 5, resources, Parameters.ACTIONS_EXPANDED, 1, 0, Parameters.FULLY_OBSERVABLE,
+        return new Parameters(5, 5, resources, Parameters.ACTIONS_FULL, 1, 0, Parameters.FULLY_OBSERVABLE,
                 Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
@@ -67,7 +81,7 @@ public class SdpCollection {
         resources.add(new Resource(0, 1, 2));
         resources.add(new Resource(1, 2, 1));
 
-        return new Parameters(3, 3, resources, Parameters.ACTIONS_LIMITED, 1, 0, Parameters.FULLY_OBSERVABLE,
+        return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
                 Parameters.STATES_CONTINUOUS, Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
@@ -82,7 +96,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 3, 1));
         resources.add(new Resource(1, 0, 4));
 
-        return new Parameters(5, 5, resources, Parameters.ACTIONS_LIMITED, 1, 0, 1, Parameters.STATES_DISCRETE,
+        return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0, 1, Parameters.STATES_DISCRETE,
                 Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
@@ -97,7 +111,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 3, 1, 1.0, 2.5));
         resources.add(new Resource(1, 0, 4, 0.3, 1.0));
 
-        return new Parameters(5, 5, resources, Parameters.ACTIONS_LIMITED, 1, 0.4, 1, Parameters.STATES_DISCRETE,
+        return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0.4, 1, Parameters.STATES_DISCRETE,
                 Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
@@ -111,7 +125,7 @@ public class SdpCollection {
         resources.add(new Resource(0, 1, 2));
         resources.add(new Resource(1, 2, 1));
 
-        return new Parameters(3, 3, resources, Parameters.ACTIONS_LIMITED, 0.8, 0, Parameters.FULLY_OBSERVABLE,
+        return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 0.8, 0, Parameters.FULLY_OBSERVABLE,
                 Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
@@ -126,7 +140,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 3, 1));
         resources.add(new Resource(1, 0, 4));
 
-        return new Parameters(5, 5, resources, Parameters.ACTIONS_LIMITED, 1, 0, Parameters.FULLY_OBSERVABLE,
+        return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
                 Parameters.STATES_DISCRETE, 2);
     }
 

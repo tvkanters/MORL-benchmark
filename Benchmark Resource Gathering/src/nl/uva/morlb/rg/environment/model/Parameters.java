@@ -14,10 +14,12 @@ public class Parameters {
 
     /** The value indicating a fully observable state */
     public static final double FULLY_OBSERVABLE = Double.POSITIVE_INFINITY;
+    /** The value indicating only 3 actions */
+    public static final int ACTIONS_TINY = 0;
     /** The value indicating only 5 actions */
-    public static final boolean ACTIONS_LIMITED = false;
+    public static final int ACTIONS_SMALL = 1;
     /** The value indicating 9 actions */
-    public static final boolean ACTIONS_EXPANDED = true;
+    public static final int ACTIONS_FULL = 2;
     /** The value indicating a discrete state and action space */
     public static final boolean STATES_DISCRETE = false;
     /** The value indicating a continuous action and action space */
@@ -37,8 +39,10 @@ public class Parameters {
     /** The amount of different types of resources available, related to the amount of objectives */
     public final int numResourceTypes;
 
-    /** Whether or not the action space has an increased size */
-    public final boolean actionsExpanded;
+    /** Which action space to use */
+    public final int actionSpace;
+    /** Which action space to use */
+    public final int actionMax;
     /** The probability that an additional random action will be performed when taking an action */
     public final double actionFailProb;
 
@@ -62,7 +66,7 @@ public class Parameters {
 
     /**
      * Creates a new parameter set for a discrete problem.
-     * 
+     *
      * @param maxX
      *            The highest possible x value of a location
      * @param maxY
@@ -70,7 +74,7 @@ public class Parameters {
      * @param resources
      *            The resources to place in the problem
      * @param actionsExpanded
-     *            Whether or not the action space has an increased size
+     *            Which action space to use
      * @param discountFactor
      *            The discount factor applied to rewards, indicates a finite horizon problem when the value is 1
      * @param actionFailProb
@@ -83,9 +87,9 @@ public class Parameters {
      * @param maxPickedUp
      *            The amount of resources an agent can pick up
      */
-    public Parameters(final double maxX, final double maxY, final List<Resource> resources,
-            final boolean actionsExpanded, final double discountFactor, final double actionFailProb,
-            final double viewDistance, final boolean continuousStatesActions, final int maxPickedUp) {
+    public Parameters(final double maxX, final double maxY, final List<Resource> resources, final int actionSpace,
+            final double discountFactor, final double actionFailProb, final double viewDistance,
+            final boolean continuousStatesActions, final int maxPickedUp) {
         // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
@@ -100,7 +104,20 @@ public class Parameters {
         numResourceTypes = maxType + 1;
 
         // Define the action space size
-        this.actionsExpanded = actionsExpanded;
+        this.actionSpace = actionSpace;
+        switch (actionSpace) {
+            case Parameters.ACTIONS_TINY:
+                actionMax = 2;
+                break;
+            case Parameters.ACTIONS_SMALL:
+                actionMax = 4;
+                break;
+            case Parameters.ACTIONS_FULL:
+                actionMax = 8;
+                break;
+            default:
+                throw new InvalidParameterException("Invalid action space");
+        }
 
         // Define the discount factor
         if (discountFactor <= 0 || discountFactor > 1) {
@@ -129,7 +146,7 @@ public class Parameters {
 
     /**
      * Shuffles the locations of the resources to random locations.
-     * 
+     *
      * @param rng
      *            The random number generator to determine the new positions with
      */
@@ -147,12 +164,12 @@ public class Parameters {
     }
 
     /**
-     * @return The parameters in the format: maxX maxY actionsExpanded discountFactor actionFailProb viewDistance
+     * @return The parameters in the format: maxX maxY actionSpace discountFactor actionFailProb viewDistance
      *         continuousStatesActions maxPickedUp resource...
      */
     @Override
     public String toString() {
-        String str = maxX + " " + maxY + " " + actionsExpanded + " " + discountFactor + " " + actionFailProb + " "
+        String str = maxX + " " + maxY + " " + actionSpace + " " + discountFactor + " " + actionFailProb + " "
                 + viewDistance + " " + continuousStatesActions + " " + maxPickedUp;
         for (final Resource resource : resources) {
             str += " " + resource;
@@ -162,12 +179,12 @@ public class Parameters {
 
     /**
      * Converts a string representation of parameters to an object.
-     * 
+     *
      * @param str
      *            The string in the toString format
      * @param rng
      *            The random number generator to determine the new positions with
-     * 
+     *
      * @return The parameters
      */
     public static Parameters fromString(final String str, final Random rng) {
@@ -176,12 +193,12 @@ public class Parameters {
 
     /**
      * Converts a string representation of parameters to an object.
-     * 
+     *
      * @param values
      *            The string in the toString format split on spaces
      * @param rng
      *            The random number generator to determine the new positions with
-     * 
+     *
      * @return The parameters
      */
     public static Parameters fromString(final String[] values, final Random rng) {
@@ -206,7 +223,7 @@ public class Parameters {
             }
         }
 
-        return new Parameters(maxX, maxY, resources, Boolean.parseBoolean(values[2]), Double.parseDouble(values[3]),
+        return new Parameters(maxX, maxY, resources, Integer.parseInt(values[2]), Double.parseDouble(values[3]),
                 Double.parseDouble(values[4]), Double.parseDouble(values[5]), continuousStatesActions,
                 Integer.parseInt(values[7]));
     }
