@@ -97,7 +97,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
             taskSpec.addContinuousAction(new DoubleRange(-mParameters.maxStepSize, mParameters.maxStepSize));
             taskSpec.addContinuousAction(new DoubleRange(-mParameters.maxStepSize, mParameters.maxStepSize));
         } else {
-            taskSpec.addDiscreteAction(new IntRange(0, (mParameters.actionsExpanded ? 8 : 4)));
+            taskSpec.addDiscreteAction(new IntRange(0, mParameters.actionMax));
         }
 
         // Set the (in)finite horizon property

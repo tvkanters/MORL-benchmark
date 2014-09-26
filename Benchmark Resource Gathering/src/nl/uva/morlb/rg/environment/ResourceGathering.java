@@ -71,8 +71,8 @@ public class ResourceGathering {
      * @return The discounted reward resulting from performing the action
      */
     public double[] performAction(final DiscreteAction action) {
-        if (!mParameters.actionsExpanded && action.ordinal() > 4) {
-            throw new InvalidParameterException("Action value cannot exceed 4 with a non-expanded action space");
+        if (action.ordinal() > mParameters.actionMax) {
+            throw new InvalidParameterException("Action value exceeds action space");
         }
 
         // Log possible next states for debugging purposes
@@ -109,7 +109,7 @@ public class ResourceGathering {
                 final double yFail = Util.RNG.nextDouble() * mParameters.maxStepSize * 2 - mParameters.maxStepSize;
                 failAction = new Location(xFail, yFail);
             } else {
-                final int failureIndex = Util.RNG.nextInt(mParameters.actionsExpanded ? 7 : 3) + 1;
+                final int failureIndex = Util.RNG.nextInt(mParameters.actionMax - 1) + 1;
                 failAction = DiscreteAction.values()[failureIndex].getLocation();
             }
         } else {
@@ -149,7 +149,7 @@ public class ResourceGathering {
         final Map<State, Double> stateProbabilities = new HashMap<State, Double>();
 
         // Add a second fail step (handles no failure with the WAIT action)
-        final int numSecondActions = (mParameters.actionFailProb > 0 ? (mParameters.actionsExpanded ? 8 : 4) : 1);
+        final int numSecondActions = (mParameters.actionFailProb > 0 ? mParameters.actionMax : 1);
         for (int actionIndex = 0; actionIndex < numSecondActions; ++actionIndex) {
             final State nextState = getNextState(state, action.getLocation(),
                     DiscreteAction.values()[actionIndex].getLocation());
