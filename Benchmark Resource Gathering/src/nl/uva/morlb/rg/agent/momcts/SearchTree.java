@@ -1,6 +1,7 @@
 package nl.uva.morlb.rg.agent.momcts;
 
 import java.util.HashMap;
+import java.util.List;
 
 import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
@@ -23,7 +24,7 @@ public class SearchTree {
 
     /**
      * Initialise the search tree with the root node
-     * 
+     *
      * @param initialState The root node
      */
     public void initialise(final State initialState) {
@@ -86,14 +87,37 @@ public class SearchTree {
     }
 
     /**
-     * Performs the given action on the current tree node and change the current node to the resulting one
+     * Performs the given action on the current tree node and change the current node to the resulting one.
+     * It also increases the visitation count of the current node by 1.
      * @param action The action to perform on the current node
      */
     public void performActionOnCurrentNode(final DiscreteAction action) {
         mCurrentNode = mCurrentNode.getNextNodeForAction(action);
+        mCurrentNode.increaseVisitationCount();
     }
 
     public String info() {
-        return "" +mEntries.size();
+        String result = "Entries: " +mEntries.size();
+        for(TreeNode t : mEntries.values()) {
+            System.out.println(t);
+        }
+
+        return result;
+    }
+
+    /**
+     * Get all already performed actions on the current node
+     * @return A list of all already performed actions on the current node
+     */
+    public List<DiscreteAction> getPerformedActionsForCurrentNode() {
+        return mCurrentNode.getListOfPerformedActions();
+    }
+
+    /**
+     * Get the current active node
+     * @return The current active node
+     */
+    public TreeNode getCurrentNode() {
+        return mCurrentNode;
     }
 }

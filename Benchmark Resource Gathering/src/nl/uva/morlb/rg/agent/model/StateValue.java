@@ -98,11 +98,31 @@ public class StateValue {
 
     /**
      * Get the dimensionality of this reward
-     * 
+     *
      * @return The dimensionality of this reward
      */
     public int getDimension() {
         return mReward.length;
+    }
+
+    @Override
+    public String toString() {
+        String result = "[ ";
+        for(double reward : mReward) {
+            result += reward +" ";
+        }
+        result += " ]";
+
+        return result;
+    }
+
+    /**
+     * Returns the reward for the given objective
+     * @param rewardPosition The given objective
+     * @return The reward for the given objective
+     */
+    public double getRewardForObjective(final int rewardPosition) {
+        return mReward[rewardPosition];
     }
 
 }

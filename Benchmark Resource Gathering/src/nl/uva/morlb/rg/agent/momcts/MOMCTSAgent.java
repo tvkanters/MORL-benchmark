@@ -1,9 +1,11 @@
 package nl.uva.morlb.rg.agent.momcts;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import jmetal.qualityIndicator.Hypervolume;
 import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.agent.model.StateValue;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
@@ -42,6 +44,9 @@ public class MOMCTSAgent implements AgentInterface {
 
     /** The accumulated reward over the whole episode **/
     private StateValue mR_u;
+
+    /** The pareto front **/
+    private final List<StateValue> mParetoFront = new ArrayList<StateValue>();
 
     /**
      * Defines the random walk phase
@@ -86,7 +91,15 @@ public class MOMCTSAgent implements AgentInterface {
 
     @Override
     public Action agent_step(final Reward reward, final Observation observation) {
-        mR_u.add(new StateValue(reward.doubleArray));
+        mR_u = mR_u.add(new StateValue(reward.doubleArray));
+
+        //Calculate the current inventory
+        for(int i = 1; i < reward.doubleArray.length; ++i) {
+            if(reward.doubleArray[i] != 0) {
+                mInventory[i-1] = true;
+            }
+        }
+
         State currentState = generateState(observation, mInventory);
 
         return treeWalk(currentState).convertToRLGlueAction();
@@ -106,14 +119,21 @@ public class MOMCTSAgent implements AgentInterface {
             }
 
             resultingAction = randomWalk();
-        } else if(!mSearchTree.isLeafNode()) { //TODO && mSearchTree. DO Progressive widening
+        } else if(!mSearchTree.isLeafNode() && !progressiveWidening()) { //TODO && mSearchTree. DO Progressive widening
 
-            resultingAction = mAvailableActions.get(Util.RNG.nextInt(mAvailableActions.size()));
+            //TODO perform maximization over action using the paretofront projection
+
+            List<DiscreteAction> availableActions = mSearchTree.getPerformedActionsForCurrentNode();
+            resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
             mSearchTree.performActionOnCurrentNode(resultingAction);
         } else {
 
             //TODO Use RAVE
-            resultingAction = mAvailableActions.get(Util.RNG.nextInt(mAvailableActions.size()));
+            List<DiscreteAction> nonAvailableActions = mSearchTree.getPerformedActionsForCurrentNode();
+            List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
+            availableActions.removeAll(nonAvailableActions);
+
+            resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
 
             //Tree building step 1, save the action
             mSearchTree.saveTreeBuildingAction(resultingAction);
@@ -124,13 +144,41 @@ public class MOMCTSAgent implements AgentInterface {
         return resultingAction;
     }
 
+    /**
+     * Get the next random walk action
+     * @return The next action determined by random walk
+     */
     private DiscreteAction randomWalk() {
         return mAvailableActions.get(Util.RNG.nextInt(mAvailableActions.size()));
+    }
+
+    /**
+     * Calculates if the progressive widening condition is met
+     * @return True if we should do progressive widening, false if not
+     */
+    private boolean progressiveWidening() {
+        int v_s = mSearchTree.getCurrentNode().getVisitationCount();
+
+        return Math.pow(v_s, 1/2) >= mSearchTree.getCurrentNode().getAmountOfChildren() && mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
     }
 
     @Override
     public void agent_end(final Reward reward) {
         System.out.println(mSearchTree.info());
+        System.out.println(mR_u);
+
+        //TODO calculate the pareto front, it seems like metal can't handle 0 values for objective rewards
+        Hypervolume hypervolume = new Hypervolume();
+        final double[][] solutionSetDoubleArray = new double[mParetoFront.size()][mTaskSpec.getNumOfObjectives()];
+        for(int paretoPoint = 0; paretoPoint < mParetoFront.size(); paretoPoint++) {
+            for(int rewardPosition = 0; rewardPosition < mTaskSpec.getNumOfObjectives(); rewardPosition++) {
+                solutionSetDoubleArray[paretoPoint][rewardPosition] = mParetoFront.get(paretoPoint).getRewardForObjective(rewardPosition);
+            }
+        }
+
+        System.out.println("Hypervolume indicator" +hypervolume.calculateHypervolume(solutionSetDoubleArray, mParetoFront.size(), mTaskSpec.getNumOfObjectives()));
+
+        mParetoFront.add(mR_u);
 
         mRandomWalk = RandomWalkPhase.OUT;
         mR_u = null;
@@ -147,7 +195,7 @@ public class MOMCTSAgent implements AgentInterface {
 
     /**
      * Generate the current state from the observation and the current inventory
-     * 
+     *
      * @param observation The current observation
      * @return The current state
      */

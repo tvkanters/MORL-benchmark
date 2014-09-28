@@ -1,6 +1,8 @@
 package nl.uva.morlb.rg.agent.momcts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.agent.model.StateValue;
@@ -22,7 +24,7 @@ public class TreeNode {
 
     /**
      * Add a child node
-     * 
+     *
      * @param action The action resulting in that child
      * @param treeNode The node resulting from that action
      */
@@ -68,7 +70,7 @@ public class TreeNode {
 
     /**
      * Evaluates if this node is a leaf
-     * 
+     *
      * @return True if it is a leaf, false if not
      */
     public boolean isLeaf() {
@@ -82,6 +84,39 @@ public class TreeNode {
      */
     public TreeNode getNextNodeForAction(final DiscreteAction action) {
         return mChildrens.get(action);
+    }
+
+    /**
+     * Generate a list of all already performed actions on this node
+     * @return A list of all already performed actions on this node
+     */
+    public List<DiscreteAction> getListOfPerformedActions() {
+        return new ArrayList<DiscreteAction>(mChildrens.keySet());
+    }
+
+    /**
+     * Increases the visitation counter by 1
+     */
+    public void increaseVisitationCount() {
+        mVisitationCout++;
+    }
+
+    /**
+     * Get the amount of children under this node
+     * @return The amount of children of this node
+     */
+    public double getAmountOfChildren() {
+        return mChildrens.size();
+    }
+
+    @Override
+    public String toString() {
+        String result = mState.toString() + " Children: " +mChildrens.size();
+        for(DiscreteAction childAction : mChildrens.keySet()) {
+            result += " " +childAction.name();
+        }
+
+        return result;
     }
 
 }
