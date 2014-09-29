@@ -14,14 +14,19 @@ import nl.uva.morlb.rg.experiment.model.Scalarisation;
  */
 public class Judge {
 
-    /** The reference point for the hypervolume for the time dimension */
-    public static final double REFERENCE_POINT_TIME = -100;
-    /** The reference point fo rthe hypervolume for the resource dimensions */
-    public static final double REFERENCE_POINT_RESOURCES = -1;
+    /** The default reference point for the hypervolume for the time dimension */
+    public static final double HYPERVOLUME_REFERENCE_POINT_TIME = -100;
+    /** The default reference point fo rthe hypervolume for the resource dimensions */
+    public static final double HYPERVOLUME_REFERENCE_POINT_RESOURCES = -1;
 
     /**
-     * Estimates the average scalarised value the solution set achieves using random weight samples. The bigger the
-     * returned value, the better. Also returns the standard deviation.
+     * Estimates the average scalarised value and the corresponding standard deviation of a solution set achieves using
+     * random weight samples and a provided scalarisation function.
+     * 
+     * @param solutionSet
+     *            The solution set that is evaluated
+     * @param scalarisation
+     *            The scalarisation function upon which the solution set is evaluated
      * 
      * @return double array of the average reward and the standard deviation that was estimated for the solution set
      */
@@ -29,7 +34,8 @@ public class Judge {
         // the number of weight values we want to test per objective
         final int weightValuesPerObjective = 2;
         // total number of tests that will be performed
-        final int totalNumTests = (int) Math.pow((double) weightValuesPerObjective, (double) solutionSet.getNumObjectives());
+        final int totalNumTests = (int) Math.pow((double) weightValuesPerObjective,
+                (double) solutionSet.getNumObjectives());
         // the seed for the random number generator (has to be the same for each test, so that comparison makes sense;
         // better would be a uniform grid over the n-dimensional space with vectors whose values sum to 1, but that is a
         // mathematical problem of its own)
@@ -78,13 +84,16 @@ public class Judge {
     }
 
     /**
-     * Estimates the additive epsilon indicator, i.e. the smallest epsilon which has to be added to the solution set so
-     * that it weakly dominates the reference set. (See E. Zitzler, L. Thiele, M. Laumanns, C.M. Fonesca, V. Grunert da
-     * Fonseca: Performance Assessment of Multiobjective Optimizers: An Analysis and Review. IEEE Transactions on
-     * Evolutionary Computation 7(2), 117-132 (2003))
+     * Estimates the additive epsilon indicator for a given solution set and a reference set, i.e. the smallest epsilon
+     * which has to be added to the solution set so that it weakly dominates the reference set. (See E. Zitzler, L.
+     * Thiele, M. Laumanns, C.M. Fonesca, V. Grunert da Fonseca: Performance Assessment of Multiobjective Optimizers: An
+     * Analysis and Review. IEEE Transactions on Evolutionary Computation 7(2), 117-132 (2003))
      * 
+     * @param solutionSet
+     *            The solution set that is evaluated
      * @param referenceSet
      *            The true Pareto front or a good approximation to which the solution can be compared
+     * 
      * @return The additive epsilon indicator
      */
     public static double additiveEpsilonIndicator(final SolutionSet solutionSet, final SolutionSet referenceSet) {
@@ -120,13 +129,16 @@ public class Judge {
     }
 
     /**
-     * Estimates the multiplicative epsilon indicator, i.e. the smallest epsilon so that to the solution weakly
-     * dominates the reference set if multiplied with the factor epsilon. (See E. Zitzler, L. Thiele, M. Laumanns, C.M.
-     * Fonesca, V. Grunert da Fonseca: Performance Assessment of Multiobjective Optimizers: An Analysis and Review. IEEE
-     * Transactions on Evolutionary Computation 7(2), 117-132 (2003))
+     * Estimates the multiplicative epsilon indicator for a given solution set and a reference set, i.e. the smallest
+     * epsilon so that to the solution weakly dominates the reference set if multiplied with the factor epsilon. (See E.
+     * Zitzler, L. Thiele, M. Laumanns, C.M. Fonesca, V. Grunert da Fonseca: Performance Assessment of Multiobjective
+     * Optimizers: An Analysis and Review. IEEE Transactions on Evolutionary Computation 7(2), 117-132 (2003))
      * 
+     * @param solutionSet
+     *            The solution set that is evaluated
      * @param referenceSet
      *            The true Pareto front or a good approximation to which the solution can be compared
+     * 
      * @return The multiplicative epsilon indicator
      */
     public static double multiplicativeEpsilonIndicator(final SolutionSet solutionSet, final SolutionSet referenceSet) {
@@ -162,23 +174,29 @@ public class Judge {
     }
 
     /**
-     * Overall Nondominated Vector Generation (ONVG) gives an indication of convergence. It is literally just the number
-     * of solutions the algorithm found. It should neither be too high nor too low, and is only useful in combination
-     * with other quality indicators, or in comparison with the ONVG of a reference set. (See J. R. Schott: Fault
-     * tolerant design using single and multicriteria genetic algorithm optimization, M.S. thesis, Dept. Aeronautics
-     * Astronautics, Massachusetts Instit. Technology, Cambridge, MA, USA, 1995)
+     * Overall Nondominated Vector Generation (ONVG) gives an indication of convergence for a provided solution set. It
+     * is literally just the number of solutions the algorithm found. It should neither be too high nor too low, and is
+     * only useful in combination with other quality indicators, or in comparison with the ONVG of a reference set. (See
+     * J. R. Schott: Fault tolerant design using single and multicriteria genetic algorithm optimization, M.S. thesis,
+     * Dept. Aeronautics Astronautics, Massachusetts Instit. Technology, Cambridge, MA, USA, 1995)
      * 
-     * @return The number of solutions the algorithm found
+     * @param solutionSet
+     *            The solution set that is evaluated
+     * 
+     * @return The number of solutions in the solution set
      */
     public static int overallNondominatedVectorGeneration(final SolutionSet solutionSet) {
         return solutionSet.getNumSolutions();
     }
 
     /**
-     * This metric gives an indication to how uniformly the solution set is distributed. The lower this value, the
-     * better. The runtime is quadratic in the number of objectives. (See J. R. Schott: Fault tolerant design using
+     * This metric gives an indication to how uniformly a provided solution set is distributed. The lower this value,
+     * the better. The runtime is quadratic in the number of objectives. (See J. R. Schott: Fault tolerant design using
      * single and multicriteria genetic algorithm optimization, M.S. thesis, Dept. Aeronautics Astronautics,
      * Massachusetts Instit. Technology, Cambridge, MA, USA, 1995)
+     * 
+     * @param solutionSet
+     *            The solution set that is evaluated
      * 
      * @return The indicator of how evenly the solutions in the solution set are distributed. A lower value indicates a
      *         better(more uniform) distribution. Returns POSITIVE_INIFINITY if there exists no or only one solution.
@@ -225,9 +243,12 @@ public class Judge {
     }
 
     /**
-     * Estimates the maximum spread, which is an indicator for how well the solutions are spread. A higher value
-     * indicates a better spread of solutions. (E. Zitzler, K. Deb, and L. Thiele: Comparison of multiobjective
-     * evolutionary algorithms: Empirical results, Evol. Comput., vol. 8, no. 2, pp. 173-195, Jun. 2000)
+     * Estimates the maximum spread of a solution set, which is an indicator for how well the solutions are spread. A
+     * higher value indicates a better spread of solutions. (E. Zitzler, K. Deb, and L. Thiele: Comparison of
+     * multiobjective evolutionary algorithms: Empirical results, Evol. Comput., vol. 8, no. 2, pp. 173-195, Jun. 2000)
+     * 
+     * @param solutionSet
+     *            The solution set that is evaluated
      * 
      * @return The maximum spread. A higher value indicates a beter (larger) spread.
      */
@@ -248,22 +269,38 @@ public class Judge {
     }
 
     /**
-     * Estimates the hypervolume of the soulution set. Note that the reference set is the origin. (See E. Zitzler and L.
-     * Thiele Multiobjective Evolutionary Algorithms: A Comparative Case Study and the Strength Pareto Approach, IEEE
-     * Transactions on Evolutionary Computation, vol. 3, no. 4, pp. 257-271, 1999)
+     * Estimates the hypervolume of a soulution set (and a default reference point). The runtime is exponential in the
+     * number of objectives. (See E. Zitzler and L. Thiele Multiobjective Evolutionary Algorithms: A Comparative Case
+     * Study and the Strength Pareto Approach, IEEE Transactions on Evolutionary Computation, vol. 3, no. 4, pp.
+     * 257-271, 1999)
+     * 
+     * @param solutionSet
+     *            The solution set that is evaluated
      * 
      * @return the hypervolume of the solution set
      */
     public static double hypervolume(final SolutionSet solutionSet) {
         // set up default reference point
         double[] referencePoint = new double[solutionSet.getNumObjectives()];
-        referencePoint[0] = REFERENCE_POINT_TIME;
+        referencePoint[0] = HYPERVOLUME_REFERENCE_POINT_TIME;
         for (int d = 1; d < solutionSet.getNumObjectives(); d++) {
-            referencePoint[d] = REFERENCE_POINT_RESOURCES;
+            referencePoint[d] = HYPERVOLUME_REFERENCE_POINT_RESOURCES;
         }
         return hypervolume(solutionSet, referencePoint);
     }
 
+    /**
+     * Estimates the hypervolume of a soulution set given a reference point. The runtime is exponential in the number of
+     * objectives. (See E. Zitzler and L. Thiele Multiobjective Evolutionary Algorithms: A Comparative Case Study and
+     * the Strength Pareto Approach, IEEE Transactions on Evolutionary Computation, vol. 3, no. 4, pp. 257-271, 1999)
+     * 
+     * @param solutionSet
+     *            The solution set that is evaluated
+     * @param referencePoint
+     *            The reference point for the hypervolume
+     * 
+     * @return
+     */
     public static double hypervolume(final SolutionSet solutionSet, double[] referencePoint) {
         if (referencePoint.length != solutionSet.getNumObjectives()) {
             System.err
@@ -271,7 +308,8 @@ public class Judge {
             return hypervolume(solutionSet);
         } else {
             // put the solution set into a double array of doubles and shift them according to reference point
-            final double[][] solutionSetDoubleArray = new double[solutionSet.getNumSolutions()][solutionSet.getNumObjectives()];
+            final double[][] solutionSetDoubleArray = new double[solutionSet.getNumSolutions()][solutionSet
+                    .getNumObjectives()];
             for (int sol = 0; sol < solutionSet.getNumSolutions(); sol++) {
                 double[] solutionValues = solutionSet.getSolutions().get(sol).getValues();
                 for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
@@ -280,7 +318,8 @@ public class Judge {
             }
             // calculate hypervolume
             Hypervolume hypervolume = new Hypervolume();
-            return hypervolume.calculateHypervolume(solutionSetDoubleArray, solutionSet.getNumSolutions(), solutionSet.getNumObjectives());
+            return hypervolume.calculateHypervolume(solutionSetDoubleArray, solutionSet.getNumSolutions(),
+                    solutionSet.getNumObjectives());
         }
     }
 
@@ -292,7 +331,7 @@ public class Judge {
     public static void main(final String[] args) {
 
         // test set
-        final SolutionSet testSolutionSet01 = new SolutionSet("(0,0,0,0)");
+        final SolutionSet testSolutionSet01 = new SolutionSet("(1,0),(0,1)");
         final SolutionSet testSolutionSet02 = new SolutionSet("(1,1,6,1)");
 
         // create a scalarization function
