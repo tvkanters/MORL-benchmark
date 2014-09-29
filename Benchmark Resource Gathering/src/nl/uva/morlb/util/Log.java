@@ -6,7 +6,7 @@ package nl.uva.morlb.util;
 public class Log {
 
     /** Whether debug levels should be printed */
-    public static final boolean D = false;
+    public static final boolean D = true;
     /** Whether informative levels should be printed */
     public static final boolean I = true;
     /** Whether error levels should be printed */

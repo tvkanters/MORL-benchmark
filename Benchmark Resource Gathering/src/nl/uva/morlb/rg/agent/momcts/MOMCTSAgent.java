@@ -48,6 +48,9 @@ public class MOMCTSAgent implements AgentInterface {
     /** The pareto front **/
     private final List<StateValue> mParetoFront = new ArrayList<StateValue>();
 
+    /** The reference point for the hypervolume indicator **/
+    private double[] mReferencePoint;
+
     /**
      * Defines the random walk phase
      */
@@ -69,6 +72,13 @@ public class MOMCTSAgent implements AgentInterface {
         }
 
         mInventory = new int[mTaskSpec.getNumOfObjectives() -1];
+        mReferencePoint = new double[mTaskSpec.getNumOfObjectives()];
+
+        //Fill the reference point
+        mReferencePoint[0] = -100;
+        for(int i = 1; i < mReferencePoint.length; ++i) {
+            mReferencePoint[i] = -1;
+        }
     }
 
     @Override
@@ -174,17 +184,9 @@ public class MOMCTSAgent implements AgentInterface {
         final double[][] solutionSetDoubleArray = new double[mParetoFront.size()][mTaskSpec.getNumOfObjectives()];
         for(int paretoPoint = 0; paretoPoint < mParetoFront.size(); paretoPoint++) {
             for(int rewardPosition = 0; rewardPosition < mTaskSpec.getNumOfObjectives(); rewardPosition++) {
-                solutionSetDoubleArray[paretoPoint][rewardPosition] = mParetoFront.get(paretoPoint).getRewardForObjective(rewardPosition);
+                solutionSetDoubleArray[paretoPoint][rewardPosition] = mParetoFront.get(paretoPoint).getRewardForObjective(rewardPosition) - mReferencePoint[rewardPosition];
             }
         }
-
-        //        for(int paretoPoint = 0; paretoPoint < mParetoFront.size(); paretoPoint++) {
-        //            for(int rewardPosition = 0; rewardPosition < mTaskSpec.getNumOfObjectives(); rewardPosition++) {
-        //                System.out.print(solutionSetDoubleArray[paretoPoint][rewardPosition] +" ");
-        //            }
-        //            System.out.println();
-        //        }
-
 
         System.out.println("Hypervolume indicator " +hypervolume.calculateHypervolume(solutionSetDoubleArray, mParetoFront.size(), mTaskSpec.getNumOfObjectives()));
 
