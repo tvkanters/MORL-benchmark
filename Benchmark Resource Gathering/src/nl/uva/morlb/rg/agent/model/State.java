@@ -51,4 +51,15 @@ public class State {
         return intHash;
     }
 
+    @Override
+    public String toString() {
+        String result = mLocation +" [ ";
+        for(boolean item : mPickedUpResources) {
+            result += item +" ";
+        }
+        result += "]";
+
+        return result;
+    }
+
 }

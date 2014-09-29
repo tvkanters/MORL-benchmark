@@ -50,7 +50,8 @@ public class SolutionSet {
     }
 
     /**
-     * Adds a solution to the solution set. The solution's number of objectives must match that of the set.
+     * Adds a solution to the solution set. The solution's number of objectives must match that of the set. Will not add
+     * solutions already added.
      *
      * @param solution
      *            The solution to add
@@ -59,6 +60,10 @@ public class SolutionSet {
         if (solution.getNumObjectives() != mNumObjectives) {
             throw new InvalidParameterException(
                     "The number of objectives in the solution must match that of the solution set");
+        }
+
+        if (mSolutions.contains(solution)) {
+            return;
         }
 
         mSolutions.add(solution);

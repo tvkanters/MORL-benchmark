@@ -1,5 +1,7 @@
 package nl.uva.morlb.rg.experiment.model;
 
+import java.util.Arrays;
+
 /**
  * A solution within a solution set. Represented by its coordinates. I.e., the value for each objective.
  */
@@ -44,6 +46,23 @@ public class Solution {
         }
         str += ")";
         return str;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof Solution)) return false;
+        return Arrays.equals(mValues, ((Solution) obj).mValues);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return mValues.hashCode();
     }
 
 }
