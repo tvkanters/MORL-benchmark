@@ -12,7 +12,7 @@ import nl.uva.morlb.rg.experiment.model.SolutionSet;
 /**
  * A pruner that converts solution sets to convex hulls
  */
-public class ConvexHullPruner {
+public class CPrune {
 
     /**
      * Prunes a solution set to the convex coverage set.
@@ -133,9 +133,4 @@ public class ConvexHullPruner {
         return result;
     }
 
-    public static void main(final String[] args) {
-        final SolutionSet solutionSet = new SolutionSet("(0,3),(3,0),(1,1),(0.5,0.5),(0.5,2.5)");
-
-        System.out.println(ConvexHullPruner.prune(solutionSet));
-    }
 }
