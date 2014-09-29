@@ -36,7 +36,7 @@ public class MOMCTSAgent implements AgentInterface {
      * State specific values
      */
     /** The current inventory **/
-    private boolean[] mInventory;
+    private int[] mInventory;
 
     /*
      * Tree walk values
@@ -68,7 +68,7 @@ public class MOMCTSAgent implements AgentInterface {
             mAvailableActions.add(DiscreteAction.values()[action]);
         }
 
-        mInventory = new boolean[mTaskSpec.getNumOfObjectives() -1];
+        mInventory = new int[mTaskSpec.getNumOfObjectives() -1];
     }
 
     @Override
@@ -96,7 +96,10 @@ public class MOMCTSAgent implements AgentInterface {
         //Calculate the current inventory
         for(int i = 1; i < reward.doubleArray.length; ++i) {
             if(reward.doubleArray[i] != 0) {
-                mInventory[i-1] = true;
+                mInventory[i-1]++;
+
+                if(mInventory[i-1] == 2)
+                    System.out.println("Picked up second ressource");
             }
         }
 
@@ -104,8 +107,6 @@ public class MOMCTSAgent implements AgentInterface {
 
         return treeWalk(currentState).convertToRLGlueAction();
     }
-
-
 
     private DiscreteAction treeWalk(final State currentState) {
         DiscreteAction resultingAction = null;
@@ -119,13 +120,14 @@ public class MOMCTSAgent implements AgentInterface {
             }
 
             resultingAction = randomWalk();
-        } else if(!mSearchTree.isLeafNode() && !progressiveWidening()) { //TODO && mSearchTree. DO Progressive widening
+        } else if(!mSearchTree.isLeafNode() && !progressiveWidening()) {
 
             //TODO perform maximization over action using the paretofront projection
 
             List<DiscreteAction> availableActions = mSearchTree.getPerformedActionsForCurrentNode();
             resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
             mSearchTree.performActionOnCurrentNode(resultingAction);
+            System.out.println(mSearchTree.getCurrentNode().getVisitationCount());
         } else {
 
             //TODO Use RAVE
@@ -159,13 +161,13 @@ public class MOMCTSAgent implements AgentInterface {
     private boolean progressiveWidening() {
         int v_s = mSearchTree.getCurrentNode().getVisitationCount();
 
-        return Math.pow(v_s, 1/2) >= mSearchTree.getCurrentNode().getAmountOfChildren() && mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
+        return Math.pow(v_s, 0.5) >= mSearchTree.getCurrentNode().getAmountOfChildren() && mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
     }
 
     @Override
     public void agent_end(final Reward reward) {
         System.out.println(mSearchTree.info());
-        System.out.println(mR_u);
+        //        System.out.println(mR_u);
 
         //TODO calculate the pareto front, it seems like metal can't handle 0 values for objective rewards
         Hypervolume hypervolume = new Hypervolume();
@@ -176,7 +178,15 @@ public class MOMCTSAgent implements AgentInterface {
             }
         }
 
-        System.out.println("Hypervolume indicator" +hypervolume.calculateHypervolume(solutionSetDoubleArray, mParetoFront.size(), mTaskSpec.getNumOfObjectives()));
+        //        for(int paretoPoint = 0; paretoPoint < mParetoFront.size(); paretoPoint++) {
+        //            for(int rewardPosition = 0; rewardPosition < mTaskSpec.getNumOfObjectives(); rewardPosition++) {
+        //                System.out.print(solutionSetDoubleArray[paretoPoint][rewardPosition] +" ");
+        //            }
+        //            System.out.println();
+        //        }
+
+
+        System.out.println("Hypervolume indicator " +hypervolume.calculateHypervolume(solutionSetDoubleArray, mParetoFront.size(), mTaskSpec.getNumOfObjectives()));
 
         mParetoFront.add(mR_u);
 
@@ -199,7 +209,7 @@ public class MOMCTSAgent implements AgentInterface {
      * @param observation The current observation
      * @return The current state
      */
-    public State generateState(final Observation observation, final boolean[] inventory) {
+    public State generateState(final Observation observation, final int[] inventory) {
         double[] observationArray = observation.doubleArray;
 
         Location currentLocation = new Location(observationArray[0], observationArray[1]);
@@ -219,7 +229,7 @@ public class MOMCTSAgent implements AgentInterface {
      */
     private void resetInventory() {
         for(int i = 0; i < mInventory.length; ++i) {
-            mInventory[i] = false;
+            mInventory[i] = 0;
         }
     }
 

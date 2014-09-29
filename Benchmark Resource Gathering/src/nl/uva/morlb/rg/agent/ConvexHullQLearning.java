@@ -23,23 +23,23 @@ public class ConvexHullQLearning implements AgentInterface {
     private final HashMap<QTableEntry, Double[]> mQTable = new HashMap<>();
 
     private QTableEntry mLastEntry;
-    private boolean[] inventory;
+    private int[] inventory;
 
-    private static boolean[][] inventoryHack =
+    private static int[][] inventoryHack =
         {
-        { true, true},
-        { true, false},
-        { false, true},
-        { false, false}
+        { 1, 1},
+        { 1, 0},
+        { 0, 1},
+        { 0, 0}
         };
 
     @Override
     public void agent_init(final String taskSpec) {
         final TaskSpec tSpec = new TaskSpec(taskSpec);
 
-        inventory = new boolean[2];
+        inventory = new int[2];
         for(int i = 0; i < inventory.length; ++i) {
-            inventory[i] = false;
+            inventory[i] = 0;
         }
 
         int obsDim = 2;
@@ -52,7 +52,7 @@ public class ConvexHullQLearning implements AgentInterface {
 
                 Location location = new Location(x, y);
 
-                for(boolean[] inventory : inventoryHack) {
+                for(int[] inventory : inventoryHack) {
 
                     State state = new State(location, inventory);
                     for(int actionCounter = 0; actionCounter < actionDim; ++actionCounter) {
@@ -78,7 +78,7 @@ public class ConvexHullQLearning implements AgentInterface {
     public Action agent_step(final Reward reward, final Observation observation) {
         for(int i = 1; i < reward.doubleArray.length; ++i) {
             if(reward.doubleArray[i] != 0) {
-                inventory[i-1] = true;
+                inventory[i-1]++;
             }
         }
         State state = generateState(observation);

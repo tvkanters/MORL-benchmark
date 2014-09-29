@@ -27,17 +27,17 @@ public class MOQLearning implements AgentInterface {
 
     private int mCurrentObjective = 0;
     private QTableEntry mLastEntry;
-    private boolean[] inventory;
+    private int[] inventory;
 
     private TaskSpecVRLGLUE3 mTaskSpec;
 
 
-    private static boolean[][] inventoryHack =
+    private static int[][] inventoryHack =
         {
-        { true, true},
-        { true, false},
-        { false, true},
-        { false, false}
+        { 1, 1},
+        { 1, 0},
+        { 0, 1},
+        { 0, 0}
         };
 
     @Override
@@ -45,9 +45,9 @@ public class MOQLearning implements AgentInterface {
         mTaskSpec = new TaskSpecVRLGLUE3(taskSpec);
         mQTable = new HashMap[mTaskSpec.getNumOfObjectives()];
 
-        inventory = new boolean[mTaskSpec.getNumOfObjectives() -1];
+        inventory = new int[mTaskSpec.getNumOfObjectives() -1];
         for(int i = 0; i < inventory.length; ++i) {
-            inventory[i] = false;
+            inventory[i] = 0;
         }
 
         int actionDim = mTaskSpec.getDiscreteActionRange(0).getMax() +1;
@@ -61,7 +61,7 @@ public class MOQLearning implements AgentInterface {
 
                     Location location = new Location(x, y);
 
-                    for(boolean[] inventory : inventoryHack) {
+                    for(int[] inventory : inventoryHack) {
 
                         State state = new State(location, inventory);
                         for(int actionCounter = 0; actionCounter < actionDim; ++actionCounter) {
@@ -76,7 +76,7 @@ public class MOQLearning implements AgentInterface {
     @Override
     public Action agent_start(final Observation observation) {
         for(int i = 0; i < inventory.length; ++i) {
-            inventory[i] = false;
+            inventory[i] = 0;
         }
 
         State state = generateState(observation);
@@ -91,7 +91,7 @@ public class MOQLearning implements AgentInterface {
         //Calculate the current inventory
         for(int i = 1; i < reward.doubleArray.length; ++i) {
             if(reward.doubleArray[i] != 0) {
-                inventory[i-1] = true;
+                inventory[i-1]++;
             }
         }
         State state = generateState(observation);
@@ -143,7 +143,7 @@ public class MOQLearning implements AgentInterface {
     public void agent_cleanup() {
 
         //Just used to print the found policies
-        boolean[] desiredInventory = inventoryHack[1];
+        int[] desiredInventory = inventoryHack[1];
         mCurrentObjective = 0;
 
         while(mCurrentObjective != mTaskSpec.getNumOfObjectives()) {
@@ -207,7 +207,7 @@ public class MOQLearning implements AgentInterface {
 
     /**
      * Generate the current state from the observation and the current inventory
-     * 
+     *
      * @param observation The current observation
      * @return The current state
      */

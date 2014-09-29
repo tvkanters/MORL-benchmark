@@ -29,27 +29,27 @@ public class ScalarisedQLearning implements AgentInterface {
     private final HashMap<State, StateValue> mVTable = new HashMap<>();
 
     private QTableEntry mLastEntry;
-    private boolean[] inventory;
+    private int[] inventory;
 
     private TaskSpecVRLGLUE3 mTaskSpec;
 
     private final double[] SCALAR = new double[] {0.01,0.4,1};
 
-    private static boolean[][] inventoryHack =
+    private static int[][] inventoryHack =
         {
-        { true, true},
-        { true, false},
-        { false, true},
-        { false, false}
+        { 1, 1},
+        { 1, 0},
+        { 0, 1},
+        { 0, 0}
         };
 
     @Override
     public void agent_init(final String taskSpec) {
         mTaskSpec = new TaskSpecVRLGLUE3(taskSpec);
 
-        inventory = new boolean[mTaskSpec.getNumOfObjectives() -1];
+        inventory = new int[mTaskSpec.getNumOfObjectives() -1];
         for(int i = 0; i < inventory.length; ++i) {
-            inventory[i] = false;
+            inventory[i] = 0;
         }
 
         int actionDim = mTaskSpec.getDiscreteActionRange(0).getMax() +1;
@@ -61,7 +61,7 @@ public class ScalarisedQLearning implements AgentInterface {
 
                 Location location = new Location(x, y);
 
-                for(boolean[] inventory : inventoryHack) {
+                for(int[] inventory : inventoryHack) {
 
                     State state = new State(location, inventory);
                     mVTable.put(state, new StateValue(new double[]{INITIAL_V_VALUE ,INITIAL_V_VALUE ,INITIAL_V_VALUE }));
@@ -76,7 +76,7 @@ public class ScalarisedQLearning implements AgentInterface {
     @Override
     public Action agent_start(final Observation observation) {
         for(int i = 0; i < inventory.length; ++i) {
-            inventory[i] = false;
+            inventory[i] = 0;
         }
 
         State state = generateState(observation);
@@ -91,7 +91,7 @@ public class ScalarisedQLearning implements AgentInterface {
         //Calculate the current inventory
         for(int i = 1; i < reward.doubleArray.length; ++i) {
             if(reward.doubleArray[i] != 0) {
-                inventory[i-1] = true;
+                inventory[i-1]++;
             }
         }
         State state = generateState(observation);
@@ -139,7 +139,7 @@ public class ScalarisedQLearning implements AgentInterface {
     @Override
     public void agent_cleanup() {
         DecimalFormat twoDForm = new DecimalFormat("####.##");
-        boolean[] desiredInventory = inventoryHack[1];
+        int[] desiredInventory = inventoryHack[1];
 
         for(int action = 0; action < 5; ++action) {
             System.out.println(DiscreteAction.values()[action].name());
@@ -196,7 +196,7 @@ public class ScalarisedQLearning implements AgentInterface {
 
     /**
      * Generate the current state from the observation and the current inventory
-     * 
+     *
      * @param observation The current observation
      * @return The current state
      */
