@@ -22,6 +22,10 @@ public class Judge {
     private final int mNumObjectives;
     /** The scalarisation function */
     private final Scalarisation mScalarisation;
+    /** The reference point for the hypervolume for the time dimension */
+    public static final double REFERENCE_POINT_TIME = -100;
+    /** The reference point fo rthe hypervolume for the resource dimensions */
+    public static final double REFERENCE_POINT_RESOURCES = -1;
 
     /**
      * Creates a Judge which can evaluate a solution set based on a scalarisation function
@@ -270,9 +274,9 @@ public class Judge {
     public double hypervolume() {
         // set up default reference point
         double[] referencePoint = new double[mNumObjectives];
-        referencePoint[0] = -100;
+        referencePoint[0] = REFERENCE_POINT_TIME;
         for (int d = 1; d < mNumObjectives; d++) {
-            referencePoint[d] = -1;
+            referencePoint[d] = REFERENCE_POINT_RESOURCES;
         }
         return hypervolume(referencePoint);
     }
