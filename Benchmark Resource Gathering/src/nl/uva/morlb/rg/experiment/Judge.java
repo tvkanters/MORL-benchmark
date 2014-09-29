@@ -268,17 +268,33 @@ public class Judge {
      * @return the hypervolume of the solution set
      */
     public double hypervolume() {
-        // put the solution set into a double array of doubles
-        final double[][] solutionSetDoubleArray = new double[mNumSolutions][mNumObjectives];
-        for (int sol = 0; sol < mNumSolutions; sol++) {
-            double[] solutionValues = mSolutionSet.getSolutions().get(sol).getValues();
-            for (int dim = 0; dim < mNumObjectives; dim++) {
-                solutionSetDoubleArray[sol][dim] = solutionValues[dim];
-            }
+        // set up default reference point
+        double[] referencePoint = new double[mNumObjectives];
+        referencePoint[0] = -100;
+        for (int d = 1; d < mNumObjectives; d++) {
+            referencePoint[d] = -1;
         }
-        // calculate hypervolume
-        Hypervolume hypervolume = new Hypervolume();
-        return hypervolume.calculateHypervolume(solutionSetDoubleArray, mNumSolutions, mNumObjectives);
+        return hypervolume(referencePoint);
+    }
+
+    public double hypervolume(double[] referencePoint) {
+        if (referencePoint.length != mNumObjectives) {
+            System.err
+                    .println("For the hypervolume the reference point has to have the same dimension as the solutions. Will take default reference point.");
+            return hypervolume();
+        } else {
+            // put the solution set into a double array of doubles and shift them according to reference point
+            final double[][] solutionSetDoubleArray = new double[mNumSolutions][mNumObjectives];
+            for (int sol = 0; sol < mNumSolutions; sol++) {
+                double[] solutionValues = mSolutionSet.getSolutions().get(sol).getValues();
+                for (int dim = 0; dim < mNumObjectives; dim++) {
+                    solutionSetDoubleArray[sol][dim] = solutionValues[dim] - referencePoint[dim];
+                }
+            }
+            // calculate hypervolume
+            Hypervolume hypervolume = new Hypervolume();
+            return hypervolume.calculateHypervolume(solutionSetDoubleArray, mNumSolutions, mNumObjectives);
+        }
     }
 
     /**
@@ -289,7 +305,7 @@ public class Judge {
     public static void main(final String[] args) {
 
         // test set
-        final SolutionSet testSolutionSet01 = new SolutionSet("(1,1),(0.5,3)");
+        final SolutionSet testSolutionSet01 = new SolutionSet("(0,0,0,0)");
         final SolutionSet testSolutionSet02 = new SolutionSet("(1,1,6,1)");
 
         // create a scalarization function
