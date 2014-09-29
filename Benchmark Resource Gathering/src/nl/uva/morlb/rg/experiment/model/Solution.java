@@ -12,7 +12,7 @@ public class Solution {
 
     /**
      * Creates a new solution at the given coordinates in the solution set.
-     *
+     * 
      * @param values
      *            The coordinates
      */
@@ -62,7 +62,7 @@ public class Solution {
      */
     @Override
     public int hashCode() {
-        return mValues.hashCode();
+        return Arrays.hashCode(mValues);
     }
 
 }

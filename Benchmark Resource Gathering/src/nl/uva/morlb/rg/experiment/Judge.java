@@ -22,6 +22,10 @@ public class Judge {
     private final int mNumObjectives;
     /** The scalarisation function */
     private final Scalarisation mScalarisation;
+    /** The reference point for the hypervolume for the time dimension */
+    public static final double REFERENCE_POINT_TIME = -100;
+    /** The reference point fo rthe hypervolume for the resource dimensions */
+    public static final double REFERENCE_POINT_RESOURCES = -1;
 
     /**
      * Creates a Judge which can evaluate a solution set based on a scalarisation function
@@ -101,6 +105,9 @@ public class Judge {
      * @return The additive epsilon indicator
      */
     public double additiveEpsilonIndicator(final SolutionSet referenceSet) {
+        if (referenceSet.getNumObjectives() != mNumObjectives) {
+            System.err.println("Reference and solution set must have same number of objectives");
+        }
         Solution ref;
         Solution sol;
         // the smallest epsilon for which it is true that for all values v from the reference set there exists one value
@@ -140,6 +147,9 @@ public class Judge {
      * @return The multiplicative epsilon indicator
      */
     public double multiplicativeEpsilonIndicator(final SolutionSet referenceSet) {
+        if (referenceSet.getNumObjectives() != mNumObjectives) {
+            System.err.println("Reference and solution set must have same number of objectives");
+        }
         Solution sol;
         Solution ref;
         // the smallest epsilon for which it is true that for all values v from the reference set there exists one value
@@ -262,17 +272,33 @@ public class Judge {
      * @return the hypervolume of the solution set
      */
     public double hypervolume() {
-        // put the solution set into a double array of doubles
-        final double[][] solutionSetDoubleArray = new double[mNumSolutions][mNumObjectives];
-        for (int sol = 0; sol < mNumSolutions; sol++) {
-            double[] solutionValues = mSolutionSet.getSolutions().get(sol).getValues();
-            for (int dim = 0; dim < mNumObjectives; dim++) {
-                solutionSetDoubleArray[sol][dim] = solutionValues[dim];
-            }
+        // set up default reference point
+        double[] referencePoint = new double[mNumObjectives];
+        referencePoint[0] = REFERENCE_POINT_TIME;
+        for (int d = 1; d < mNumObjectives; d++) {
+            referencePoint[d] = REFERENCE_POINT_RESOURCES;
         }
-        // calculate hypervolume
-        Hypervolume hypervolume = new Hypervolume();
-        return hypervolume.calculateHypervolume(solutionSetDoubleArray, mNumSolutions, mNumObjectives);
+        return hypervolume(referencePoint);
+    }
+
+    public double hypervolume(double[] referencePoint) {
+        if (referencePoint.length != mNumObjectives) {
+            System.err
+                    .println("For the hypervolume the reference point has to have the same dimension as the solutions. Will take default reference point.");
+            return hypervolume();
+        } else {
+            // put the solution set into a double array of doubles and shift them according to reference point
+            final double[][] solutionSetDoubleArray = new double[mNumSolutions][mNumObjectives];
+            for (int sol = 0; sol < mNumSolutions; sol++) {
+                double[] solutionValues = mSolutionSet.getSolutions().get(sol).getValues();
+                for (int dim = 0; dim < mNumObjectives; dim++) {
+                    solutionSetDoubleArray[sol][dim] = solutionValues[dim] - referencePoint[dim];
+                }
+            }
+            // calculate hypervolume
+            Hypervolume hypervolume = new Hypervolume();
+            return hypervolume.calculateHypervolume(solutionSetDoubleArray, mNumSolutions, mNumObjectives);
+        }
     }
 
     /**
@@ -283,8 +309,8 @@ public class Judge {
     public static void main(final String[] args) {
 
         // test set
-        final SolutionSet testSolutionSet01 = new SolutionSet("(1,1),(0.5,3)");
-        final SolutionSet testSolutionSet02 = new SolutionSet("(1,1,1,1)");
+        final SolutionSet testSolutionSet01 = new SolutionSet("(0,0,0,0)");
+        final SolutionSet testSolutionSet02 = new SolutionSet("(1,1,6,1)");
 
         // create a scalarization function
         final LinearScalarisation linearScalarisation = new LinearScalarisation();
