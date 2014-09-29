@@ -14,59 +14,37 @@ import nl.uva.morlb.rg.experiment.model.Scalarisation;
  */
 public class Judge {
 
-    /** The approximative solution an algorithm returns which has to be evaluated */
-    private final SolutionSet mSolutionSet;
-    /** The number of points in the solution set */
-    private final int mNumSolutions;
-    /** The number of objectives of the values in the solution set */
-    private final int mNumObjectives;
-    /** The scalarisation function */
-    private final Scalarisation mScalarisation;
     /** The reference point for the hypervolume for the time dimension */
     public static final double REFERENCE_POINT_TIME = -100;
     /** The reference point fo rthe hypervolume for the resource dimensions */
     public static final double REFERENCE_POINT_RESOURCES = -1;
 
     /**
-     * Creates a Judge which can evaluate a solution set based on a scalarisation function
-     * 
-     * @param solutionSet
-     *            The solution set that is evaluated
-     * @param scalarisation
-     *            The scalarisation function
-     */
-    public Judge(final SolutionSet solutionSet, final Scalarisation scalarisation) {
-        mSolutionSet = solutionSet;
-        mNumSolutions = solutionSet.getNumSolutions();
-        mNumObjectives = solutionSet.getNumObjectives();
-        mScalarisation = scalarisation;
-    }
-
-    /**
      * Estimates the average scalarised value the solution set achieves using random weight samples. The bigger the
-     * returned value, the better.
+     * returned value, the better. Also returns the standard deviation.
      * 
-     * @return the average reward that was estimated for the solution set
+     * @return double array of the average reward and the standard deviation that was estimated for the solution set
      */
-    public double averageReward() {
+    public static double[] averageReward(final SolutionSet solutionSet, final Scalarisation scalarisation) {
         // the number of weight values we want to test per objective
         final int weightValuesPerObjective = 2;
         // total number of tests that will be performed
-        final int totalNumTests = (int) Math.pow((double) weightValuesPerObjective, (double) mNumObjectives);
+        final int totalNumTests = (int) Math.pow((double) weightValuesPerObjective, (double) solutionSet.getNumObjectives());
         // the seed for the random number generator (has to be the same for each test, so that comparison makes sense;
         // better would be a uniform grid over the n-dimensional space with vectors whose values sum to 1, but that is a
         // mathematical problem of its own)
         final long seed = 666;
         // the weight vector
-        double[] weights = new double[mNumObjectives];
+        double[] weights = new double[solutionSet.getNumObjectives()];
         Random rand = new Random(seed);
         double rewardSum = 0;
+        double rewardSqSum = 0; // for the variance
         // perform the tests
         for (int i = 0; i < totalNumTests; i++) {
             // create a random vector with values between 0 and 1 (exclusive)
             double nextRand = 0;
             double sum = 0;
-            for (int j = 0; j < mNumObjectives; j++) {
+            for (int j = 0; j < solutionSet.getNumObjectives(); j++) {
                 while (nextRand == 0 || nextRand == 1) {
                     nextRand = rand.nextDouble();
                 }
@@ -75,23 +53,28 @@ public class Judge {
                 nextRand = 0;
             }
             // normalise so that the weights sum up to one
-            for (int k = 0; k < mNumObjectives; k++) {
+            for (int k = 0; k < solutionSet.getNumObjectives(); k++) {
                 weights[k] /= sum;
             }
             // find the point in the solution set for which the scalarised value is maximal
             double maxScalarisedValue = Double.NEGATIVE_INFINITY;
             double scalarisedValue;
             Solution solution;
-            for (int l = 0; l < mNumSolutions; l++) {
-                solution = mSolutionSet.getSolutions().get(l);
-                scalarisedValue = mScalarisation.scalarise(solution.getValues(), weights);
+            for (int l = 0; l < solutionSet.getNumSolutions(); l++) {
+                solution = solutionSet.getSolutions().get(l);
+                scalarisedValue = scalarisation.scalarise(solution.getValues(), weights);
                 maxScalarisedValue = Math.max(maxScalarisedValue, scalarisedValue);
             }
             // sum up the maximal scalarised values (the value that this solution would get for the given weights)
             rewardSum += maxScalarisedValue;
+            rewardSqSum += Math.pow(maxScalarisedValue, 2);
         }
         // return the average reward that this solution set received across the performed tests
-        return rewardSum / totalNumTests;
+        double averageReward = rewardSum / totalNumTests;
+        double variance = (rewardSqSum - Math.pow(rewardSum, 2) / totalNumTests) / (totalNumTests - 1);
+        double standardDev = Math.sqrt(variance);
+        double[] returnArray = { averageReward, standardDev };
+        return returnArray;
     }
 
     /**
@@ -104,8 +87,8 @@ public class Judge {
      *            The true Pareto front or a good approximation to which the solution can be compared
      * @return The additive epsilon indicator
      */
-    public double additiveEpsilonIndicator(final SolutionSet referenceSet) {
-        if (referenceSet.getNumObjectives() != mNumObjectives) {
+    public static double additiveEpsilonIndicator(final SolutionSet solutionSet, final SolutionSet referenceSet) {
+        if (referenceSet.getNumObjectives() != solutionSet.getNumObjectives()) {
             System.err.println("Reference and solution set must have same number of objectives");
         }
         Solution ref;
@@ -118,12 +101,12 @@ public class Judge {
             // singleEpsilon is the smallest epsilon so that there exists one (!) solution in the solution set that
             // weakly epsilon-dominates the current reference point ref
             double singleEpsilon = Double.POSITIVE_INFINITY;
-            for (int solIndex = 0; solIndex < mSolutionSet.getNumSolutions(); solIndex++) {
-                sol = mSolutionSet.getSolutions().get(solIndex);
+            for (int solIndex = 0; solIndex < solutionSet.getNumSolutions(); solIndex++) {
+                sol = solutionSet.getSolutions().get(solIndex);
                 // maxEpsilonPerSingleDim is the smallest epsilon for which the current solution sol weakly
                 // epsilon-dominates the currect reference point ref
                 double maxEpsilonPerSingleDim = Double.NEGATIVE_INFINITY;
-                for (int dim = 0; dim < mNumObjectives; dim++) {
+                for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
                     double distance = ref.getValues()[dim] - sol.getValues()[dim];
                     maxEpsilonPerSingleDim = Math.max(distance, maxEpsilonPerSingleDim);
                 }
@@ -146,8 +129,8 @@ public class Judge {
      *            The true Pareto front or a good approximation to which the solution can be compared
      * @return The multiplicative epsilon indicator
      */
-    public double multiplicativeEpsilonIndicator(final SolutionSet referenceSet) {
-        if (referenceSet.getNumObjectives() != mNumObjectives) {
+    public static double multiplicativeEpsilonIndicator(final SolutionSet solutionSet, final SolutionSet referenceSet) {
+        if (referenceSet.getNumObjectives() != solutionSet.getNumObjectives()) {
             System.err.println("Reference and solution set must have same number of objectives");
         }
         Solution sol;
@@ -160,12 +143,12 @@ public class Judge {
             // singleEpsilon is the smallest epsilon so that there exists one (!) solution in the solution set that
             // weakly epsilon-dominates the current reference point ref
             double singleEpsilon = Double.POSITIVE_INFINITY;
-            for (int solIndex = 0; solIndex < mSolutionSet.getNumSolutions(); solIndex++) {
-                sol = mSolutionSet.getSolutions().get(solIndex);
+            for (int solIndex = 0; solIndex < solutionSet.getNumSolutions(); solIndex++) {
+                sol = solutionSet.getSolutions().get(solIndex);
                 // maxEpsilonPerSingleDim is the smallest epsilon for which the current solution sol weakly
                 // epsilon-dominates the currect reference point ref
                 double maxEpsilonPerSingleDim = Double.NEGATIVE_INFINITY;
-                for (int dim = 0; dim < mNumObjectives; dim++) {
+                for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
                     double distance = ref.getValues()[dim] / sol.getValues()[dim];
                     maxEpsilonPerSingleDim = Math.max(distance, maxEpsilonPerSingleDim);
                 }
@@ -187,8 +170,8 @@ public class Judge {
      * 
      * @return The number of solutions the algorithm found
      */
-    public int overallNondominatedVectorGeneration() {
-        return mNumSolutions;
+    public static int overallNondominatedVectorGeneration(final SolutionSet solutionSet) {
+        return solutionSet.getNumSolutions();
     }
 
     /**
@@ -200,19 +183,19 @@ public class Judge {
      * @return The indicator of how evenly the solutions in the solution set are distributed. A lower value indicates a
      *         better(more uniform) distribution. Returns POSITIVE_INIFINITY if there exists no or only one solution.
      */
-    public double schottSpacingMetric() {
+    public static double schottSpacingMetric(final SolutionSet solutionSet) {
         // estimate the minimal distances d_i for each solution i
-        double[] minDistances = new double[mNumSolutions];
+        double[] minDistances = new double[solutionSet.getNumSolutions()];
         int index = 0;
-        for (int i = 0; i < mNumSolutions; i++) {
+        for (int i = 0; i < solutionSet.getNumSolutions(); i++) {
             double minDistance = Double.POSITIVE_INFINITY;
-            for (int j = 0; j < mNumSolutions; j++) {
+            for (int j = 0; j < solutionSet.getNumSolutions(); j++) {
                 if (i != j) {
                     double distance = 0;
-                    for (int dim = 0; dim < mNumObjectives; dim++) {
+                    for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
                         // sum up the dimension-wise distances between two distinct solutions in the solution set
-                        distance += Math.abs(mSolutionSet.getSolutions().get(i).getValues()[dim]
-                                - mSolutionSet.getSolutions().get(j).getValues()[dim]);
+                        distance += Math.abs(solutionSet.getSolutions().get(i).getValues()[dim]
+                                - solutionSet.getSolutions().get(j).getValues()[dim]);
                     }
                     minDistance = Math.min(minDistance, distance);
                 }
@@ -228,13 +211,13 @@ public class Judge {
         averageMinDist /= minDistances.length;
         // build the sum inside the sqrt of the schott metric
         double sum = 0;
-        for (int l = 0; l < mNumSolutions; l++) {
+        for (int l = 0; l < solutionSet.getNumSolutions(); l++) {
             sum += Math.pow(averageMinDist - minDistances[l], 2);
         }
         // estimate the value of the schott metric (delta)
         double delta;
-        if (mNumSolutions > 1) {
-            delta = Math.sqrt(sum / (mNumSolutions - 1));
+        if (solutionSet.getNumSolutions() > 1) {
+            delta = Math.sqrt(sum / (solutionSet.getNumSolutions() - 1));
         } else {
             delta = Double.POSITIVE_INFINITY;
         }
@@ -248,13 +231,13 @@ public class Judge {
      * 
      * @return The maximum spread. A higher value indicates a beter (larger) spread.
      */
-    public double maximumSpread() {
+    public static double maximumSpread(final SolutionSet solutionSet) {
         double sum = 0;
-        for (int dim = 0; dim < mNumObjectives; dim++) {
+        for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
             double maxVal = Double.NEGATIVE_INFINITY;
             double minVal = Double.POSITIVE_INFINITY;
-            for (int s = 0; s < mNumSolutions; s++) {
-                double solutionValue = mSolutionSet.getSolutions().get(s).getValues()[dim];
+            for (int s = 0; s < solutionSet.getNumSolutions(); s++) {
+                double solutionValue = solutionSet.getSolutions().get(s).getValues()[dim];
                 maxVal = Math.max(solutionValue, maxVal);
                 minVal = Math.min(solutionValue, minVal);
             }
@@ -271,33 +254,33 @@ public class Judge {
      * 
      * @return the hypervolume of the solution set
      */
-    public double hypervolume() {
+    public static double hypervolume(final SolutionSet solutionSet) {
         // set up default reference point
-        double[] referencePoint = new double[mNumObjectives];
+        double[] referencePoint = new double[solutionSet.getNumObjectives()];
         referencePoint[0] = REFERENCE_POINT_TIME;
-        for (int d = 1; d < mNumObjectives; d++) {
+        for (int d = 1; d < solutionSet.getNumObjectives(); d++) {
             referencePoint[d] = REFERENCE_POINT_RESOURCES;
         }
-        return hypervolume(referencePoint);
+        return hypervolume(solutionSet, referencePoint);
     }
 
-    public double hypervolume(double[] referencePoint) {
-        if (referencePoint.length != mNumObjectives) {
+    public static double hypervolume(final SolutionSet solutionSet, double[] referencePoint) {
+        if (referencePoint.length != solutionSet.getNumObjectives()) {
             System.err
                     .println("For the hypervolume the reference point has to have the same dimension as the solutions. Will take default reference point.");
-            return hypervolume();
+            return hypervolume(solutionSet);
         } else {
             // put the solution set into a double array of doubles and shift them according to reference point
-            final double[][] solutionSetDoubleArray = new double[mNumSolutions][mNumObjectives];
-            for (int sol = 0; sol < mNumSolutions; sol++) {
-                double[] solutionValues = mSolutionSet.getSolutions().get(sol).getValues();
-                for (int dim = 0; dim < mNumObjectives; dim++) {
+            final double[][] solutionSetDoubleArray = new double[solutionSet.getNumSolutions()][solutionSet.getNumObjectives()];
+            for (int sol = 0; sol < solutionSet.getNumSolutions(); sol++) {
+                double[] solutionValues = solutionSet.getSolutions().get(sol).getValues();
+                for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
                     solutionSetDoubleArray[sol][dim] = solutionValues[dim] - referencePoint[dim];
                 }
             }
             // calculate hypervolume
             Hypervolume hypervolume = new Hypervolume();
-            return hypervolume.calculateHypervolume(solutionSetDoubleArray, mNumSolutions, mNumObjectives);
+            return hypervolume.calculateHypervolume(solutionSetDoubleArray, solutionSet.getNumSolutions(), solutionSet.getNumObjectives());
         }
     }
 
@@ -316,29 +299,27 @@ public class Judge {
         final LinearScalarisation linearScalarisation = new LinearScalarisation();
         final ProductScalarisation productScalarisation = new ProductScalarisation();
 
-        // create judge with the solution set that is tested
-        final Judge testJudge = new Judge(testSolutionSet01, linearScalarisation);
-
         // perform tests
-        double avgRew = testJudge.averageReward();
-        System.out.println("Average Reward: " + avgRew);
+        double[] avgRew = averageReward(testSolutionSet01, linearScalarisation);
+        System.out.println("Average Reward: " + avgRew[0]);
+        System.out.println("Standard Deviation: " + avgRew[1]);
 
-        double addEps = testJudge.additiveEpsilonIndicator(testSolutionSet02);
+        double addEps = additiveEpsilonIndicator(testSolutionSet01, testSolutionSet02);
         System.out.println("Additive Epsilon Indicator : " + addEps);
 
-        double multEps = testJudge.multiplicativeEpsilonIndicator(testSolutionSet02);
+        double multEps = multiplicativeEpsilonIndicator(testSolutionSet01, testSolutionSet02);
         System.out.println("Multiplicative Epsilon Indicator: " + multEps);
 
-        int oNVG = testJudge.overallNondominatedVectorGeneration();
+        int oNVG = overallNondominatedVectorGeneration(testSolutionSet01);
         System.out.println("ONVG: " + oNVG);
 
-        double unif = testJudge.schottSpacingMetric();
+        double unif = schottSpacingMetric(testSolutionSet01);
         System.out.println("Uniformity measure: " + unif);
 
-        double spread = testJudge.maximumSpread();
+        double spread = maximumSpread(testSolutionSet01);
         System.out.println("Spread measure: " + spread);
 
-        double hypervolume = testJudge.hypervolume();
+        double hypervolume = hypervolume(testSolutionSet01);
         System.out.println("Hypervolume: " + hypervolume);
 
     }

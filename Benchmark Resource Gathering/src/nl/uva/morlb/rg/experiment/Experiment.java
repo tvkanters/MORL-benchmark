@@ -7,6 +7,7 @@ import nl.uva.morlb.rg.agent.DumbAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
+import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
 
 import org.rlcommunity.rlglue.codec.RLGlue;
@@ -38,22 +39,23 @@ public class Experiment {
                 runEpisode(100);
             }
 
-            final Judge judge = new Judge(new SolutionSet(RLGlue.RL_agent_message("getSolutionSet")),
-                    new LinearScalarisation());
+            SolutionSet solutionSet = new SolutionSet(RLGlue.RL_agent_message("getSolutionSet"));
+            Scalarisation scalarisation = new LinearScalarisation();
 
-            final double avgRew = judge.averageReward();
-            System.out.println("Average Reward: " + avgRew);
+            final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);
+            System.out.println("Average Reward: " + avgRew[0]);
+            System.out.println("Standard deviation of average reward: " + avgRew[1]);
 
-            final int oNVG = judge.overallNondominatedVectorGeneration();
+            final int oNVG = Judge.overallNondominatedVectorGeneration(solutionSet);
             System.out.println("ONVG: " + oNVG);
 
-            final double unif = judge.schottSpacingMetric();
+            final double unif = Judge.schottSpacingMetric(solutionSet);
             System.out.println("Uniformity measure: " + unif);
 
-            final double spread = judge.maximumSpread();
+            final double spread = Judge.maximumSpread(solutionSet);
             System.out.println("Spread measure: " + spread);
 
-            final double hypervolume = judge.hypervolume();
+            final double hypervolume = Judge.hypervolume(solutionSet);
             System.out.println("Hypervolume: " + hypervolume);
 
             RLGlue.RL_cleanup();
