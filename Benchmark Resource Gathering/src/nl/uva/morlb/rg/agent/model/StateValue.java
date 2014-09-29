@@ -125,4 +125,12 @@ public class StateValue {
         return mReward[rewardPosition];
     }
 
+    /**
+     * Get the complete reward vector
+     * @return The complete reward vector
+     */
+    public double[] getRewardVector() {
+        return mReward;
+    }
+
 }

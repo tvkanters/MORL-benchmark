@@ -10,6 +10,9 @@ import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.agent.model.StateValue;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
+import nl.uva.morlb.rg.experiment.Judge;
+import nl.uva.morlb.rg.experiment.model.Solution;
+import nl.uva.morlb.rg.experiment.model.SolutionSet;
 import nl.uva.morlb.util.Util;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
@@ -101,8 +104,14 @@ public class MOMCTSAgent implements AgentInterface {
 
     @Override
     public Action agent_step(final Reward reward, final Observation observation) {
-        mR_u = mR_u.add(new StateValue(reward.doubleArray));
+        mR_u = handleReward(reward);
 
+        State currentState = generateState(observation, mInventory);
+
+        return treeWalk(currentState).convertToRLGlueAction();
+    }
+
+    private StateValue handleReward(final Reward reward) {
         //Calculate the current inventory
         for(int i = 1; i < reward.doubleArray.length; ++i) {
             if(reward.doubleArray[i] != 0) {
@@ -113,9 +122,7 @@ public class MOMCTSAgent implements AgentInterface {
             }
         }
 
-        State currentState = generateState(observation, mInventory);
-
-        return treeWalk(currentState).convertToRLGlueAction();
+        return mR_u.add(new StateValue(reward.doubleArray));
     }
 
     private DiscreteAction treeWalk(final State currentState) {
@@ -176,6 +183,7 @@ public class MOMCTSAgent implements AgentInterface {
 
     @Override
     public void agent_end(final Reward reward) {
+        mR_u = handleReward(reward);
         System.out.println(mSearchTree.info());
         //        System.out.println(mR_u);
 
@@ -187,6 +195,13 @@ public class MOMCTSAgent implements AgentInterface {
                 solutionSetDoubleArray[paretoPoint][rewardPosition] = mParetoFront.get(paretoPoint).getRewardForObjective(rewardPosition) - mReferencePoint[rewardPosition];
             }
         }
+
+        SolutionSet solution = new SolutionSet(mTaskSpec.getNumOfObjectives());
+        for(StateValue paretoPoint : mParetoFront) {
+            solution.addSolution(new Solution(paretoPoint.getRewardVector()));
+        }
+
+        System.out.println(Judge.hypervolume(solution));
 
         System.out.println("Hypervolume indicator " +hypervolume.calculateHypervolume(solutionSetDoubleArray, mParetoFront.size(), mTaskSpec.getNumOfObjectives()));
 

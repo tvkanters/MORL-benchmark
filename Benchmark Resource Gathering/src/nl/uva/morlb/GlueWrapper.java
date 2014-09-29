@@ -3,7 +3,7 @@ package nl.uva.morlb;
 import java.util.LinkedList;
 import java.util.List;
 
-import nl.uva.morlb.rg.agent.DumbAgent;
+import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.Parameters;
@@ -26,15 +26,15 @@ public class GlueWrapper {
         resources.add(new Resource(1, 2, 1));
         resources.add(new Resource(1, 2, 2));
 
-        ResourceGatheringEnv environment = new ResourceGatheringEnv(new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED));
-        //        final AgentInterface agent = new MOMCTSAgent();
-        final AgentInterface agent = new DumbAgent();
+        Parameters parameters = SdpCollection.getSimpleProblem();
+        ResourceGatheringEnv environment = new ResourceGatheringEnv(parameters);
+        final AgentInterface agent = new MOMCTSAgent();
+        //        final AgentInterface agent = new DumbAgent();
 
         agent.agent_init(environment.env_init());
 
         for (int episodeCounter = 0; episodeCounter < 10000; ++episodeCounter) {
-            environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
+            environment = new ResourceGatheringEnv(parameters);
 
             // Start the episode until a terminal state is reached
             Action performedAction = agent.agent_start(environment.env_start());
