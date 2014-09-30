@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import nl.uva.morlb.rg.agent.model.QTableEntry;
 import nl.uva.morlb.rg.agent.model.State;
-import nl.uva.morlb.rg.agent.model.StateValue;
+import nl.uva.morlb.rg.agent.model.BenchmarkReward;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.util.Util;
@@ -25,8 +25,8 @@ public class ScalarisedQLearning implements AgentInterface {
     private static final double GAMMA = 0.9d;
     private static final double ALPHA = 0.5d;
 
-    private final HashMap<QTableEntry, StateValue> mQTable = new HashMap<>();
-    private final HashMap<State, StateValue> mVTable = new HashMap<>();
+    private final HashMap<QTableEntry, BenchmarkReward> mQTable = new HashMap<>();
+    private final HashMap<State, BenchmarkReward> mVTable = new HashMap<>();
 
     private QTableEntry mLastEntry;
     private int[] inventory;
@@ -64,9 +64,9 @@ public class ScalarisedQLearning implements AgentInterface {
                 for(int[] inventory : inventoryHack) {
 
                     State state = new State(location, inventory);
-                    mVTable.put(state, new StateValue(new double[]{INITIAL_V_VALUE ,INITIAL_V_VALUE ,INITIAL_V_VALUE }));
+                    mVTable.put(state, new BenchmarkReward(new double[]{INITIAL_V_VALUE ,INITIAL_V_VALUE ,INITIAL_V_VALUE }));
                     for(int actionCounter = 0; actionCounter < actionDim; ++actionCounter) {
-                        mQTable.put(new QTableEntry(state, DiscreteAction.values()[actionCounter]), new StateValue( new double[]{INITIAL_Q_VALUE,INITIAL_Q_VALUE,INITIAL_Q_VALUE}));
+                        mQTable.put(new QTableEntry(state, DiscreteAction.values()[actionCounter]), new BenchmarkReward( new double[]{INITIAL_Q_VALUE,INITIAL_Q_VALUE,INITIAL_Q_VALUE}));
                     }
                 }
             }
@@ -95,16 +95,16 @@ public class ScalarisedQLearning implements AgentInterface {
             }
         }
         State state = generateState(observation);
-        StateValue convertedReward = new StateValue(reward.doubleArray);
+        BenchmarkReward convertedReward = new BenchmarkReward(reward.doubleArray);
 
         //Q-Table step
         double bestActionValue = Double.NEGATIVE_INFINITY;
-        StateValue bestActionReward = null;
+        BenchmarkReward bestActionReward = null;
         for(int i = 0; i < 5; ++i) {
             DiscreteAction currentAction = DiscreteAction.values()[i];
 
             QTableEntry g = new QTableEntry(state, currentAction);
-            StateValue qTableReward = mQTable.get(g);
+            BenchmarkReward qTableReward = mQTable.get(g);
             double currentValue = qTableReward.scalarise(SCALAR).getSum();
 
             if(currentValue >= bestActionValue) {
@@ -113,7 +113,7 @@ public class ScalarisedQLearning implements AgentInterface {
             }
         }
 
-        StateValue lastStateValue = mQTable.get(mLastEntry);
+        BenchmarkReward lastStateValue = mQTable.get(mLastEntry);
         lastStateValue = lastStateValue.add(convertedReward.add(bestActionReward, GAMMA).sub(lastStateValue), ALPHA);
         mQTable.put(mLastEntry, lastStateValue);
 
@@ -127,10 +127,10 @@ public class ScalarisedQLearning implements AgentInterface {
 
     @Override
     public void agent_end(final Reward reward) {
-        StateValue convertedReward = new StateValue(reward.doubleArray);
-        StateValue nextReward = new StateValue(new double[reward.doubleArray.length]);
+        BenchmarkReward convertedReward = new BenchmarkReward(reward.doubleArray);
+        BenchmarkReward nextReward = new BenchmarkReward(new double[reward.doubleArray.length]);
 
-        StateValue lastStateValue = mQTable.get(mLastEntry);
+        BenchmarkReward lastStateValue = mQTable.get(mLastEntry);
         lastStateValue = lastStateValue.add(convertedReward.add(nextReward, GAMMA).sub(lastStateValue), ALPHA);
         mQTable.put(mLastEntry, lastStateValue);
 

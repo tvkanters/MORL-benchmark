@@ -1,13 +1,9 @@
 package nl.uva.morlb;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.Parameters;
-import nl.uva.morlb.rg.environment.model.Resource;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
 import org.rlcommunity.rlglue.codec.types.Action;
@@ -20,11 +16,6 @@ public class GlueWrapper {
 
     public static void main(final String[] args) {
         // Prepare the environment and agent
-
-        final List<Resource> resources = new LinkedList<>();
-        resources.add(new Resource(0, 1, 2));
-        resources.add(new Resource(1, 2, 1));
-        resources.add(new Resource(1, 2, 2));
 
         Parameters parameters = SdpCollection.getSimpleProblem();
         ResourceGatheringEnv environment = new ResourceGatheringEnv(parameters);

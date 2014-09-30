@@ -5,9 +5,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import jmetal.qualityIndicator.Hypervolume;
 import nl.uva.morlb.rg.agent.model.State;
-import nl.uva.morlb.rg.agent.model.StateValue;
+import nl.uva.morlb.rg.agent.model.BenchmarkReward;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.experiment.Judge;
@@ -46,10 +45,10 @@ public class MOMCTSAgent implements AgentInterface {
      */
 
     /** The accumulated reward over the whole episode **/
-    private StateValue mR_u;
+    private BenchmarkReward mR_u;
 
     /** The pareto front **/
-    private final List<StateValue> mParetoFront = new ArrayList<StateValue>();
+    private SolutionSet mParetoFront;
 
     /** The reference point for the hypervolume indicator **/
     private double[] mReferencePoint;
@@ -69,6 +68,7 @@ public class MOMCTSAgent implements AgentInterface {
     @Override
     public void agent_init(final String taskSpec) {
         mTaskSpec = new TaskSpecVRLGLUE3(taskSpec);
+        mParetoFront = new SolutionSet(mTaskSpec.getNumOfObjectives());
 
         for(int action = mTaskSpec.getDiscreteActionRange(0).getMin(); action <= mTaskSpec.getDiscreteActionRange(0).getMax(); action++) {
             mAvailableActions.add(DiscreteAction.values()[action]);
@@ -97,7 +97,7 @@ public class MOMCTSAgent implements AgentInterface {
         }
 
         //start a new r_u
-        mR_u = new StateValue(new double[mTaskSpec.getNumOfObjectives()]);
+        mR_u = new BenchmarkReward(new double[mTaskSpec.getNumOfObjectives()]);
 
         return treeWalk(currentState).convertToRLGlueAction();
     }
@@ -111,7 +111,7 @@ public class MOMCTSAgent implements AgentInterface {
         return treeWalk(currentState).convertToRLGlueAction();
     }
 
-    private StateValue handleReward(final Reward reward) {
+    private BenchmarkReward handleReward(final Reward reward) {
         //Calculate the current inventory
         for(int i = 1; i < reward.doubleArray.length; ++i) {
             if(reward.doubleArray[i] != 0) {
@@ -122,7 +122,7 @@ public class MOMCTSAgent implements AgentInterface {
             }
         }
 
-        return mR_u.add(new StateValue(reward.doubleArray));
+        return mR_u.add(new BenchmarkReward(reward.doubleArray));
     }
 
     private DiscreteAction treeWalk(final State currentState) {
@@ -144,7 +144,6 @@ public class MOMCTSAgent implements AgentInterface {
             List<DiscreteAction> availableActions = mSearchTree.getPerformedActionsForCurrentNode();
             resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
             mSearchTree.performActionOnCurrentNode(resultingAction);
-            System.out.println(mSearchTree.getCurrentNode().getVisitationCount());
         } else {
 
             //TODO Use RAVE
@@ -184,28 +183,16 @@ public class MOMCTSAgent implements AgentInterface {
     @Override
     public void agent_end(final Reward reward) {
         mR_u = handleReward(reward);
-        System.out.println(mSearchTree.info());
-        //        System.out.println(mR_u);
 
-        //TODO calculate the pareto front, it seems like metal can't handle 0 values for objective rewards
-        Hypervolume hypervolume = new Hypervolume();
-        final double[][] solutionSetDoubleArray = new double[mParetoFront.size()][mTaskSpec.getNumOfObjectives()];
-        for(int paretoPoint = 0; paretoPoint < mParetoFront.size(); paretoPoint++) {
-            for(int rewardPosition = 0; rewardPosition < mTaskSpec.getNumOfObjectives(); rewardPosition++) {
-                solutionSetDoubleArray[paretoPoint][rewardPosition] = mParetoFront.get(paretoPoint).getRewardForObjective(rewardPosition) - mReferencePoint[rewardPosition];
-            }
+        Solution currentSolution = new Solution(mR_u.getRewardVector());
+
+        if(!mParetoFront.isDominated(currentSolution) && mParetoFront.addSolution(currentSolution)) {
+
+            System.out.print( mParetoFront +" -> ");
+            mParetoFront.pruneDominatedSolutions();
+            System.out.print(mParetoFront +" Hypervolume: ");
+            System.out.println(Judge.hypervolume(mParetoFront));
         }
-
-        SolutionSet solution = new SolutionSet(mTaskSpec.getNumOfObjectives());
-        for(StateValue paretoPoint : mParetoFront) {
-            solution.addSolution(new Solution(paretoPoint.getRewardVector()));
-        }
-
-        System.out.println(Judge.hypervolume(solution));
-
-        System.out.println("Hypervolume indicator " +hypervolume.calculateHypervolume(solutionSetDoubleArray, mParetoFront.size(), mTaskSpec.getNumOfObjectives()));
-
-        mParetoFront.add(mR_u);
 
         mRandomWalk = RandomWalkPhase.OUT;
         mR_u = null;
@@ -217,7 +204,10 @@ public class MOMCTSAgent implements AgentInterface {
     }
 
     @Override
-    public void agent_cleanup() {}
+    public void agent_cleanup() {
+
+        System.out.println(mSearchTree.info());
+    }
 
 
     /**

@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import nl.uva.morlb.rg.agent.model.State;
-import nl.uva.morlb.rg.agent.model.StateValue;
+import nl.uva.morlb.rg.agent.model.BenchmarkReward;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 
 public class TreeNode {
 
     private final State mState;
 
-    private final HashMap<DiscreteAction, StateValue> mActionReward = new HashMap<>();
+    private final HashMap<DiscreteAction, BenchmarkReward> mActionReward = new HashMap<>();
 
     private final HashMap<DiscreteAction, TreeNode> mChildrens = new HashMap<>();
 
