@@ -1,6 +1,6 @@
 package nl.uva.morlb;
 
-import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
+import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 
@@ -15,13 +15,13 @@ public class GlueWrapper {
 
     public static void main(final String[] args) {
         // Prepare the environment and agent
-        ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getTinyActionsProblem());
-        final AgentInterface agent = new MOMCTSAgent();
+        ResourceGatheringEnv environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
+        final AgentInterface agent = new ConvexHullQLearning();
         // final AgentInterface agent = new DumbAgent();
 
         agent.agent_init(environment.env_init());
 
-        for (int episodeCounter = 0; episodeCounter < 100; ++episodeCounter) {
+        for (int episodeCounter = 0; episodeCounter < 250; ++episodeCounter) {
             environment = new ResourceGatheringEnv(SdpCollection.getSimpleProblem());
 
             // Start the episode until a terminal state is reached

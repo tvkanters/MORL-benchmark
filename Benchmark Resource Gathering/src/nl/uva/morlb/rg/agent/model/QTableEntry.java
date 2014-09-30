@@ -4,27 +4,19 @@ import nl.uva.morlb.rg.environment.model.DiscreteAction;
 
 public class QTableEntry {
 
-    private final State mState;
-    private final DiscreteAction mAction;
+    public final State state;
+    public final DiscreteAction action;
 
     public QTableEntry(final State state, final DiscreteAction action) {
-        mState = state;
-        mAction = action;
-    }
-
-    public State getState() {
-        return mState;
-    }
-
-    public DiscreteAction getAction() {
-        return mAction;
+        this.state = state;
+        this.action = action;
     }
 
     /**
-     * Checks if this q-table entry has the same contents as the given one.
+     * Checks if this Q-table entry has the same contents as the given one.
      *
      * @param other
-     *            The q-table entry to compare
+     *            The Q-table entry to compare
      *
      * @return True iff the contents are the same
      */
@@ -35,17 +27,17 @@ public class QTableEntry {
         }
 
         final QTableEntry otherEntry = (QTableEntry) other;
-        return otherEntry.mState.equals(mState) && otherEntry.mAction.equals(mAction);
+        return otherEntry.state.equals(state) && otherEntry.action.equals(action);
     }
 
     /**
-     * Hashes the q-table entry based on the contents.
+     * Hashes the Q-table entry based on the contents.
      *
      * @return The hash code for the q-table entry
      */
     @Override
     public int hashCode() {
-        return mState.hashCode() * 10 + mAction.ordinal();
+        return state.hashCode() * 10 + action.ordinal();
     }
 
 }

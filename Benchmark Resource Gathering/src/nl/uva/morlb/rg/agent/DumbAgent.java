@@ -109,7 +109,7 @@ public class DumbAgent implements AgentInterface {
 
     /**
      * Increments the return with the received reward.
-     * 
+     *
      * @param reward
      *            The reward received
      */
@@ -128,7 +128,7 @@ public class DumbAgent implements AgentInterface {
     }
 
     /**
-     * Handles Glue messages, not implemented yet
+     * Handles Glue messages.
      *
      * @param message
      *            The message to handle
