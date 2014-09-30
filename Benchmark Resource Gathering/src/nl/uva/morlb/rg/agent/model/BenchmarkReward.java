@@ -5,11 +5,11 @@ import java.util.Arrays;
 /**
  * Represents the reward array
  */
-public class StateValue {
+public class BenchmarkReward {
 
     private final double[] mReward;
 
-    public StateValue(final double[] reward) {
+    public BenchmarkReward(final double[] reward) {
         mReward = reward;
     }
 
@@ -19,7 +19,7 @@ public class StateValue {
      * @param other
      * @return this
      */
-    public StateValue add(final StateValue other) {
+    public BenchmarkReward add(final BenchmarkReward other) {
         return add(other, 1.0d);
     }
 
@@ -29,7 +29,7 @@ public class StateValue {
      * @param other
      * @return this
      */
-    public StateValue sub(final StateValue other) {
+    public BenchmarkReward sub(final BenchmarkReward other) {
         return sub(other, 1.0d);
     }
 
@@ -39,7 +39,7 @@ public class StateValue {
      * @param other
      * @return this
      */
-    public StateValue add(final StateValue other, final double discount) {
+    public BenchmarkReward add(final BenchmarkReward other, final double discount) {
         if (other.getDimension() != getDimension()) {
             throw new RuntimeException("Dimensions are not aligned");
         }
@@ -50,7 +50,7 @@ public class StateValue {
             newReward[i] += discount * other.mReward[i];
         }
 
-        return new StateValue(newReward);
+        return new BenchmarkReward(newReward);
     }
 
     /**
@@ -59,7 +59,7 @@ public class StateValue {
      * @param other
      * @return this
      */
-    public StateValue sub(final StateValue other, final double discount) {
+    public BenchmarkReward sub(final BenchmarkReward other, final double discount) {
         if (other.getDimension() != getDimension()) {
             throw new RuntimeException("Dimensions are not aligned");
         }
@@ -70,10 +70,10 @@ public class StateValue {
             newReward[i] -= discount * other.mReward[i];
         }
 
-        return new StateValue(newReward);
+        return new BenchmarkReward(newReward);
     }
 
-    public StateValue scalarise(final double[] scalar) {
+    public BenchmarkReward scalarise(final double[] scalar) {
         if (scalar.length != mReward.length) {
             throw new RuntimeException("Dimensions do not align");
         }
@@ -84,7 +84,7 @@ public class StateValue {
             scalarisedReward[i] *= scalar[i];
         }
 
-        return new StateValue(scalarisedReward);
+        return new BenchmarkReward(scalarisedReward);
     }
 
     public double getSum() {
@@ -123,6 +123,14 @@ public class StateValue {
      */
     public double getRewardForObjective(final int rewardPosition) {
         return mReward[rewardPosition];
+    }
+
+    /**
+     * Get the complete reward vector
+     * @return The complete reward vector
+     */
+    public double[] getRewardVector() {
+        return mReward;
     }
 
 }

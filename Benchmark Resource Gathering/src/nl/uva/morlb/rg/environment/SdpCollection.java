@@ -56,6 +56,7 @@ public class SdpCollection {
                 Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
+
     /**
      * Creates a medium, discrete problem with 3 objectives and 9 actions.
      *

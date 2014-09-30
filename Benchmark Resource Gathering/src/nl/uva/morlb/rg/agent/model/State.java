@@ -13,9 +13,9 @@ public class State {
 
     private final Location mLocation;
 
-    private final boolean[] mPickedUpResources;
+    private final int[] mPickedUpResources;
 
-    public State(final Location location, final boolean[] pickedUpResources) {
+    public State(final Location location, final int[] pickedUpResources) {
         mLocation = location;
         mPickedUpResources = pickedUpResources;
     }
@@ -54,7 +54,7 @@ public class State {
     @Override
     public String toString() {
         String result = mLocation + " [ ";
-        for (final boolean pickedUp : mPickedUpResources) {
+        for (final int pickedUp : mPickedUpResources) {
             result += pickedUp + " ";
         }
         result += "]";

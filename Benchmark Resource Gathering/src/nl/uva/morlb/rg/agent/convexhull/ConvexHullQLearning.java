@@ -3,9 +3,9 @@ package nl.uva.morlb.rg.agent.convexhull;
 import java.util.HashMap;
 
 import nl.uva.morlb.rg.agent.model.QTableEntry;
-import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
+import nl.uva.morlb.rg.environment.model.State;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.Solution;
@@ -205,7 +205,7 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Retrieves the saved Q value or creates a default one
-     * 
+     *
      * @param key
      *            The state-action pair to search
      *
