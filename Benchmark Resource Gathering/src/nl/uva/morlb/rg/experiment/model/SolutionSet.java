@@ -19,7 +19,7 @@ public class SolutionSet {
 
     /**
      * Creates a solution set with a given amount of objectives.
-     * 
+     *
      * @param numObjectives
      *            The amount of objectives a solution has
      */
@@ -29,7 +29,7 @@ public class SolutionSet {
 
     /**
      * Creates a solution set from a string representation in the form of (v,...,v),...,(v,...,v).
-     * 
+     *
      * @param solutionSet
      *            The string representation of the solution set
      */
@@ -52,10 +52,10 @@ public class SolutionSet {
     /**
      * Adds a solution to the solution set. The solution's number of objectives must match that of the set. Will not add
      * solutions already added.
-     * 
+     *
      * @param solution
      *            The solution to add
-     * 
+     *
      * @return True iff the solution was added
      */
     public boolean addSolution(final Solution solution) {
@@ -87,17 +87,18 @@ public class SolutionSet {
 
     /**
      * Checks if a solution is dominated by the solutions in the solution set.
-     * 
+     *
      * @param solution
      *            The solution to check
-     * 
+     *
      * @return True iff no other solution dominates the given one
      */
     public boolean isDominated(final Solution solution) {
         final double[] values = solution.getValues();
 
         // Compare this solution to all the others
-        solutionCheck: for (final Solution other : mSolutions) {
+        solutionCheck:
+        for (final Solution other : mSolutions) {
             if (other.equals(solution)) {
                 continue;
             }
@@ -113,6 +114,21 @@ public class SolutionSet {
         }
 
         return false;
+    }
+
+    /**
+     * Creates a copy of this solution set.
+     *
+     * @return A copy
+     */
+    public SolutionSet copy() {
+        final SolutionSet copy = new SolutionSet(mNumObjectives);
+
+        for (final Solution solution : mSolutions) {
+            copy.addSolution(solution);
+        }
+
+        return copy;
     }
 
     /**
