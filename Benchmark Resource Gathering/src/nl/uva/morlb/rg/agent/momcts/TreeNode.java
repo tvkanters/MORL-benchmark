@@ -1,6 +1,7 @@
 package nl.uva.morlb.rg.agent.momcts;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,6 +22,9 @@ public class TreeNode {
 
     /** The resulting tree nodes given this state and an action **/
     private final HashMap<DiscreteAction, TreeNode> mChildrens = new HashMap<>();
+
+    /** The last used action in this node, to recreate the treewalk **/
+    private DiscreteAction mLastUsedAction = null;
 
     /** The visitation count n_s of this tree node **/
     private int mVisitationCout = 0;
@@ -127,7 +131,7 @@ public class TreeNode {
     }
 
     /**
-     * Increases the action counter for the specific action by 1
+     * Increases the action counter for the specific action by 1 and sets it as last used action
      * @param action The given action to increase the counter for
      */
     public void increaseActionCounterFor(final DiscreteAction action) {
@@ -137,6 +141,57 @@ public class TreeNode {
         }
 
         mActionCounter.put(action, ++actionCounter);
+        mLastUsedAction = action;
     }
 
+    /**
+     * Get the last used action in this tree node
+     * @return The last used action or null if there wheren't any
+     */
+    public DiscreteAction getLastUsedAction() {
+        return mLastUsedAction;
+    }
+
+    /**
+     * Evaluate if this node has a last used action
+     * @return True if this node has a last used action
+     */
+    public boolean hasLastUsedAction() {
+        return mLastUsedAction != null;
+    }
+
+    /**
+     * Get the reward for a given action
+     * @param takenAction The action taken
+     * @return The reward for the given action
+     */
+    public BenchmarkReward getRewardForAction(final DiscreteAction takenAction) {
+        if(!mActionReward.containsKey(takenAction)) {
+            return new BenchmarkReward(Arrays.copyOf(MOMCTSAgent.sInitialReward, MOMCTSAgent.sInitialReward.length));
+        } else {
+            return mActionReward.get(mLastUsedAction);
+        }
+    }
+
+    /**
+     * Get the number of times the given action was taken in this node
+     * @param takenAction The taken action
+     * @return The number of times this action was taken
+     */
+    public int getNumOfTimesActionWasTaken(final DiscreteAction takenAction) {
+        if(!mActionCounter.containsKey(takenAction)) {
+            return 0;
+        }
+
+        return mActionCounter.get(takenAction);
+    }
+
+    /**
+     * Set the reward for taking a specific action in this state
+     * @param action The taken action
+     * @param newReward The resulting reward
+     */
+    public void setRewardForAction(final DiscreteAction action, final BenchmarkReward reward) {
+        mActionReward.put(action, reward);
+    }
 }

@@ -73,6 +73,26 @@ public class BenchmarkReward {
         return new BenchmarkReward(newReward);
     }
 
+    /**
+     * Multiply a reward by a scalar value
+     * @param multiplicant The scalar value
+     * @return The multiplied reward
+     */
+    public BenchmarkReward mult(final double multiplicant) {
+        final double[] newReward = Arrays.copyOf(mReward, mReward.length);
+
+        for (int i = 0; i < mReward.length; ++i) {
+            newReward[i] *= multiplicant;
+        }
+
+        return new BenchmarkReward(newReward);
+    }
+
+    /**
+     * Scalarise this reward
+     * @param scalar The scalar
+     * @return The scalarised reward
+     */
     public BenchmarkReward scalarise(final double[] scalar) {
         if (scalar.length != mReward.length) {
             throw new RuntimeException("Dimensions do not align");

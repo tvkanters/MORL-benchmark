@@ -25,6 +25,8 @@ import org.rlcommunity.rlglue.codec.types.Reward;
  */
 public class MOMCTSAgent implements AgentInterface {
 
+    public static double[] sInitialReward;
+
     /** The search tree used by our tree walks **/
     private final SearchTree mSearchTree = new SearchTree();
 
@@ -43,6 +45,12 @@ public class MOMCTSAgent implements AgentInterface {
     /*
      * Tree walk values
      */
+
+    /** The action history of the current tree walk  **/
+    private List<DiscreteAction> mActionHistory = new LinkedList<DiscreteAction>();
+
+    /** The state history of the current tree walk **/
+    private List<State> mStateHistory = new LinkedList<State>();
 
     /** The accumulated reward over the whole episode **/
     private BenchmarkReward mR_u;
@@ -82,6 +90,11 @@ public class MOMCTSAgent implements AgentInterface {
         for(int i = 1; i < mReferencePoint.length; ++i) {
             mReferencePoint[i] = -1;
         }
+
+        sInitialReward = new double[mTaskSpec.getNumOfObjectives()];
+        for(int i = 0; i < sInitialReward.length; ++i) {
+            sInitialReward[i] = 0;
+        }
     }
 
     @Override
@@ -99,30 +112,26 @@ public class MOMCTSAgent implements AgentInterface {
         //start a new r_u
         mR_u = new BenchmarkReward(new double[mTaskSpec.getNumOfObjectives()]);
 
-        return treeWalk(currentState).convertToRLGlueAction();
+        DiscreteAction actionToTake = treeWalk(currentState);
+        mActionHistory.add(actionToTake);
+        mStateHistory.add(currentState);
+
+        return actionToTake.convertToRLGlueAction();
     }
 
     @Override
     public Action agent_step(final Reward reward, final Observation observation) {
         mR_u = handleReward(reward);
-
         State currentState = generateState(observation, mInventory);
 
-        return treeWalk(currentState).convertToRLGlueAction();
-    }
+        DiscreteAction actionToTake = treeWalk(currentState);
 
-    private BenchmarkReward handleReward(final Reward reward) {
-        //Calculate the current inventory
-        for(int i = 1; i < reward.doubleArray.length; ++i) {
-            if(reward.doubleArray[i] != 0) {
-                mInventory[i-1]++;
-
-                if(mInventory[i-1] == 2)
-                    System.out.println("Picked up second ressource");
-            }
+        if(mRandomWalk != RandomWalkPhase.IN) {
+            mActionHistory.add(actionToTake);
+            mStateHistory.add(currentState);
         }
 
-        return mR_u.add(new BenchmarkReward(reward.doubleArray));
+        return actionToTake.convertToRLGlueAction();
     }
 
     private DiscreteAction treeWalk(final State currentState) {
@@ -150,7 +159,7 @@ public class MOMCTSAgent implements AgentInterface {
             List<DiscreteAction> nonAvailableActions = mSearchTree.getPerformedActionsForCurrentNode();
             List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
             availableActions.removeAll(nonAvailableActions);
-            System.out.println(availableActions.get(0).name());
+
             resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
 
             //Tree building step 1, save the action
@@ -158,6 +167,8 @@ public class MOMCTSAgent implements AgentInterface {
 
             mRandomWalk = RandomWalkPhase.STARTED;
         }
+
+
 
         return resultingAction;
     }
@@ -187,7 +198,7 @@ public class MOMCTSAgent implements AgentInterface {
 
         if(mRandomWalk == RandomWalkPhase.STARTED ) {
             //Tree building step 2, save the resulting state
-            //We do not get an observation for the end state so we create a fake end state to fit our datastructure
+            //We do not get an observation for the end state so we create a fake end state to fit our data structure
             Observation fakeEndstateObservation = new Observation();
             fakeEndstateObservation.doubleArray = new double[2];
             fakeEndstateObservation.doubleArray[0] = fakeEndstateObservation.doubleArray[1] = -1;
@@ -195,6 +206,24 @@ public class MOMCTSAgent implements AgentInterface {
             mSearchTree.completeTreeBuilding(generateState(fakeEndstateObservation, mInventory));
         }
 
+        //Update r*head*_s,a
+        for(int historyPosition = 0; historyPosition < mStateHistory.size(); ++historyPosition) {
+            TreeNode toEvaluateNode = mSearchTree.getNodeForState(mStateHistory.get(historyPosition));
+            DiscreteAction takenAction = mActionHistory.get(historyPosition);
+
+            BenchmarkReward oldReward = toEvaluateNode.getRewardForAction(takenAction);
+            int actionCounter = toEvaluateNode.getNumOfTimesActionWasTaken(takenAction);
+
+            BenchmarkReward newReward = oldReward.mult(actionCounter).add(mR_u).mult(1.0d / (actionCounter +1));
+            toEvaluateNode.setRewardForAction(takenAction, newReward);
+
+            toEvaluateNode.increaseActionCounterFor(takenAction);
+        }
+
+        mStateHistory = new LinkedList<State>();
+        mActionHistory = new LinkedList<DiscreteAction>();
+
+        //Build pareto front
         Solution currentSolution = new Solution(mR_u.getRewardVector());
 
         if(!mParetoFront.isDominated(currentSolution) && mParetoFront.addSolution(currentSolution)) {
@@ -218,8 +247,41 @@ public class MOMCTSAgent implements AgentInterface {
     public void agent_cleanup() {
 
         System.out.println(mSearchTree.info());
+        resetInventory();
+
+        Observation fakeTestObs= new Observation();
+        fakeTestObs.doubleArray = new double[2];
+        fakeTestObs.doubleArray[0] = 0;
+        fakeTestObs.doubleArray[1] = 1;
+
+        State fakeTestState = generateState(fakeTestObs, mInventory);
+
+        TreeNode toPrint = mSearchTree.getNodeForState(fakeTestState);
+        for(DiscreteAction action : mAvailableActions) {
+            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
+        }
+
+
     }
 
+    /**
+     * Calculate the appropriate reward and the current inventory based on the last observed reward
+     * @param reward The last observed reward
+     * @return The last observed reward
+     */
+    private BenchmarkReward handleReward(final Reward reward) {
+        //Calculate the current inventory
+        for(int i = 1; i < reward.doubleArray.length; ++i) {
+            if(reward.doubleArray[i] != 0) {
+                mInventory[i-1]++;
+
+                if(mInventory[i-1] == 2)
+                    System.out.println("Picked up second ressource");
+            }
+        }
+
+        return mR_u.add(new BenchmarkReward(reward.doubleArray));
+    }
 
     /**
      * Generate the current state from the observation and the current inventory
