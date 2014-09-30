@@ -2,6 +2,8 @@ package nl.uva.morlb.rg.agent.model;
 
 import java.util.Arrays;
 
+import nl.uva.morlb.rg.experiment.model.Solution;
+
 /**
  * Represents the reward array
  */
@@ -107,6 +109,10 @@ public class BenchmarkReward {
         return new BenchmarkReward(scalarisedReward);
     }
 
+    /**
+     * Sum all reward entries
+     * @return The sum of the reward
+     */
     public double getSum() {
         double result = 0;
         for (final double d : mReward) {
@@ -117,23 +123,20 @@ public class BenchmarkReward {
     }
 
     /**
+     * Convert this benchmark reward to a solution
+     * @return The converted solution
+     */
+    public Solution toSolution() {
+        return new Solution(mReward);
+    }
+
+    /**
      * Get the dimensionality of this reward
      *
      * @return The dimensionality of this reward
      */
     public int getDimension() {
         return mReward.length;
-    }
-
-    @Override
-    public String toString() {
-        String result = "[ ";
-        for(double reward : mReward) {
-            result += reward +" ";
-        }
-        result += " ]";
-
-        return result;
     }
 
     /**
@@ -151,6 +154,17 @@ public class BenchmarkReward {
      */
     public double[] getRewardVector() {
         return mReward;
+    }
+
+    @Override
+    public String toString() {
+        String result = "[ ";
+        for(double reward : mReward) {
+            result += reward +" ";
+        }
+        result += " ]";
+
+        return result;
     }
 
 }

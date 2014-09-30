@@ -147,11 +147,11 @@ public class MOMCTSAgent implements AgentInterface {
 
             resultingAction = randomWalk();
         } else if(!mSearchTree.isLeafNode() && !progressiveWidening()) {
-
             //TODO perform maximization over action using the paretofront projection
 
             List<DiscreteAction> availableActions = mSearchTree.getPerformedActionsForCurrentNode();
             resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+
             mSearchTree.performActionOnCurrentNode(resultingAction);
         } else {
 
@@ -160,6 +160,7 @@ public class MOMCTSAgent implements AgentInterface {
             List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
             availableActions.removeAll(nonAvailableActions);
 
+            System.out.println(availableActions.size());
             resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
 
             //Tree building step 1, save the action
@@ -224,7 +225,7 @@ public class MOMCTSAgent implements AgentInterface {
         mActionHistory = new LinkedList<DiscreteAction>();
 
         //Build pareto front
-        Solution currentSolution = new Solution(mR_u.getRewardVector());
+        Solution currentSolution = mR_u.toSolution();
 
         if(!mParetoFront.isDominated(currentSolution) && mParetoFront.addSolution(currentSolution)) {
 
@@ -240,13 +241,11 @@ public class MOMCTSAgent implements AgentInterface {
 
     @Override
     public String agent_message(final String message) {
-        return null;
+        return Judge.hypervolume(mParetoFront) +"";
     }
 
     @Override
     public void agent_cleanup() {
-
-        System.out.println(mSearchTree.info());
         resetInventory();
 
         Observation fakeTestObs= new Observation();
@@ -255,12 +254,40 @@ public class MOMCTSAgent implements AgentInterface {
         fakeTestObs.doubleArray[1] = 1;
 
         State fakeTestState = generateState(fakeTestObs, mInventory);
-
+        System.out.println(fakeTestState);
         TreeNode toPrint = mSearchTree.getNodeForState(fakeTestState);
         for(DiscreteAction action : mAvailableActions) {
             System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
         }
 
+        resetInventory();
+
+        fakeTestObs= new Observation();
+        fakeTestObs.doubleArray = new double[2];
+        fakeTestObs.doubleArray[0] = 0;
+        fakeTestObs.doubleArray[1] = 2;
+
+        fakeTestState = generateState(fakeTestObs, mInventory);
+        System.out.println();
+        System.out.println(fakeTestState);
+        toPrint = mSearchTree.getNodeForState(fakeTestState);
+        for(DiscreteAction action : mAvailableActions) {
+            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
+        }
+
+
+        fakeTestObs= new Observation();
+        fakeTestObs.doubleArray = new double[2];
+        fakeTestObs.doubleArray[0] = 0;
+        fakeTestObs.doubleArray[1] = 3;
+
+        fakeTestState = generateState(fakeTestObs, mInventory);
+        System.out.println();
+        System.out.println(fakeTestState);
+        toPrint = mSearchTree.getNodeForState(fakeTestState);
+        for(DiscreteAction action : mAvailableActions) {
+            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
+        }
 
     }
 

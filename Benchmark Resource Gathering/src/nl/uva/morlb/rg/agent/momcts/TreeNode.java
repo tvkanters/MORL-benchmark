@@ -23,9 +23,6 @@ public class TreeNode {
     /** The resulting tree nodes given this state and an action **/
     private final HashMap<DiscreteAction, TreeNode> mChildrens = new HashMap<>();
 
-    /** The last used action in this node, to recreate the treewalk **/
-    private DiscreteAction mLastUsedAction = null;
-
     /** The visitation count n_s of this tree node **/
     private int mVisitationCout = 0;
 
@@ -141,23 +138,6 @@ public class TreeNode {
         }
 
         mActionCounter.put(action, ++actionCounter);
-        mLastUsedAction = action;
-    }
-
-    /**
-     * Get the last used action in this tree node
-     * @return The last used action or null if there wheren't any
-     */
-    public DiscreteAction getLastUsedAction() {
-        return mLastUsedAction;
-    }
-
-    /**
-     * Evaluate if this node has a last used action
-     * @return True if this node has a last used action
-     */
-    public boolean hasLastUsedAction() {
-        return mLastUsedAction != null;
     }
 
     /**
@@ -169,7 +149,7 @@ public class TreeNode {
         if(!mActionReward.containsKey(takenAction)) {
             return new BenchmarkReward(Arrays.copyOf(MOMCTSAgent.sInitialReward, MOMCTSAgent.sInitialReward.length));
         } else {
-            return mActionReward.get(mLastUsedAction);
+            return mActionReward.get(takenAction);
         }
     }
 
