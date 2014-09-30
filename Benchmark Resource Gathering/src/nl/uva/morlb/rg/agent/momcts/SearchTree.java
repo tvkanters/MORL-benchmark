@@ -29,6 +29,7 @@ public class SearchTree {
      */
     public void initialise(final State initialState) {
         mRootNode = mCurrentNode = new TreeNode(initialState);
+        mCurrentNode.increaseVisitationCount();
         mEntries.put(initialState, mRootNode);
         mInitialised = true;
     }
@@ -38,6 +39,7 @@ public class SearchTree {
      */
     public void reset() {
         mCurrentNode = mRootNode;
+        mCurrentNode.increaseVisitationCount();
     }
 
     /**
@@ -88,10 +90,11 @@ public class SearchTree {
 
     /**
      * Performs the given action on the current tree node and change the current node to the resulting one.
-     * It also increases the visitation count of the current node by 1.
+     * It also increases the visitation count of the current node and the action by 1.
      * @param action The action to perform on the current node
      */
     public void performActionOnCurrentNode(final DiscreteAction action) {
+        mCurrentNode.increaseActionCounterFor(action);
         mCurrentNode = mCurrentNode.getNextNodeForAction(action);
         mCurrentNode.increaseVisitationCount();
     }

@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.agent.model.BenchmarkReward;
+import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.experiment.Judge;
@@ -150,7 +150,7 @@ public class MOMCTSAgent implements AgentInterface {
             List<DiscreteAction> nonAvailableActions = mSearchTree.getPerformedActionsForCurrentNode();
             List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
             availableActions.removeAll(nonAvailableActions);
-
+            System.out.println(availableActions.get(0).name());
             resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
 
             //Tree building step 1, save the action
@@ -177,12 +177,23 @@ public class MOMCTSAgent implements AgentInterface {
     private boolean progressiveWidening() {
         int v_s = mSearchTree.getCurrentNode().getVisitationCount();
 
-        return Math.pow(v_s, 0.5) >= mSearchTree.getCurrentNode().getAmountOfChildren() && mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
+        return Math.pow(v_s, 0.5) >= mSearchTree.getCurrentNode().getAmountOfChildren()
+                && mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
     }
 
     @Override
     public void agent_end(final Reward reward) {
         mR_u = handleReward(reward);
+
+        if(mRandomWalk == RandomWalkPhase.STARTED ) {
+            //Tree building step 2, save the resulting state
+            //We do not get an observation for the end state so we create a fake end state to fit our datastructure
+            Observation fakeEndstateObservation = new Observation();
+            fakeEndstateObservation.doubleArray = new double[2];
+            fakeEndstateObservation.doubleArray[0] = fakeEndstateObservation.doubleArray[1] = -1;
+
+            mSearchTree.completeTreeBuilding(generateState(fakeEndstateObservation, mInventory));
+        }
 
         Solution currentSolution = new Solution(mR_u.getRewardVector());
 

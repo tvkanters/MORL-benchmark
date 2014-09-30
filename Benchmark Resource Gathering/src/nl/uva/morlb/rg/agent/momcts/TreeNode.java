@@ -4,18 +4,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.agent.model.BenchmarkReward;
+import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 
 public class TreeNode {
 
+    /** The state representing the current node **/
     private final State mState;
 
+    /** The reward given this state and an action **/
     private final HashMap<DiscreteAction, BenchmarkReward> mActionReward = new HashMap<>();
 
+    /** The number of times a given action was taken in this state **/
+    private final HashMap<DiscreteAction, Integer> mActionCounter = new HashMap<>();
+
+    /** The resulting tree nodes given this state and an action **/
     private final HashMap<DiscreteAction, TreeNode> mChildrens = new HashMap<>();
 
+    /** The visitation count n_s of this tree node **/
     private int mVisitationCout = 0;
 
     public TreeNode(final State state) {
@@ -30,14 +37,6 @@ public class TreeNode {
      */
     public void addChild(final DiscreteAction action, final TreeNode treeNode) {
         mChildrens.put(action, treeNode);
-    }
-
-    public int getVisitationCount() {
-        return mVisitationCout;
-    }
-
-    public void visited() {
-        mVisitationCout++;
     }
 
     /**
@@ -102,6 +101,14 @@ public class TreeNode {
     }
 
     /**
+     * Get the visitation count of this tree node
+     * @return The visitation count of this tree node
+     */
+    public int getVisitationCount() {
+        return mVisitationCout;
+    }
+
+    /**
      * Get the amount of children under this node
      * @return The amount of children of this node
      */
@@ -117,6 +124,19 @@ public class TreeNode {
         }
 
         return result;
+    }
+
+    /**
+     * Increases the action counter for the specific action by 1
+     * @param action The given action to increase the counter for
+     */
+    public void increaseActionCounterFor(final DiscreteAction action) {
+        Integer actionCounter = mActionCounter.get(action);
+        if(actionCounter == null) {
+            actionCounter = 0;
+        }
+
+        mActionCounter.put(action, ++actionCounter);
     }
 
 }
