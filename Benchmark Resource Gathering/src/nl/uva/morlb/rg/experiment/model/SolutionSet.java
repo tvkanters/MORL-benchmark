@@ -72,6 +72,18 @@ public class SolutionSet {
     }
 
     /**
+     * Adds the solutions from a different solution set to this one.
+     *
+     * @param solutionSet
+     *            The solution set to add
+     */
+    public void addSolutionSet(final SolutionSet solutionSet) {
+        for (final Solution solution : solutionSet.mSolutions) {
+            addSolution(solution);
+        }
+    }
+
+    /**
      * Prunes the solution set by removing all dominated solutions.
      */
     public void pruneDominatedSolutions() {

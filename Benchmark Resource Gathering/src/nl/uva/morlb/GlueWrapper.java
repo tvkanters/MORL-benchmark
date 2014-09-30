@@ -16,11 +16,10 @@ public class GlueWrapper {
 
     public static void main(final String[] args) {
         // Prepare the environment and agent
-
-        Parameters parameters = SdpCollection.getSimpleProblem();
+        final Parameters parameters = SdpCollection.getSimpleProblem();
         ResourceGatheringEnv environment = new ResourceGatheringEnv(parameters);
         final AgentInterface agent = new MOMCTSAgent();
-        //        final AgentInterface agent = new DumbAgent();
+        // final AgentInterface agent = new DumbAgent();
 
         agent.agent_init(environment.env_init());
 

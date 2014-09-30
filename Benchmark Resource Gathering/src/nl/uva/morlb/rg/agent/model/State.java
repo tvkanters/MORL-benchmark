@@ -53,9 +53,9 @@ public class State {
 
     @Override
     public String toString() {
-        String result = mLocation +" [ ";
-        for(int item : mPickedUpResources) {
-            result += item +" ";
+        String result = mLocation + " [ ";
+        for (final int pickedUp : mPickedUpResources) {
+            result += pickedUp + " ";
         }
         result += "]";
 
