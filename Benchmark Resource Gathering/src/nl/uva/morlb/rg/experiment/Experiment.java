@@ -1,9 +1,8 @@
 package nl.uva.morlb.rg.experiment;
 
-import java.util.Arrays;
 import java.util.Random;
 
-import nl.uva.morlb.rg.agent.DumbAgent;
+import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
@@ -33,30 +32,31 @@ public class Experiment {
     public void runExperiment() {
 
         for (int test = 0; test < 10; ++test) {
+            System.out.println("\n\n========== TEST " + test + " ==========\n\n");
+
             RLGlue.RL_init();
 
-            for (int episode = 0; episode < 20; ++episode) {
+            for (int episode = 0; episode < 10000; ++episode) {
                 runEpisode(100);
+
+                final String solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
+                if (!solutionSetString.equals("")) {
+                    final SolutionSet solutionSet = new SolutionSet(solutionSetString);
+                    final Scalarisation scalarisation = new LinearScalarisation();
+
+                    final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);
+                    final int oNVG = Judge.overallNondominatedVectorGeneration(solutionSet);
+                    final double unif = Judge.schottSpacingMetric(solutionSet);
+                    final double spread = Judge.maximumSpread(solutionSet);
+                    final double hypervolume = Judge.hypervolume(solutionSet);
+                    System.out.println(avgRew[0] + " " + avgRew[1] + " " + oNVG + " " + unif + " " + spread + " "
+                            + hypervolume);
+                }
+
+                if (Boolean.parseBoolean(RLGlue.RL_agent_message("isConverged"))) {
+                    break;
+                }
             }
-
-            SolutionSet solutionSet = new SolutionSet(RLGlue.RL_agent_message("getSolutionSet"));
-            Scalarisation scalarisation = new LinearScalarisation();
-
-            final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);
-            System.out.println("Average Reward: " + avgRew[0]);
-            System.out.println("Standard deviation of average reward: " + avgRew[1]);
-
-            final int oNVG = Judge.overallNondominatedVectorGeneration(solutionSet);
-            System.out.println("ONVG: " + oNVG);
-
-            final double unif = Judge.schottSpacingMetric(solutionSet);
-            System.out.println("Uniformity measure: " + unif);
-
-            final double spread = Judge.maximumSpread(solutionSet);
-            System.out.println("Spread measure: " + spread);
-
-            final double hypervolume = Judge.hypervolume(solutionSet);
-            System.out.println("Hypervolume: " + hypervolume);
 
             RLGlue.RL_cleanup();
             sProblem.shuffleResources(sRng);
@@ -67,7 +67,7 @@ public class Experiment {
 
     /**
      * Runs an episode of resource gathering.
-     *
+     * 
      * @param stepLimit
      *            The amount steps before terminating
      */
@@ -77,8 +77,8 @@ public class Experiment {
         final int totalSteps = RLGlue.RL_num_steps();
         final Reward totalReward = RLGlue.RL_return();
 
-//        System.out.println("Episode " + mEpisodeCount);
-//        System.out.println("    Reward: " + Arrays.toString(totalReward.doubleArray));
+        // System.out.println("Episode " + mEpisodeCount);
+        // System.out.println("    Reward: " + Arrays.toString(totalReward.doubleArray));
 
         ++mEpisodeCount;
     }
@@ -110,7 +110,7 @@ public class Experiment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new AgentLoader(new DumbAgent()).run();
+                new AgentLoader(new ConvexHullQLearning()).run();
             }
         }).start();
     }
