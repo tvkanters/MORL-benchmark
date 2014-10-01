@@ -11,6 +11,7 @@ import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.Solution;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
+import nl.uva.morlb.util.Log;
 import nl.uva.morlb.util.Util;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
@@ -37,6 +38,8 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /** The Q table entry that should be updated next */
     private QTableEntry mLastEntry;
+    private int mRepeatCount = 0;;
+    private String mPrevSolutionSet = "";
 
     /**
      * Called when preparing the problem.
@@ -50,7 +53,9 @@ public class ConvexHullQLearning implements AgentInterface {
         mMaxAction = tSpec.getDiscreteActionRange(0).getMax();
 
         mDefaultQValue = new SolutionSet(mNumObjectives);
-        mDefaultQValue.addSolution(new Solution(new double[mNumObjectives]));
+        final double[] solutionValues = new double[mNumObjectives];
+        solutionValues[0] = -100;
+        mDefaultQValue.addSolution(new Solution(solutionValues));
     }
 
     /**
@@ -145,7 +150,7 @@ public class ConvexHullQLearning implements AgentInterface {
         final Scalarisation scalarisation = new LinearScalarisation();
 
         while (currentObjective != mNumObjectives) {
-            System.out.println("Objective: " + currentObjective);
+            Log.d("Objective: " + currentObjective);
             for (int y = 3; y >= 0; --y) {
                 for (int x = 0; x < 4; ++x) {
                     final Location location = new Location(x, y);
@@ -169,10 +174,10 @@ public class ConvexHullQLearning implements AgentInterface {
 
                     }
 
-                    System.out.print("\t" + bestAction.name() + "\t");
+                    Log.d("\t" + bestAction.name() + "\t");
 
                 }
-                System.out.println();
+                Log.d("");
             }
 
             ++currentObjective;
@@ -189,7 +194,12 @@ public class ConvexHullQLearning implements AgentInterface {
 
         union.pruneDominatedSolutions();
 
-        System.out.println(union);
+        Log.d(union.toString());
+
+        // Do the actual clean up work
+        mQTable.clear();
+        mRepeatCount = 0;
+        mPrevSolutionSet = "";
     }
 
     /**
@@ -200,23 +210,40 @@ public class ConvexHullQLearning implements AgentInterface {
      */
     @Override
     public String agent_message(final String message) {
-        if (message.equals("getSolutionSet")) {
-            final SolutionSet union = new SolutionSet(mNumObjectives);
+        switch (message) {
+        case "getSolutionSet":
+            return getSolutionSet().toString();
 
-            // Union the Q values of the state over the actions
-            final State initState = new State(new Location(0, 0), new boolean[2]);
-            for (int i = mMinAction; i <= mMaxAction; ++i) {
-                final QTableEntry entry = new QTableEntry(initState, DiscreteAction.values()[i]);
-                union.addSolutionSet(getQValue(entry));
+        case "isConverged":
+            final String solutionSetString = getSolutionSet().toString();
+            if (mPrevSolutionSet.equals(solutionSetString)) {
+                ++mRepeatCount;
+                if (mRepeatCount == 10) {
+                    return Boolean.TRUE.toString();
+                }
+            } else {
+                mRepeatCount = 0;
+                mPrevSolutionSet = solutionSetString;
             }
-
-            union.pruneDominatedSolutions();
-
-            System.out.println(union);
-            return union.toString();
+            return Boolean.FALSE.toString();
         }
 
         throw new InvalidParameterException("Unknown message: " + message);
+    }
+
+    private SolutionSet getSolutionSet() {
+        final SolutionSet union = new SolutionSet(mNumObjectives);
+
+        // Union the Q values of the state over the actions
+        final State initState = new State(new Location(0, 0), new boolean[2]);
+        for (int i = mMinAction; i <= mMaxAction; ++i) {
+            final QTableEntry entry = new QTableEntry(initState, DiscreteAction.values()[i]);
+            union.addSolutionSet(getQValue(entry));
+        }
+
+        union.pruneDominatedSolutions();
+
+        return union;
     }
 
     /**
