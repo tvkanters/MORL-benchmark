@@ -42,7 +42,7 @@ public class LinearScalarisation extends Scalarisation {
         for (int j = 0; j < dimensions; j++) {
             randomWeightVector[j] /= sum;
         }
-        return null;
+        return randomWeightVector;
     }
 
 }
