@@ -7,11 +7,8 @@ import nl.uva.morlb.rg.agent.model.QTableEntry;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.State;
-import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
-import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.Solution;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
-import nl.uva.morlb.util.Log;
 import nl.uva.morlb.util.Util;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
@@ -24,6 +21,8 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /** The discount factor of Q table updates */
     private static final double DISCOUNT = 1;
+    /** The amount of times the solution set has to be the same before converging */
+    private static final int REPEAT_CONVERGE_LIMIT = 15;
 
     /** The Q table to store values for state-action pairs */
     private final HashMap<QTableEntry, SolutionSet> mQTable = new HashMap<>();
@@ -38,7 +37,9 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /** The Q table entry that should be updated next */
     private QTableEntry mLastEntry;
-    private int mRepeatCount = 0;;
+    /** The amount of times the same solution set has been returned */
+    private int mRepeatCount = 0;
+    /** The solution set previous returned */
     private String mPrevSolutionSet = "";
 
     /**
@@ -142,60 +143,6 @@ public class ConvexHullQLearning implements AgentInterface {
      */
     @Override
     public void agent_cleanup() {
-        // Print the solution for a specific situation
-        final boolean[] desiredInventory = new boolean[] { false, true };
-        final double[][] weights = new double[][] { { 8, 0.1, 0.1 }, { 0.1, 8, 0.1 }, { 0.1, 0.1, 8 } };
-        int currentObjective = 0;
-
-        final Scalarisation scalarisation = new LinearScalarisation();
-
-        while (currentObjective != mNumObjectives) {
-            Log.d("Objective: " + currentObjective);
-            for (int y = 3; y >= 0; --y) {
-                for (int x = 0; x < 4; ++x) {
-                    final Location location = new Location(x, y);
-                    final State state = new State(location, desiredInventory);
-
-                    double bestActionValue = Double.NEGATIVE_INFINITY;
-                    DiscreteAction bestAction = null;
-                    for (int i = mMinAction; i <= mMaxAction; ++i) {
-                        final DiscreteAction currentAction = DiscreteAction.values()[i];
-
-                        final SolutionSet qValue = getQValue(new QTableEntry(state, currentAction));
-                        for (final Solution solution : qValue.getSolutions()) {
-                            final double currentActionValue = scalarisation.scalarise(solution.getValues(),
-                                    weights[currentObjective]);
-
-                            if (currentActionValue > bestActionValue) {
-                                bestActionValue = currentActionValue;
-                                bestAction = currentAction;
-                            }
-                        }
-
-                    }
-
-                    Log.d("\t" + bestAction.name() + "\t");
-
-                }
-                Log.d("");
-            }
-
-            ++currentObjective;
-        }
-
-        final SolutionSet union = new SolutionSet(mNumObjectives);
-
-        // Union the Q values of the state over the actions
-        final State initState = new State(new Location(0, 0), new boolean[2]);
-        for (int i = mMinAction; i <= mMaxAction; ++i) {
-            final QTableEntry entry = new QTableEntry(initState, DiscreteAction.values()[i]);
-            union.addSolutionSet(getQValue(entry));
-        }
-
-        union.pruneDominatedSolutions();
-
-        Log.d(union.toString());
-
         // Do the actual clean up work
         mQTable.clear();
         mRepeatCount = 0;
@@ -218,7 +165,7 @@ public class ConvexHullQLearning implements AgentInterface {
             final String solutionSetString = getSolutionSet().toString();
             if (mPrevSolutionSet.equals(solutionSetString)) {
                 ++mRepeatCount;
-                if (mRepeatCount == 10) {
+                if (mRepeatCount == REPEAT_CONVERGE_LIMIT) {
                     return Boolean.TRUE.toString();
                 }
             } else {
@@ -231,11 +178,16 @@ public class ConvexHullQLearning implements AgentInterface {
         throw new InvalidParameterException("Unknown message: " + message);
     }
 
+    /**
+     * Unions the solutions sets of the initial state-actions to return the full Pareto front.
+     * 
+     * @return The solution set
+     */
     private SolutionSet getSolutionSet() {
         final SolutionSet union = new SolutionSet(mNumObjectives);
 
         // Union the Q values of the state over the actions
-        final State initState = new State(new Location(0, 0), new boolean[2]);
+        final State initState = new State(new Location(0, 0), new boolean[mLastEntry.state.getPickedUp().length]);
         for (int i = mMinAction; i <= mMaxAction; ++i) {
             final QTableEntry entry = new QTableEntry(initState, DiscreteAction.values()[i]);
             union.addSolutionSet(getQValue(entry));
