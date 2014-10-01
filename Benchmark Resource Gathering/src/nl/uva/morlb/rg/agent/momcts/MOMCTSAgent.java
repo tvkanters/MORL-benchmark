@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import nl.uva.morlb.rg.agent.model.BenchmarkReward;
-import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
+import nl.uva.morlb.rg.environment.model.State;
 import nl.uva.morlb.rg.experiment.Judge;
 import nl.uva.morlb.rg.experiment.model.Solution;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
@@ -40,17 +40,17 @@ public class MOMCTSAgent implements AgentInterface {
      * State specific values
      */
     /** The current inventory **/
-    private int[] mInventory;
+    private boolean[] mInventory;
 
     /*
      * Tree walk values
      */
 
     /** The action history of the current tree walk  **/
-    private List<DiscreteAction> mActionHistory = new LinkedList<DiscreteAction>();
+    private final List<DiscreteAction> mActionHistory = new LinkedList<DiscreteAction>();
 
     /** The state history of the current tree walk **/
-    private List<State> mStateHistory = new LinkedList<State>();
+    private final List<State> mStateHistory = new LinkedList<State>();
 
     /** The accumulated reward over the whole episode **/
     private BenchmarkReward mR_u;
@@ -82,7 +82,7 @@ public class MOMCTSAgent implements AgentInterface {
             mAvailableActions.add(DiscreteAction.values()[action]);
         }
 
-        mInventory = new int[mTaskSpec.getNumOfObjectives() -1];
+        mInventory = new boolean[mTaskSpec.getNumOfObjectives() -1];
         mReferencePoint = new double[mTaskSpec.getNumOfObjectives()];
 
         //Fill the reference point
@@ -93,7 +93,7 @@ public class MOMCTSAgent implements AgentInterface {
 
         sInitialReward = new double[mTaskSpec.getNumOfObjectives()];
         for(int i = 0; i < sInitialReward.length; ++i) {
-            sInitialReward[i] = 0;
+            sInitialReward[i] = -100;
         }
     }
 
@@ -160,7 +160,6 @@ public class MOMCTSAgent implements AgentInterface {
             List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
             availableActions.removeAll(nonAvailableActions);
 
-            System.out.println(availableActions.size());
             resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
 
             //Tree building step 1, save the action
@@ -221,8 +220,8 @@ public class MOMCTSAgent implements AgentInterface {
             toEvaluateNode.increaseActionCounterFor(takenAction);
         }
 
-        mStateHistory = new LinkedList<State>();
-        mActionHistory = new LinkedList<DiscreteAction>();
+        mStateHistory.clear();
+        mActionHistory.clear();
 
         //Build pareto front
         Solution currentSolution = mR_u.toSolution();
@@ -241,53 +240,68 @@ public class MOMCTSAgent implements AgentInterface {
 
     @Override
     public String agent_message(final String message) {
-        return Judge.hypervolume(mParetoFront) +"";
+        switch (message) {
+            case "isConverged":
+                return "false";
+            case "getSolutionSet":
+                return mParetoFront.toString();
+            default:
+                return "Cannot parse message";
+        }
     }
 
     @Override
     public void agent_cleanup() {
         resetInventory();
 
-        Observation fakeTestObs= new Observation();
-        fakeTestObs.doubleArray = new double[2];
-        fakeTestObs.doubleArray[0] = 0;
-        fakeTestObs.doubleArray[1] = 1;
+        mStateHistory.clear();
+        mActionHistory.clear();
 
-        State fakeTestState = generateState(fakeTestObs, mInventory);
-        System.out.println(fakeTestState);
-        TreeNode toPrint = mSearchTree.getNodeForState(fakeTestState);
-        for(DiscreteAction action : mAvailableActions) {
-            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
-        }
+        mRandomWalk = RandomWalkPhase.OUT;
+        mR_u = null;
 
-        resetInventory();
+        mSearchTree.clear();
 
-        fakeTestObs= new Observation();
-        fakeTestObs.doubleArray = new double[2];
-        fakeTestObs.doubleArray[0] = 0;
-        fakeTestObs.doubleArray[1] = 2;
-
-        fakeTestState = generateState(fakeTestObs, mInventory);
-        System.out.println();
-        System.out.println(fakeTestState);
-        toPrint = mSearchTree.getNodeForState(fakeTestState);
-        for(DiscreteAction action : mAvailableActions) {
-            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
-        }
-
-
-        fakeTestObs= new Observation();
-        fakeTestObs.doubleArray = new double[2];
-        fakeTestObs.doubleArray[0] = 0;
-        fakeTestObs.doubleArray[1] = 3;
-
-        fakeTestState = generateState(fakeTestObs, mInventory);
-        System.out.println();
-        System.out.println(fakeTestState);
-        toPrint = mSearchTree.getNodeForState(fakeTestState);
-        for(DiscreteAction action : mAvailableActions) {
-            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
-        }
+        //        Observation fakeTestObs= new Observation();
+        //        fakeTestObs.doubleArray = new double[2];
+        //        fakeTestObs.doubleArray[0] = 0;
+        //        fakeTestObs.doubleArray[1] = 1;
+        //
+        //        State fakeTestState = generateState(fakeTestObs, mInventory);
+        //        System.out.println(fakeTestState);
+        //        TreeNode toPrint = mSearchTree.getNodeForState(fakeTestState);
+        //        for(DiscreteAction action : mAvailableActions) {
+        //            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
+        //        }
+        //
+        //        resetInventory();
+        //
+        //        fakeTestObs= new Observation();
+        //        fakeTestObs.doubleArray = new double[2];
+        //        fakeTestObs.doubleArray[0] = 0;
+        //        fakeTestObs.doubleArray[1] = 2;
+        //
+        //        fakeTestState = generateState(fakeTestObs, mInventory);
+        //        System.out.println();
+        //        System.out.println(fakeTestState);
+        //        toPrint = mSearchTree.getNodeForState(fakeTestState);
+        //        for(DiscreteAction action : mAvailableActions) {
+        //            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
+        //        }
+        //
+        //
+        //        fakeTestObs= new Observation();
+        //        fakeTestObs.doubleArray = new double[2];
+        //        fakeTestObs.doubleArray[0] = 0;
+        //        fakeTestObs.doubleArray[1] = 3;
+        //
+        //        fakeTestState = generateState(fakeTestObs, mInventory);
+        //        System.out.println();
+        //        System.out.println(fakeTestState);
+        //        toPrint = mSearchTree.getNodeForState(fakeTestState);
+        //        for(DiscreteAction action : mAvailableActions) {
+        //            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
+        //        }
 
     }
 
@@ -300,10 +314,7 @@ public class MOMCTSAgent implements AgentInterface {
         //Calculate the current inventory
         for(int i = 1; i < reward.doubleArray.length; ++i) {
             if(reward.doubleArray[i] != 0) {
-                mInventory[i-1]++;
-
-                if(mInventory[i-1] == 2)
-                    System.out.println("Picked up second ressource");
+                mInventory[i-1] = true;
             }
         }
 
@@ -316,7 +327,7 @@ public class MOMCTSAgent implements AgentInterface {
      * @param observation The current observation
      * @return The current state
      */
-    public State generateState(final Observation observation, final int[] inventory) {
+    public State generateState(final Observation observation, final boolean[] inventory) {
         double[] observationArray = observation.doubleArray;
 
         Location currentLocation = new Location(observationArray[0], observationArray[1]);
@@ -336,7 +347,7 @@ public class MOMCTSAgent implements AgentInterface {
      */
     private void resetInventory() {
         for(int i = 0; i < mInventory.length; ++i) {
-            mInventory[i] = 0;
+            mInventory[i] = false;
         }
     }
 

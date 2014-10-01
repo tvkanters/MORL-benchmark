@@ -3,8 +3,8 @@ package nl.uva.morlb.rg.agent.momcts;
 import java.util.HashMap;
 import java.util.List;
 
-import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
+import nl.uva.morlb.rg.environment.model.State;
 
 public class SearchTree {
 
@@ -135,5 +135,15 @@ public class SearchTree {
      */
     public TreeNode getNodeForState(final State state) {
         return mEntries.get(state);
+    }
+
+    /**
+     * Resets the search tree to an empty uninitialised one
+     */
+    public void clear() {
+        mRootNode = mCurrentNode = null;
+        mEntries.clear();
+        mActionForTreeBuilding = null;
+        mInitialised = false;
     }
 }
