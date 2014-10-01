@@ -2,7 +2,7 @@ package nl.uva.morlb.rg.experiment;
 
 import java.util.Random;
 
-import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
+import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
@@ -67,7 +67,7 @@ public class Experiment {
 
     /**
      * Runs an episode of resource gathering.
-     * 
+     *
      * @param stepLimit
      *            The amount steps before terminating
      */
@@ -110,7 +110,7 @@ public class Experiment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new AgentLoader(new ConvexHullQLearning()).run();
+                new AgentLoader(new MOMCTSAgent()).run();
             }
         }).start();
     }

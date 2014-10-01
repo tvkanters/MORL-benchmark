@@ -43,6 +43,16 @@ public class MOMCTSAgent implements AgentInterface {
     private boolean[] mInventory;
 
     /*
+     * RL_GLUE values
+     */
+
+    private static final int CONVERGENCE_THRESHOLD = 15;
+
+    private int mConvergenceCounter = CONVERGENCE_THRESHOLD;
+
+    private double mHypervolume = Double.NEGATIVE_INFINITY;
+
+    /*
      * Tree walk values
      */
 
@@ -150,7 +160,16 @@ public class MOMCTSAgent implements AgentInterface {
             //TODO perform maximization over action using the paretofront projection
 
             List<DiscreteAction> availableActions = mSearchTree.getPerformedActionsForCurrentNode();
-            resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+            //            resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+
+            double bestSum = Double.NEGATIVE_INFINITY;
+            for(DiscreteAction action : availableActions) {
+                final double currentSum = mSearchTree.getCurrentNode().getRewardForAction(action).getSum();
+                if(bestSum < currentSum) {
+                    bestSum = currentSum;
+                    resultingAction = action;
+                }
+            }
 
             mSearchTree.performActionOnCurrentNode(resultingAction);
         } else {
@@ -160,8 +179,11 @@ public class MOMCTSAgent implements AgentInterface {
             List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
             availableActions.removeAll(nonAvailableActions);
 
-            resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
-
+            if(availableActions.size() != 0) {
+                resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+            } else {
+                resultingAction = mAvailableActions.get(Util.RNG.nextInt(mAvailableActions.size()));
+            }
             //Tree building step 1, save the action
             mSearchTree.saveTreeBuildingAction(resultingAction);
 
@@ -242,6 +264,18 @@ public class MOMCTSAgent implements AgentInterface {
     public String agent_message(final String message) {
         switch (message) {
             case "isConverged":
+                final double hypervolume = Judge.hypervolume(mParetoFront);
+                if(hypervolume == mHypervolume) {
+                    mConvergenceCounter--;
+
+                    if(mConvergenceCounter == 0) {
+                        return "true";
+                    }
+                } else {
+                    mHypervolume = hypervolume;
+                    mConvergenceCounter = CONVERGENCE_THRESHOLD;
+                }
+
                 return "false";
             case "getSolutionSet":
                 return mParetoFront.toString();
