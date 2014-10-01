@@ -5,8 +5,8 @@ import java.security.InvalidParameterException;
 /**
  * A product scalarisation function that simply multiplies everything.
  */
-public class ProductScalarisation implements Scalarisation {
-
+public class ProductScalarisation extends Scalarisation {
+    
     /**
      * {@inheritDoc}
      *
@@ -25,4 +25,5 @@ public class ProductScalarisation implements Scalarisation {
 
         return scalar;
     }
+        
 }
