@@ -5,7 +5,7 @@ import java.security.InvalidParameterException;
 /**
  * A linear scalarisation function.
  */
-public class LinearScalarisation implements Scalarisation {
+public class LinearScalarisation extends Scalarisation {
 
     /**
      * {@inheritDoc}
@@ -25,4 +25,24 @@ public class LinearScalarisation implements Scalarisation {
 
         return scalar;
     }
+
+    /**
+     * {inheritDoc}
+     * 
+     * Makes sure that the weights sum to one
+     */
+    @Override
+    public double[] randomWeightVector(final int dimensions) {
+        double[] randomWeightVector = super.randomWeightVector(dimensions);
+        // make the weights sum to one
+        double sum = 0;
+        for (int i = 0; i < dimensions; i++) {
+            sum += randomWeightVector[i];
+        }
+        for (int j = 0; j < dimensions; j++) {
+            randomWeightVector[j] /= sum;
+        }
+        return null;
+    }
+
 }

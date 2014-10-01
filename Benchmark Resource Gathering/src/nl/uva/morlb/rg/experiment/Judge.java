@@ -36,38 +36,18 @@ public class Judge {
         // total number of tests that will be performed
         final int totalNumTests = (int) Math.pow((double) weightValuesPerObjective,
                 (double) solutionSet.getNumObjectives());
-        // the seed for the random number generator (has to be the same for each test, so that comparison makes sense;
-        // better would be a uniform grid over the n-dimensional space with vectors whose values sum to 1, but that is a
-        // mathematical problem of its own)
-        final long seed = 666;
         // the weight vector
-        double[] weights = new double[solutionSet.getNumObjectives()];
-        Random rand = new Random(seed);
         double rewardSum = 0;
         double rewardSqSum = 0; // for the variance
         // perform the tests
-        for (int i = 0; i < totalNumTests; i++) {
-            // create a random vector with values between 0 and 1 (exclusive)
-            double nextRand = 0;
-            double sum = 0;
-            for (int j = 0; j < solutionSet.getNumObjectives(); j++) {
-                while (nextRand == 0 || nextRand == 1) {
-                    nextRand = rand.nextDouble();
-                }
-                weights[j] = nextRand;
-                sum += nextRand;
-                nextRand = 0;
-            }
-            // normalise so that the weights sum up to one
-            for (int k = 0; k < solutionSet.getNumObjectives(); k++) {
-                weights[k] /= sum;
-            }
+        for (int test = 0; test < totalNumTests; test++) {
+            double[] weights = scalarisation.randomWeightVector(solutionSet.getNumObjectives());
             // find the point in the solution set for which the scalarised value is maximal
             double maxScalarisedValue = Double.NEGATIVE_INFINITY;
             double scalarisedValue;
             Solution solution;
-            for (int l = 0; l < solutionSet.getNumSolutions(); l++) {
-                solution = solutionSet.getSolutions().get(l);
+            for (int i = 0; i < solutionSet.getNumSolutions(); i++) {
+                solution = solutionSet.getSolutions().get(i);
                 scalarisedValue = scalarisation.scalarise(solution.getValues(), weights);
                 maxScalarisedValue = Math.max(maxScalarisedValue, scalarisedValue);
             }
