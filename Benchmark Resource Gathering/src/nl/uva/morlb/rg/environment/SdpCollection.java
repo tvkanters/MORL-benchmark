@@ -13,7 +13,7 @@ public class SdpCollection {
 
     /**
      * Creates a small, discrete problem with 3 objectives.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getSimpleProblem() {
@@ -27,7 +27,7 @@ public class SdpCollection {
 
     /**
      * Creates a large, discrete problem with 4 objectives.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getLargeProblem() {
@@ -44,7 +44,7 @@ public class SdpCollection {
 
     /**
      * Creates a small, discrete problem with 3 objectives and 3 actions.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getTinyActionsProblem() {
@@ -56,10 +56,9 @@ public class SdpCollection {
                 Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
     }
 
-
     /**
      * Creates a medium, discrete problem with 3 objectives and 9 actions.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getFullActionsProblem() {
@@ -74,7 +73,7 @@ public class SdpCollection {
 
     /**
      * Creates a small, continuous problem with 3 objectives.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getSmallContinuousProblem() {
@@ -88,7 +87,7 @@ public class SdpCollection {
 
     /**
      * Creates a medium, discrete partially observable problem with 3 objectives.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getPartiallyObservableProblem() {
@@ -103,7 +102,7 @@ public class SdpCollection {
 
     /**
      * Creates a medium, discrete problem with 3 objectives and stochasticity in transitions and rewards.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getStochasticProblem() {
@@ -118,7 +117,7 @@ public class SdpCollection {
 
     /**
      * Creates a small, discrete problem with 3 objectives and an infinite horizon.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getInfiniteHorizonProblem() {
@@ -132,7 +131,7 @@ public class SdpCollection {
 
     /**
      * Creates a medium, discrete problem with 3 objectives and a limit of picking 2 resources up.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getLimitedMaxPickedUpProblem() {
