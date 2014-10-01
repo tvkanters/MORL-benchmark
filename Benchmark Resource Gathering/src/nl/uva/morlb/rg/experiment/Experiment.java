@@ -1,5 +1,6 @@
 package nl.uva.morlb.rg.experiment;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
@@ -49,8 +50,10 @@ public class Experiment {
                     final double unif = Judge.schottSpacingMetric(solutionSet);
                     final double spread = Judge.maximumSpread(solutionSet);
                     final double hypervolume = Judge.hypervolume(solutionSet);
+                    final double[] returnValues = RLGlue.RL_return().doubleArray;
+
                     System.out.println(avgRew[0] + " " + avgRew[1] + " " + oNVG + " " + unif + " " + spread + " "
-                            + hypervolume);
+                            + hypervolume + " " + Arrays.toString(returnValues));
                 }
 
                 if (Boolean.parseBoolean(RLGlue.RL_agent_message("isConverged"))) {
