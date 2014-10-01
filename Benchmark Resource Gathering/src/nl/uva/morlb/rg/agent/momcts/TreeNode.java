@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import nl.uva.morlb.rg.agent.model.BenchmarkReward;
-import nl.uva.morlb.rg.agent.model.State;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
+import nl.uva.morlb.rg.environment.model.State;
 
 public class TreeNode {
 
