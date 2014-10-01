@@ -1,5 +1,6 @@
 package nl.uva.morlb.rg.agent.convexhull;
 
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 
 import nl.uva.morlb.rg.agent.model.QTableEntry;
@@ -21,7 +22,7 @@ import org.rlcommunity.rlglue.codec.types.Reward;
 public class ConvexHullQLearning implements AgentInterface {
 
     /** The discount factor of Q table updates */
-    private static final double DISCOUNT = 0.8d;
+    private static final double DISCOUNT = 1;
 
     /** The Q table to store values for state-action pairs */
     private final HashMap<QTableEntry, SolutionSet> mQTable = new HashMap<>();
@@ -54,10 +55,10 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Called when the environment just started and returned the initial observation.
-     *
+     * 
      * @param observation
      *            The observation as given by the environment
-     *
+     * 
      * @return The action to perform next
      */
     @Override
@@ -71,12 +72,12 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Called after performing an action.
-     *
+     * 
      * @param reward
      *            The reward given by performing the previous action
      * @param observation
      *            The observation as given by the environment
-     *
+     * 
      * @return The action to perform next
      */
     @Override
@@ -118,7 +119,7 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Called when a terminal state has been reached or a time limit is reached.
-     *
+     * 
      * @param reward
      *            The reward given by performing the previous action
      */
@@ -193,22 +194,37 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Handles Glue messages.
-     *
+     * 
      * @param message
      *            The message to handle
      */
     @Override
-    public String agent_message(final String arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    public String agent_message(final String message) {
+        if (message.equals("getSolutionSet")) {
+            final SolutionSet union = new SolutionSet(mNumObjectives);
+
+            // Union the Q values of the state over the actions
+            final State initState = new State(new Location(0, 0), new boolean[2]);
+            for (int i = mMinAction; i <= mMaxAction; ++i) {
+                final QTableEntry entry = new QTableEntry(initState, DiscreteAction.values()[i]);
+                union.addSolutionSet(getQValue(entry));
+            }
+
+            union.pruneDominatedSolutions();
+
+            System.out.println(union);
+            return union.toString();
+        }
+
+        throw new InvalidParameterException("Unknown message: " + message);
     }
 
     /**
      * Retrieves the saved Q value or creates a default one
-     *
+     * 
      * @param key
      *            The state-action pair to search
-     *
+     * 
      * @return The saved Q value or a solution set with a 0-solution
      */
     private SolutionSet getQValue(final QTableEntry key) {
@@ -221,10 +237,10 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Generates a state based on the given observation.
-     *
+     * 
      * @param observation
      *            The observation given by the environment
-     *
+     * 
      * @return The state corresponding to the observation
      */
     public State generateState(final Observation observation) {

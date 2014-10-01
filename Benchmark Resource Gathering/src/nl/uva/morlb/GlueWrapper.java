@@ -1,6 +1,6 @@
 package nl.uva.morlb;
 
-import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
+import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.Parameters;
@@ -18,12 +18,12 @@ public class GlueWrapper {
         // Prepare the environment and agent
         final Parameters parameters = SdpCollection.getSimpleProblem();
         ResourceGatheringEnv environment = new ResourceGatheringEnv(parameters);
-        final AgentInterface agent = new MOMCTSAgent();
+        final AgentInterface agent = new ConvexHullQLearning();
         // final AgentInterface agent = new DumbAgent();
 
         agent.agent_init(environment.env_init());
 
-        for (int episodeCounter = 0; episodeCounter < 100000; ++episodeCounter) {
+        for (int episodeCounter = 0; episodeCounter < 250; ++episodeCounter) {
             environment = new ResourceGatheringEnv(parameters);
 
             // Start the episode until a terminal state is reached
@@ -33,15 +33,6 @@ public class GlueWrapper {
             while (!currentStep.isTerminal()) {
                 performedAction = agent.agent_step(currentStep.r, currentStep.o);
                 currentStep = environment.env_step(performedAction);
-            }
-
-            String answer = "";
-            if((answer = agent.agent_message("Hypervolume")) != null) {
-                double hypervolume = Double.parseDouble(answer);
-                if(hypervolume == 374.0) {
-                    System.out.println("Converged after " +episodeCounter + " turns.");
-                    break;
-                }
             }
 
             agent.agent_end(currentStep.r);
