@@ -22,7 +22,7 @@ public class ConvexHullQLearning implements AgentInterface {
     /** The discount factor of Q table updates */
     private static final double DISCOUNT = 1;
     /** The amount of times the solution set has to be the same before converging */
-    private static final int REPEAT_CONVERGE_LIMIT = 100;
+    private static final int REPEAT_CONVERGE_LIMIT = 15;
 
     /** The Q table to store values for state-action pairs */
     private final HashMap<QTableEntry, SolutionSet> mQTable = new HashMap<>();
@@ -187,7 +187,7 @@ public class ConvexHullQLearning implements AgentInterface {
         final SolutionSet union = new SolutionSet(mNumObjectives);
 
         // Union the Q values of the state over the actions
-        final State initState = new State(new Location(0, 0), new boolean[2]);
+        final State initState = new State(new Location(0, 0), new boolean[mLastEntry.state.getPickedUp().length]);
         for (int i = mMinAction; i <= mMaxAction; ++i) {
             final QTableEntry entry = new QTableEntry(initState, DiscreteAction.values()[i]);
             union.addSolutionSet(getQValue(entry));

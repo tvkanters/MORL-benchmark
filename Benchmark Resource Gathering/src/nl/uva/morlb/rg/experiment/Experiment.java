@@ -54,6 +54,7 @@ public class Experiment {
                 }
 
                 if (Boolean.parseBoolean(RLGlue.RL_agent_message("isConverged"))) {
+                    System.out.println("\n\nNumber of episodes: " + (episode + 1) + "\n\n");
                     break;
                 }
             }
