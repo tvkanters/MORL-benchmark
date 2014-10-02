@@ -167,4 +167,32 @@ public class BenchmarkReward {
         return result;
     }
 
+    /**
+     * Calculate the minimum reward entry
+     * @return The smallest reward entry
+     */
+    public double getMinimumRewardEntry() {
+        double minimum = Double.POSITIVE_INFINITY;
+        for(double rewardEntry : mReward) {
+            if(rewardEntry < minimum) {
+                minimum = rewardEntry;
+            }
+        }
+
+        return minimum;
+    }
+
+    /**
+     * Calculate the length of this reward vector
+     * @return The length of this vector
+     */
+    public double getLength() {
+        double result = 0;
+        for(double entry : mReward) {
+            result += Math.pow(entry, 2.0);
+        }
+
+        return Math.sqrt(result);
+    }
+
 }
