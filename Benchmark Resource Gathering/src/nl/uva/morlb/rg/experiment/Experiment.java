@@ -1,5 +1,6 @@
 package nl.uva.morlb.rg.experiment;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
@@ -10,7 +11,6 @@ import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
 
 import org.rlcommunity.rlglue.codec.RLGlue;
-import org.rlcommunity.rlglue.codec.types.Reward;
 import org.rlcommunity.rlglue.codec.util.AgentLoader;
 import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
 
@@ -19,8 +19,6 @@ import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
  */
 public class Experiment {
 
-    /** The amount of episodes ran */
-    private int mEpisodeCount = 0;
     /** The resource gathering problem */
     private static ResourceGatheringEnv sProblem;
     /** The seeded random number generator */
@@ -37,7 +35,7 @@ public class Experiment {
             RLGlue.RL_init();
 
             for (int episode = 0; episode < 10000; ++episode) {
-                runEpisode(100);
+                RLGlue.RL_episode((int) Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
 
                 final String solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
                 if (!solutionSetString.equals("")) {
@@ -49,12 +47,15 @@ public class Experiment {
                     final double unif = Judge.schottSpacingMetric(solutionSet);
                     final double spread = Judge.maximumSpread(solutionSet);
                     final double hypervolume = Judge.hypervolume(solutionSet);
+                    final double[] returnValues = RLGlue.RL_return().doubleArray;
+
                     System.out.println(avgRew[0] + " " + avgRew[1] + " " + oNVG + " " + unif + " " + spread + " "
-                            + hypervolume);
+                            + hypervolume + " " + Arrays.toString(returnValues));
                 }
 
                 if (Boolean.parseBoolean(RLGlue.RL_agent_message("isConverged"))) {
-                    System.out.println("\n\nNumber of episodes: " + (episode + 1) + "\n\n");
+                    System.out.println("\n\nNumber of episodes: " + (episode + 1));
+                    System.out.println("Solution set: " + solutionSetString + "\n\n");
                     break;
                 }
             }
@@ -64,24 +65,6 @@ public class Experiment {
         }
 
         System.exit(0);
-    }
-
-    /**
-     * Runs an episode of resource gathering.
-     *
-     * @param stepLimit
-     *            The amount steps before terminating
-     */
-    private void runEpisode(final int stepLimit) {
-        final int terminal = RLGlue.RL_episode(stepLimit);
-
-        final int totalSteps = RLGlue.RL_num_steps();
-        final Reward totalReward = RLGlue.RL_return();
-
-        // System.out.println("Episode " + mEpisodeCount);
-        // System.out.println("    Reward: " + Arrays.toString(totalReward.doubleArray));
-
-        ++mEpisodeCount;
     }
 
     public static void main(final String[] args) {
