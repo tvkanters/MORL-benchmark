@@ -5,6 +5,7 @@ import java.util.Random;
 
 import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
+import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
@@ -79,11 +80,11 @@ public class Experiment {
     }
 
     public static void main(final String[] args) {
-        // if (args.length > 0) {
-        // sProblem = new ResourceGatheringEnv(Parameters.fromString(args, sRng));
-        // } else {
-        sProblem = new ResourceGatheringEnv();
-        // }
+        if (args.length > 0) {
+            sProblem = new ResourceGatheringEnv(Parameters.fromString(args, sRng));
+        } else {
+            sProblem = new ResourceGatheringEnv();
+        }
 
         // Start the experiment
         new Thread(new Runnable() {

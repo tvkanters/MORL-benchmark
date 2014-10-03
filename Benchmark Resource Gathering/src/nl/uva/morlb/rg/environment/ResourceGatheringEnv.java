@@ -1,6 +1,7 @@
 package nl.uva.morlb.rg.environment;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -302,7 +303,9 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Determines if this state is terminal
-     * @param state The state to check
+     *
+     * @param state
+     *            The state to check
      * @return True if the state is terminal, false if not
      */
     public boolean isTerminal(final State state) {
@@ -316,4 +319,50 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         return mParameters;
     }
 
+    @Override
+    public String toString() {
+        final State state = getCurrentState();
+        final Location agent = state.getAgent();
+        final Location goal = mProblem.getGoal();
+
+        // Check which resources haven't been picked up yet
+        final List<Resource> resources = new ArrayList<>();
+        for (int i = 0; i < mParameters.resources.size(); ++i) {
+            if (!state.isPickedUp(i)) {
+                resources.add(mParameters.resources.get(i));
+            }
+        }
+
+        // Go through the grid to place resources on the map
+        String visual = "";
+        for (int y = (int) mParameters.maxY; y >= 0; --y) {
+            for (int x = 0; x <= mParameters.maxX; ++x) {
+                final Location location = new Location(x, y);
+                if (agent.equals(location)) {
+                    visual += "P";
+                } else {
+                    boolean resourcePlaced = false;
+                    for (int i = 0; i < resources.size(); ++i) {
+                        if (resources.get(i).getLocation().equals(location)) {
+                            visual += i;
+                            resourcePlaced = true;
+                        }
+                    }
+
+                    if (!resourcePlaced) {
+                        if (goal.equals(location)) {
+                            visual += "G";
+                        } else {
+                            visual += " ";
+                        }
+                    }
+                }
+
+                visual += " ";
+            }
+
+            visual += "\n";
+        }
+        return visual;
+    }
 }
