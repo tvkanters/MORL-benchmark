@@ -309,4 +309,11 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         return mProblem.isTerminal(state);
     }
 
+    /**
+     * @return The current parameters of the environment
+     */
+    public Parameters getParameters() {
+        return mParameters;
+    }
+
 }

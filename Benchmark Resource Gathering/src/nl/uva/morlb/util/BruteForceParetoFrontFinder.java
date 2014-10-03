@@ -1,4 +1,4 @@
-package nl.uva.morlb.rg;
+package nl.uva.morlb.util;
 
 import java.util.LinkedList;
 import java.util.List;
