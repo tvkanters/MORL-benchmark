@@ -2,6 +2,7 @@ package nl.uva.morlb.rg.agent.model;
 
 import java.util.Arrays;
 
+import nl.uva.morlb.rg.environment.model.RewardRange;
 import nl.uva.morlb.rg.experiment.model.Solution;
 
 /**
@@ -13,6 +14,13 @@ public class BenchmarkReward {
 
     public BenchmarkReward(final double[] reward) {
         mReward = reward;
+    }
+
+    public BenchmarkReward(final RewardRange[] rewardRanges) {
+        mReward = new double[rewardRanges.length];
+        for(int i = 0; i < rewardRanges.length; ++i) {
+            mReward[i] = rewardRanges[i].min;
+        }
     }
 
     /**

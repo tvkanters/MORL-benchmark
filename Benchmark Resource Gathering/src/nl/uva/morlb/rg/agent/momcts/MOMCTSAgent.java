@@ -45,11 +45,7 @@ public class MOMCTSAgent implements AgentInterface {
     /*
      * RL_GLUE values
      */
-
-    private static final int CONVERGENCE_THRESHOLD = 100;
-
-    private final int mConvergenceCounter = CONVERGENCE_THRESHOLD;
-
+    /** The current value of the hypervolume indicator **/
     private final double mHypervolume = Double.NEGATIVE_INFINITY;
 
     /*
@@ -228,8 +224,7 @@ public class MOMCTSAgent implements AgentInterface {
     private boolean progressiveWidening() {
         int v_s = mSearchTree.getCurrentNode().getVisitationCount();
 
-        return Math.pow(v_s, 0.5) >= mSearchTree.getCurrentNode().getAmountOfChildren()
-                ;//&& mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
+        return Math.pow(v_s, 0.5) >= mSearchTree.getCurrentNode().getAmountOfChildren(); //&& mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
     }
 
     /**
@@ -271,6 +266,7 @@ public class MOMCTSAgent implements AgentInterface {
     public void agent_end(final Reward reward) {
         mR_u = handleReward(reward);
 
+        //This code must be used in a infinite horizon setting
         //        if(mRandomWalk == RandomWalkPhase.STARTED ) {
         //            //Tree building step 2, save the resulting state
         //            //We do not get an observation for the end state so we create a fake end state to fit our data structure
@@ -318,18 +314,6 @@ public class MOMCTSAgent implements AgentInterface {
     public String agent_message(final String message) {
         switch (message) {
             case "isConverged":
-                //                final double hypervolume = Judge.hypervolume(mParetoFront);
-                //                if(hypervolume == mHypervolume) {
-                //                    mConvergenceCounter--;
-                //
-                //                    if(mConvergenceCounter == 0) {
-                //                        return "true";
-                //                    }
-                //                } else {
-                //                    mHypervolume = hypervolume;
-                //                    mConvergenceCounter = CONVERGENCE_THRESHOLD;
-                //                }
-
                 return "false";
             case "getSolutionSet":
                 return mParetoFront.toString();
@@ -349,48 +333,6 @@ public class MOMCTSAgent implements AgentInterface {
         mR_u = null;
 
         mSearchTree.clear();
-
-        //        Observation fakeTestObs= new Observation();
-        //        fakeTestObs.doubleArray = new double[2];
-        //        fakeTestObs.doubleArray[0] = 0;
-        //        fakeTestObs.doubleArray[1] = 1;
-        //
-        //        State fakeTestState = generateState(fakeTestObs, mInventory);
-        //        System.out.println(fakeTestState);
-        //        TreeNode toPrint = mSearchTree.getNodeForState(fakeTestState);
-        //        for(DiscreteAction action : mAvailableActions) {
-        //            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
-        //        }
-        //
-        //        resetInventory();
-        //
-        //        fakeTestObs= new Observation();
-        //        fakeTestObs.doubleArray = new double[2];
-        //        fakeTestObs.doubleArray[0] = 0;
-        //        fakeTestObs.doubleArray[1] = 2;
-        //
-        //        fakeTestState = generateState(fakeTestObs, mInventory);
-        //        System.out.println();
-        //        System.out.println(fakeTestState);
-        //        toPrint = mSearchTree.getNodeForState(fakeTestState);
-        //        for(DiscreteAction action : mAvailableActions) {
-        //            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
-        //        }
-        //
-        //
-        //        fakeTestObs= new Observation();
-        //        fakeTestObs.doubleArray = new double[2];
-        //        fakeTestObs.doubleArray[0] = 0;
-        //        fakeTestObs.doubleArray[1] = 3;
-        //
-        //        fakeTestState = generateState(fakeTestObs, mInventory);
-        //        System.out.println();
-        //        System.out.println(fakeTestState);
-        //        toPrint = mSearchTree.getNodeForState(fakeTestState);
-        //        for(DiscreteAction action : mAvailableActions) {
-        //            System.out.println(action.name() +" " +toPrint.getRewardForAction(action));
-        //        }
-
     }
 
     /**

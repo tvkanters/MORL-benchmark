@@ -300,4 +300,13 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         return mProblem.getCurrentState();
     }
 
+    /**
+     * Determines if this state is terminal
+     * @param state The state to check
+     * @return True if the state is terminal, false if not
+     */
+    public boolean isTerminal(final State state) {
+        return mProblem.isTerminal(state);
+    }
+
 }
