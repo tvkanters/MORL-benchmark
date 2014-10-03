@@ -43,6 +43,16 @@ public class MOMCTSAgent implements AgentInterface {
     private boolean[] mInventory;
 
     /*
+     * RL_GLUE values
+     */
+
+    private static final int CONVERGENCE_THRESHOLD = 100;
+
+    private final int mConvergenceCounter = CONVERGENCE_THRESHOLD;
+
+    private final double mHypervolume = Double.NEGATIVE_INFINITY;
+
+    /*
      * Tree walk values
      */
 
@@ -57,6 +67,9 @@ public class MOMCTSAgent implements AgentInterface {
 
     /** The pareto front **/
     private SolutionSet mParetoFront;
+
+    /** The current hypervolume indicator **/
+    private double mHypervolumeIndicator = Double.NEGATIVE_INFINITY;
 
     /** The reference point for the hypervolume indicator **/
     private double[] mReferencePoint;
@@ -147,21 +160,48 @@ public class MOMCTSAgent implements AgentInterface {
 
             resultingAction = randomWalk();
         } else if(!mSearchTree.isLeafNode() && !progressiveWidening()) {
-            //TODO perform maximization over action using the paretofront projection
 
             List<DiscreteAction> availableActions = mSearchTree.getPerformedActionsForCurrentNode();
             resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
 
+            if(availableActions.size() > 1) {
+
+                double bestLookingActionValue = Double.NEGATIVE_INFINITY;
+                for(DiscreteAction consideredAction : availableActions) {
+                    final BenchmarkReward actionReward = mSearchTree.getCurrentNode().getRewardForAction(consideredAction);
+
+                    if(mParetoFront.isDominated(new Solution(actionReward.getRewardVector()))) {
+                        final double actionValue = mHypervolumeIndicator - calculateParetoProjection(actionReward).sub(actionReward).getLength();
+
+                        if(actionValue > bestLookingActionValue) {
+                            bestLookingActionValue = actionValue;
+                            resultingAction = consideredAction;
+                        }
+                    } else {
+                        if(mHypervolume > bestLookingActionValue) {
+                            bestLookingActionValue = mHypervolume;
+                            resultingAction = consideredAction;
+                        }
+                    }
+                }
+
+            } else {
+                resultingAction = availableActions.get(0);
+            }
+
             mSearchTree.performActionOnCurrentNode(resultingAction);
         } else {
+            //Using RAVE at this position did not improve the performance of the algorithm but rather made it worse.
 
-            //TODO Use RAVE
             List<DiscreteAction> nonAvailableActions = mSearchTree.getPerformedActionsForCurrentNode();
             List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
             availableActions.removeAll(nonAvailableActions);
 
-            resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
-
+            if(availableActions.size() != 0) {
+                resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+            } else {
+                resultingAction = mAvailableActions.get(Util.RNG.nextInt(mAvailableActions.size()));
+            }
             //Tree building step 1, save the action
             mSearchTree.saveTreeBuildingAction(resultingAction);
 
@@ -189,22 +229,57 @@ public class MOMCTSAgent implements AgentInterface {
         int v_s = mSearchTree.getCurrentNode().getVisitationCount();
 
         return Math.pow(v_s, 0.5) >= mSearchTree.getCurrentNode().getAmountOfChildren()
-                && mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
+                ;//&& mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
+    }
+
+    /**
+     * Calculates the projection on the pareto front
+     * @param reward The reward to project
+     * @return The projected point
+     */
+    private BenchmarkReward calculateParetoProjection(final BenchmarkReward reward) {
+        double maxGradient = Double.NEGATIVE_INFINITY;
+
+        for(Solution solution : mParetoFront.getSolutions()) {
+            BenchmarkReward gradients = pointwiseDivision (solution, reward);
+            final double gradient = gradients.getMinimumRewardEntry();
+
+            if(maxGradient < gradient) {
+                maxGradient = gradient;
+            }
+        }
+
+        return reward.mult(maxGradient);
+    }
+
+    /**
+     * Calculates the pointwise division of a reward with a solutiont
+     * @param solution The solution set
+     * @param reward The reward
+     * @return A pointwise division from the reward with the solution
+     */
+    private BenchmarkReward pointwiseDivision(final Solution solution, final BenchmarkReward reward) {
+        double[] result = new double[reward.getDimension()];
+        for(int i = 0; i < result.length; i++) {
+            result[i] = solution.getValues()[i] / reward.getRewardForObjective(i);
+        }
+
+        return new BenchmarkReward(result);
     }
 
     @Override
     public void agent_end(final Reward reward) {
         mR_u = handleReward(reward);
 
-        if(mRandomWalk == RandomWalkPhase.STARTED ) {
-            //Tree building step 2, save the resulting state
-            //We do not get an observation for the end state so we create a fake end state to fit our data structure
-            Observation fakeEndstateObservation = new Observation();
-            fakeEndstateObservation.doubleArray = new double[2];
-            fakeEndstateObservation.doubleArray[0] = fakeEndstateObservation.doubleArray[1] = -1;
-
-            mSearchTree.completeTreeBuilding(generateState(fakeEndstateObservation, mInventory));
-        }
+        //        if(mRandomWalk == RandomWalkPhase.STARTED ) {
+        //            //Tree building step 2, save the resulting state
+        //            //We do not get an observation for the end state so we create a fake end state to fit our data structure
+        //            Observation fakeEndstateObservation = new Observation();
+        //            fakeEndstateObservation.doubleArray = new double[2];
+        //            fakeEndstateObservation.doubleArray[0] = fakeEndstateObservation.doubleArray[1] = -1;
+        //
+        //            mSearchTree.completeTreeBuilding(generateState(fakeEndstateObservation, mInventory));
+        //        }
 
         //Update r*head*_s,a
         for(int historyPosition = 0; historyPosition < mStateHistory.size(); ++historyPosition) {
@@ -228,10 +303,11 @@ public class MOMCTSAgent implements AgentInterface {
 
         if(!mParetoFront.isDominated(currentSolution) && mParetoFront.addSolution(currentSolution)) {
 
-            System.out.print( mParetoFront +" -> ");
+            System.out.println( mParetoFront +" -> ");
             mParetoFront.pruneDominatedSolutions();
-            System.out.print(mParetoFront +" Hypervolume: ");
-            System.out.println(Judge.hypervolume(mParetoFront));
+            System.out.println(mParetoFront);
+            mHypervolumeIndicator = Judge.hypervolume(mParetoFront);
+            System.out.println(" Hypervolume: " +mHypervolumeIndicator);
         }
 
         mRandomWalk = RandomWalkPhase.OUT;
@@ -242,6 +318,18 @@ public class MOMCTSAgent implements AgentInterface {
     public String agent_message(final String message) {
         switch (message) {
             case "isConverged":
+                //                final double hypervolume = Judge.hypervolume(mParetoFront);
+                //                if(hypervolume == mHypervolume) {
+                //                    mConvergenceCounter--;
+                //
+                //                    if(mConvergenceCounter == 0) {
+                //                        return "true";
+                //                    }
+                //                } else {
+                //                    mHypervolume = hypervolume;
+                //                    mConvergenceCounter = CONVERGENCE_THRESHOLD;
+                //                }
+
                 return "false";
             case "getSolutionSet":
                 return mParetoFront.toString();
@@ -332,14 +420,6 @@ public class MOMCTSAgent implements AgentInterface {
 
         Location currentLocation = new Location(observationArray[0], observationArray[1]);
         return new State(currentLocation, Arrays.copyOf(inventory, inventory.length));
-    }
-
-    /**
-     * The next action form our random policy
-     * @return The next action
-     */
-    public DiscreteAction getRandomAction() {
-        return DiscreteAction.values()[Util.RNG.nextInt(5)];
     }
 
     /**
