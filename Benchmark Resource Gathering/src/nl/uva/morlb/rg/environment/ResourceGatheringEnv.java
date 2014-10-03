@@ -343,8 +343,9 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
                 } else {
                     boolean resourcePlaced = false;
                     for (int i = 0; i < resources.size(); ++i) {
-                        if (resources.get(i).getLocation().equals(location)) {
-                            visual += i;
+                        final Resource resource = resources.get(i);
+                        if (resource.getLocation().equals(location)) {
+                            visual += resource.getType();
                             resourcePlaced = true;
                         }
                     }
@@ -353,7 +354,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
                         if (goal.equals(location)) {
                             visual += "G";
                         } else {
-                            visual += " ";
+                            visual += ".";
                         }
                     }
                 }
