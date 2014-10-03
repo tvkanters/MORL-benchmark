@@ -12,6 +12,11 @@ import nl.uva.morlb.util.Util;
  */
 public class Parameters {
 
+    /** The initial hash value; must be prime */
+    private static final int HASH_SEED = 7;
+    /** The hash offset for following numbers; must be prime */
+    private static final int HASH_OFFSET = 31;
+
     /** The value indicating a fully observable state */
     public static final double FULLY_OBSERVABLE = Double.POSITIVE_INFINITY;
     /** The value indicating only 3 actions */
@@ -66,7 +71,7 @@ public class Parameters {
 
     /**
      * Creates a new parameter set for a discrete problem.
-     *
+     * 
      * @param maxX
      *            The highest possible x value of a location
      * @param maxY
@@ -106,17 +111,17 @@ public class Parameters {
         // Define the action space size
         this.actionSpace = actionSpace;
         switch (actionSpace) {
-            case Parameters.ACTIONS_TINY:
-                actionMax = 2;
-                break;
-            case Parameters.ACTIONS_SMALL:
-                actionMax = 4;
-                break;
-            case Parameters.ACTIONS_FULL:
-                actionMax = 8;
-                break;
-            default:
-                throw new InvalidParameterException("Invalid action space");
+        case Parameters.ACTIONS_TINY:
+            actionMax = 2;
+            break;
+        case Parameters.ACTIONS_SMALL:
+            actionMax = 4;
+            break;
+        case Parameters.ACTIONS_FULL:
+            actionMax = 8;
+            break;
+        default:
+            throw new InvalidParameterException("Invalid action space");
         }
 
         // Define the discount factor
@@ -146,7 +151,7 @@ public class Parameters {
 
     /**
      * Shuffles the locations of the resources to random locations.
-     *
+     * 
      * @param rng
      *            The random number generator to determine the new positions with
      */
@@ -179,12 +184,12 @@ public class Parameters {
 
     /**
      * Converts a string representation of parameters to an object.
-     *
+     * 
      * @param str
      *            The string in the toString format
      * @param rng
      *            The random number generator to determine the new positions with
-     *
+     * 
      * @return The parameters
      */
     public static Parameters fromString(final String str, final Random rng) {
@@ -193,12 +198,12 @@ public class Parameters {
 
     /**
      * Converts a string representation of parameters to an object.
-     *
+     * 
      * @param values
      *            The string in the toString format split on spaces
      * @param rng
      *            The random number generator to determine the new positions with
-     *
+     * 
      * @return The parameters
      */
     public static Parameters fromString(final String[] values, final Random rng) {
@@ -227,4 +232,32 @@ public class Parameters {
                 Double.parseDouble(values[4]), Double.parseDouble(values[5]), continuousStatesActions,
                 Integer.parseInt(values[7]));
     }
+
+    /**
+     * Checks if this state has the same contents as the given one.
+     * 
+     * @param other
+     *            The state to compare
+     * 
+     * @return True iff the contents are the same
+     */
+    @Override
+    public boolean equals(final Object other) {
+        if (!(other instanceof Parameters)) {
+            return false;
+        }
+
+        return toString().equals(((Parameters) other).toString());
+    }
+
+    /**
+     * Hashes the state based on the contents.
+     * 
+     * @return The hash code for the state
+     */
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
 }

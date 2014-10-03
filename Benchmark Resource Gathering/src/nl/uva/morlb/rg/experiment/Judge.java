@@ -1,7 +1,5 @@
 package nl.uva.morlb.rg.experiment;
 
-import java.util.Random;
-
 import jmetal.qualityIndicator.Hypervolume;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.ProductScalarisation;
@@ -34,14 +32,13 @@ public class Judge {
         // the number of weight values we want to test per objective
         final int weightValuesPerObjective = 2;
         // total number of tests that will be performed
-        final int totalNumTests = (int) Math.pow((double) weightValuesPerObjective,
-                (double) solutionSet.getNumObjectives());
+        final int totalNumTests = (int) Math.pow(weightValuesPerObjective, solutionSet.getNumObjectives());
         // the weight vector
         double rewardSum = 0;
         double rewardSqSum = 0; // for the variance
         // perform the tests
         for (int test = 0; test < totalNumTests; test++) {
-            double[] weights = scalarisation.randomWeightVector(solutionSet.getNumObjectives());
+            final double[] weights = scalarisation.randomWeightVector(solutionSet.getNumObjectives());
             // find the point in the solution set for which the scalarised value is maximal
             double maxScalarisedValue = Double.NEGATIVE_INFINITY;
             double scalarisedValue;
@@ -56,10 +53,10 @@ public class Judge {
             rewardSqSum += Math.pow(maxScalarisedValue, 2);
         }
         // return the average reward that this solution set received across the performed tests
-        double averageReward = rewardSum / totalNumTests;
-        double variance = (rewardSqSum - Math.pow(rewardSum, 2) / totalNumTests) / (totalNumTests - 1);
-        double standardDev = Math.sqrt(variance);
-        double[] returnArray = { averageReward, standardDev };
+        final double averageReward = rewardSum / totalNumTests;
+        final double variance = (rewardSqSum - Math.pow(rewardSum, 2) / totalNumTests) / (totalNumTests - 1);
+        final double standardDev = Math.sqrt(variance);
+        final double[] returnArray = { averageReward, standardDev };
         return returnArray;
     }
 
@@ -142,6 +139,7 @@ public class Judge {
                 double maxEpsilonPerSingleDim = Double.NEGATIVE_INFINITY;
                 for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
                     final double distance = ref.getValues()[dim] / sol.getValues()[dim];
+                    // TODO: Look into division by 0 here
                     maxEpsilonPerSingleDim = Math.max(distance, maxEpsilonPerSingleDim);
                 }
                 singleEpsilon = Math.min(singleEpsilon, maxEpsilonPerSingleDim);

@@ -45,7 +45,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Creates a new resource gathering problem with a given parameter set.
-     *
+     * 
      * @param parameters
      *            The parameters affecting the problem
      */
@@ -60,7 +60,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Shuffles the locations of the resources to random locations.
-     *
+     * 
      * @param rng
      *            The random number generator to determine the new positions with
      */
@@ -125,10 +125,10 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Performs an action in the problem and determines the resulting reward and state
-     *
+     * 
      * @param action
      *            The action that the agent wants to perform
-     *
+     * 
      * @return The resulting reward, observation and whether or not the state is now terminal
      */
     @Override
@@ -173,7 +173,7 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Handles Glue messages.
-     *
+     * 
      * @param message
      *            The message to handle
      */
@@ -182,30 +182,30 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         System.err.println(message);
         final String[] arguments = message.split(" ");
         switch (arguments[0]) {
-            case "getPossibleTransitions":
-                // Parse the message
-                final State state = State.fromString(arguments[1]);
-                final DiscreteAction action = DiscreteAction.values()[Integer.parseInt(arguments[2])];
+        case "getPossibleTransitions":
+            // Parse the message
+            final State state = State.fromString(arguments[1]);
+            final DiscreteAction action = DiscreteAction.values()[Integer.parseInt(arguments[2])];
 
-                // Return the possible transactions
-                String resultTrans = "";
-                final Map<State, Double> possibleTransations = getPossibleTransitions(state, action);
-                for (final State possibleState : possibleTransations.keySet()) {
-                    resultTrans += possibleState + " " + possibleTransations.get(possibleState) + "\n";
-                }
+            // Return the possible transactions
+            String resultTrans = "";
+            final Map<State, Double> possibleTransations = getPossibleTransitions(state, action);
+            for (final State possibleState : possibleTransations.keySet()) {
+                resultTrans += possibleState + " " + possibleTransations.get(possibleState) + "\n";
+            }
 
-                return resultTrans;
+            return resultTrans;
 
-            case "getRewardRanges":
-                // Return the reward ranges for transitioning between two states
-                String resultRange = "";
-                final RewardRange[] rewards = getRewardRanges(State.fromString(arguments[1]),
-                        State.fromString(arguments[2]));
-                for (final RewardRange rewardRange : rewards) {
-                    resultRange += rewardRange + "\n";
-                }
+        case "getRewardRanges":
+            // Return the reward ranges for transitioning between two states
+            String resultRange = "";
+            final RewardRange[] rewards = getRewardRanges(State.fromString(arguments[1]),
+                    State.fromString(arguments[2]));
+            for (final RewardRange rewardRange : rewards) {
+                resultRange += rewardRange + "\n";
+            }
 
-                return resultRange;
+            return resultRange;
         }
 
         throw new InvalidParameterException("Unknown message: " + message);
@@ -213,10 +213,10 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
 
     /**
      * Converts a state to an observation to be given to an agent.
-     *
+     * 
      * @param state
      *            The state to convert to an observation
-     *
+     * 
      * @return The observation representation of the state
      */
     private Observation getObservation(final State state) {
@@ -266,12 +266,12 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
     /**
      * Determines all possible outcomes given a state and discrete action. The states contain the reward that was
      * achieved through the transition.
-     *
+     * 
      * @param state
      *            The current state
      * @param action
      *            The action performed by the agent
-     *
+     * 
      * @return All possible resulting states mapped to their probabilities
      */
     public Map<State, Double> getPossibleTransitions(final State state, final DiscreteAction action) {
@@ -281,12 +281,12 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
     /**
      * Determines the reward ranges that can be given for a state transition for every objective. Does NOT take discount
      * factors into account.
-     *
+     * 
      * @param initialState
      *            The state before transitioning
      * @param resultingState
      *            The state after transitioning
-     *
+     * 
      * @return The reward ranges for every objective
      */
     public RewardRange[] getRewardRanges(final State initialState, final State resultingState) {
@@ -298,6 +298,13 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
      */
     public State getCurrentState() {
         return mProblem.getCurrentState();
+    }
+
+    /**
+     * @return The current parameters of the environment
+     */
+    public Parameters getParameters() {
+        return mParameters;
     }
 
 }

@@ -5,7 +5,6 @@ import java.util.Random;
 
 import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
-import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
@@ -42,6 +41,7 @@ public class Experiment {
                     final SolutionSet solutionSet = new SolutionSet(solutionSetString);
                     final Scalarisation scalarisation = new LinearScalarisation();
 
+                    // Calculate non-reference metrics
                     final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);
                     final int oNVG = Judge.overallNondominatedVectorGeneration(solutionSet);
                     final double unif = Judge.schottSpacingMetric(solutionSet);
@@ -49,8 +49,19 @@ public class Experiment {
                     final double hypervolume = Judge.hypervolume(solutionSet);
                     final double[] returnValues = RLGlue.RL_return().doubleArray;
 
-                    System.out.println(avgRew[0] + " " + avgRew[1] + " " + oNVG + " " + unif + " " + spread + " "
-                            + hypervolume + " " + Arrays.toString(returnValues));
+                    System.out.print(avgRew[0] + " " + avgRew[1] + " " + oNVG + " " + unif + " " + spread + " "
+                            + hypervolume);
+
+                    // Check if we can use reference set metrics
+                    final SolutionSet optimalSolution = OptimalSolutions.getSolution(sProblem.getParameters());
+                    if (optimalSolution != null) {
+                        final double addEpsilon = Judge.additiveEpsilonIndicator(solutionSet, optimalSolution);
+                        final double multEpsilon = Judge.multiplicativeEpsilonIndicator(solutionSet, optimalSolution);
+
+                        System.out.print(" " + addEpsilon + " " + multEpsilon);
+                    }
+
+                    System.out.println(" " + Arrays.toString(returnValues));
                 }
 
                 if (Boolean.parseBoolean(RLGlue.RL_agent_message("isConverged"))) {
@@ -68,11 +79,11 @@ public class Experiment {
     }
 
     public static void main(final String[] args) {
-        if (args.length > 0) {
-            sProblem = new ResourceGatheringEnv(Parameters.fromString(args, sRng));
-        } else {
-            sProblem = new ResourceGatheringEnv();
-        }
+        // if (args.length > 0) {
+        // sProblem = new ResourceGatheringEnv(Parameters.fromString(args, sRng));
+        // } else {
+        sProblem = new ResourceGatheringEnv();
+        // }
 
         // Start the experiment
         new Thread(new Runnable() {
