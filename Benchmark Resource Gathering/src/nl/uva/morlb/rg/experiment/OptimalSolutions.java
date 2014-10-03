@@ -17,14 +17,15 @@ public class OptimalSolutions {
 
     static {
         sOptimalSolutions.put(SdpCollection.getSimpleProblem(), new SolutionSet("(-6,1,0),(-6,0,1),(-8,1,1)"));
+        sOptimalSolutions.put(SdpCollection.getFullActionsProblem(), new SolutionSet(""));
     }
 
     /**
      * Retrieves the optimal solution set given a set of parameters.
-     * 
+     *
      * @param parameters
      *            The problem parameters
-     * 
+     *
      * @return The optimal solution set or null if none exist for the parameters
      */
     public static SolutionSet getSolution(final Parameters parameters) {

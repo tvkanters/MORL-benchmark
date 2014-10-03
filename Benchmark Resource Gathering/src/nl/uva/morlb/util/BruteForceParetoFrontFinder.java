@@ -18,11 +18,11 @@ import nl.uva.morlb.rg.experiment.model.SolutionSet;
  */
 public class BruteForceParetoFrontFinder {
 
-    private final static int MAX_DEPTH = 10;
+    private final static int MAX_DEPTH = 20;
 
     public static void main(final String[] args) {
 
-        Parameters problem = SdpCollection.getSimpleProblem();
+        Parameters problem = SdpCollection.getFullActionsProblem();
         ResourceGatheringEnv environment = new ResourceGatheringEnv(problem);
         environment.env_init();
         environment.env_start();
@@ -35,6 +35,7 @@ public class BruteForceParetoFrontFinder {
         int numOfObjectives = problem.numResourceTypes +1;
         SolutionSet paretoFront = new SolutionSet(numOfObjectives);
         for(DiscreteAction action : availableActions) {
+            System.out.println(action.name());
             performAction(MAX_DEPTH, environment.getCurrentState(), new BenchmarkReward(new double[numOfObjectives]), action, availableActions, environment, paretoFront);
         }
 
@@ -58,6 +59,11 @@ public class BruteForceParetoFrontFinder {
         State nextState = environment.getPossibleTransitions(currentState, action).keySet().iterator().next();
         BenchmarkReward nextReward = new BenchmarkReward(environment.getRewardRanges(currentState, nextState));
         BenchmarkReward currentReward = rewardSoFar.add(nextReward);
+
+        //Its never good to stay in the same state
+        if(nextState == currentState) {
+            return;
+        }
 
         if(environment.isTerminal(nextState)) {
             Solution currentSolution = new Solution(currentReward.getRewardVector());
