@@ -3,12 +3,13 @@ package nl.uva.morlb.rg.experiment;
 import java.util.Arrays;
 import java.util.Random;
 
-import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
+import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
+import nl.uva.morlb.util.Log;
 
 import org.rlcommunity.rlglue.codec.RLGlue;
 import org.rlcommunity.rlglue.codec.util.AgentLoader;
@@ -29,16 +30,20 @@ public class Experiment {
      */
     public void runExperiment() {
 
-        for (int test = 0; test < 10; ++test) {
-            System.out.println("\n\n========== TEST " + test + " ==========\n\n");
+        for (int test = 1; test <= 10; ++test) {
+            Log.f("\n\n========== TEST " + test + " ==========\n\n");
 
             RLGlue.RL_init();
+
+            final SolutionSet optimalSolution = OptimalSolutions.getSolution(sProblem.getParameters());
 
             for (int episode = 0; episode < 10000; ++episode) {
                 RLGlue.RL_episode((int) Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
 
                 final String solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
                 if (!solutionSetString.equals("")) {
+                    String metrics = "";
+
                     final SolutionSet solutionSet = new SolutionSet(solutionSetString);
                     final Scalarisation scalarisation = new LinearScalarisation();
 
@@ -50,24 +55,28 @@ public class Experiment {
                     final double hypervolume = Judge.hypervolume(solutionSet);
                     final double[] returnValues = RLGlue.RL_return().doubleArray;
 
-                    System.out.print(avgRew[0] + " " + avgRew[1] + " " + oNVG + " " + unif + " " + spread + " "
-                            + hypervolume);
+                    metrics += avgRew[0] + " " + avgRew[1] + " " + oNVG + " " + unif + " " + spread + " " + hypervolume;
 
                     // Check if we can use reference set metrics
-                    final SolutionSet optimalSolution = OptimalSolutions.getSolution(sProblem.getParameters());
                     if (optimalSolution != null) {
                         final double addEpsilon = Judge.additiveEpsilonIndicator(solutionSet, optimalSolution);
                         final double multEpsilon = Judge.multiplicativeEpsilonIndicator(solutionSet, optimalSolution);
 
-                        System.out.print(" " + addEpsilon + " " + multEpsilon);
+                        metrics += " " + addEpsilon + " " + multEpsilon;
                     }
 
-                    System.out.println(" " + Arrays.toString(returnValues));
+                    Log.f(metrics + " " + Arrays.toString(returnValues));
                 }
 
+                // Print final results at the end of the test
                 if (Boolean.parseBoolean(RLGlue.RL_agent_message("isConverged"))) {
-                    System.out.println("\n\nNumber of episodes: " + (episode + 1));
-                    System.out.println("Solution set: " + solutionSetString + "\n\n");
+                    Log.f("\n\n");
+                    Log.f("Number of episodes: " + (episode + 1));
+                    Log.f("Solution set: " + solutionSetString);
+                    if (optimalSolution != null) {
+                        Log.f("Optimal set: " + optimalSolution);
+                    }
+                    Log.f("\n\n");
                     break;
                 }
             }
@@ -106,7 +115,7 @@ public class Experiment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new AgentLoader(new MOMCTSAgent()).run();
+                new AgentLoader(new ConvexHullQLearning()).run();
             }
         }).start();
     }

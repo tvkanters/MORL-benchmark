@@ -50,6 +50,7 @@ public class ResourceGathering {
         mGoal = new Location(mParameters.maxX, mParameters.maxY);
 
         mInitialState = new State(new Location(0, 0), mResources.size());
+        reset();
     }
 
     /**
