@@ -37,8 +37,8 @@ public class Experiment {
 
             final SolutionSet optimalSolution = OptimalSolutions.getSolution(sProblem.getParameters());
 
-            for (int episode = 0; episode < 10000; ++episode) {
-                RLGlue.RL_episode((int) Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
+            for (int episode = 0; episode < 1000000; ++episode) {
+                RLGlue.RL_episode((int) -Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
 
                 final String solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
                 if (!solutionSetString.equals("")) {

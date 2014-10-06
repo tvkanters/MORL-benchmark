@@ -135,11 +135,24 @@ public class Judge {
             for (int solIndex = 0; solIndex < solutionSet.getNumSolutions(); solIndex++) {
                 sol = solutionSet.getSolutions().get(solIndex);
                 // maxEpsilonPerSingleDim is the smallest epsilon for which the current solution sol weakly
-                // epsilon-dominates the currect reference point ref
+                // epsilon-dominates the current reference point ref
                 double maxEpsilonPerSingleDim = Double.NEGATIVE_INFINITY;
                 for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
-                    final double distance = ref.getValues()[dim] / sol.getValues()[dim];
-                    // TODO: Look into division by 0 here
+                    final double solValue = sol.getValues()[dim] - (dim == 0 ? HYPERVOLUME_REFERENCE_POINT_TIME : 0);
+                    final double refValue = ref.getValues()[dim] - (dim == 0 ? HYPERVOLUME_REFERENCE_POINT_TIME : 0);
+
+                    final double distance;
+                    if (refValue == 0) {
+                        distance = 0;
+                    } else if (solValue == 0) {
+                        if (refValue < 0) {
+                            distance = 0;
+                        } else {
+                            distance = Double.POSITIVE_INFINITY;
+                        }
+                    } else {
+                        distance = refValue / solValue;
+                    }
                     maxEpsilonPerSingleDim = Math.max(distance, maxEpsilonPerSingleDim);
                 }
                 singleEpsilon = Math.min(singleEpsilon, maxEpsilonPerSingleDim);
