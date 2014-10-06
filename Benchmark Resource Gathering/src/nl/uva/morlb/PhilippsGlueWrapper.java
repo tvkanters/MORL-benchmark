@@ -7,6 +7,7 @@ import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.Judge;
+import nl.uva.morlb.rg.experiment.OptimalSolutions;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
@@ -22,7 +23,7 @@ import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
  */
 public class PhilippsGlueWrapper {
 
-    private static final int EPISODE_COUNT = 1000000;
+    private static final int EPISODE_COUNT = 100000;
     private static final int STEP_COUNT = 100;
     private final static Random sRng = new Random(62434);
 
@@ -37,7 +38,9 @@ public class PhilippsGlueWrapper {
             System.out.println("\n\n========== TEST " + test + " ==========\n\n");
 
             agent.agent_init(environment.env_init());
-            for (int episodeCounter = 0; episodeCounter < EPISODE_COUNT; ++episodeCounter) {
+            SolutionSet result = new SolutionSet(4);
+            int episodeCounter = 0;
+            for (; Judge.additiveEpsilonIndicator(result, OptimalSolutions.getSolution(SdpCollection.getLargeProblem())) != 0; ++episodeCounter) { //episodeCounter < EPISODE_COUNT
                 environment = new ResourceGatheringEnv(parameters);
 
                 // Start the episode until a terminal state is reached
@@ -60,11 +63,13 @@ public class PhilippsGlueWrapper {
 
                 agent.agent_end(currentStep.r);
 
+                result = new SolutionSet(agent.agent_message("getSolutionSet"));
                 if (Boolean.parseBoolean(agent.agent_message("isConverged"))) {
                     System.out.println("\n\nNumber of episodes: " + (stepCounter) + "\n\n");
                     break;
                 }
             }
+            System.out.println("Converges after: " +episodeCounter +" Episeode");
 
             final String solutionSetString = agent.agent_message("getSolutionSet");
             if (!solutionSetString.equals("")) {

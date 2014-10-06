@@ -22,7 +22,7 @@ public class BruteForceParetoFrontFinder {
 
     public static void main(final String[] args) {
 
-        Parameters problem = SdpCollection.getFullActionsProblem();
+        Parameters problem = SdpCollection.getTinyActionsProblem();
         ResourceGatheringEnv environment = new ResourceGatheringEnv(problem);
         environment.env_init();
         environment.env_start();

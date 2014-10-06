@@ -6,10 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import nl.uva.morlb.rg.agent.model.BenchmarkReward;
+import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.State;
 import nl.uva.morlb.rg.experiment.Judge;
+import nl.uva.morlb.rg.experiment.OptimalSolutions;
 import nl.uva.morlb.rg.experiment.model.Solution;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
 import nl.uva.morlb.util.Util;
@@ -45,8 +47,6 @@ public class MOMCTSAgent implements AgentInterface {
     /*
      * RL_GLUE values
      */
-    /** The current value of the hypervolume indicator **/
-    private final double mHypervolume = Double.NEGATIVE_INFINITY;
 
     /*
      * Tree walk values
@@ -144,7 +144,6 @@ public class MOMCTSAgent implements AgentInterface {
     }
 
     private DiscreteAction treeWalk(final State currentState) {
-        DiscreteAction resultingAction = null;
 
         //Add Progressive Widening condition here (Sec. 2.2)
         if(mRandomWalk == RandomWalkPhase.IN || mRandomWalk == RandomWalkPhase.STARTED ) {
@@ -154,15 +153,15 @@ public class MOMCTSAgent implements AgentInterface {
                 mRandomWalk = RandomWalkPhase.IN;
             }
 
-            resultingAction = randomWalk();
+            return randomWalk();
         } else if(!mSearchTree.isLeafNode() && !progressiveWidening()) {
 
             List<DiscreteAction> availableActions = mSearchTree.getPerformedActionsForCurrentNode();
-            resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+            DiscreteAction choosenAction = null;
+            double bestLookingActionValue = Double.NEGATIVE_INFINITY;
 
             if(availableActions.size() > 1) {
 
-                double bestLookingActionValue = Double.NEGATIVE_INFINITY;
                 for(DiscreteAction consideredAction : availableActions) {
                     final BenchmarkReward actionReward = mSearchTree.getCurrentNode().getRewardForAction(consideredAction);
 
@@ -171,21 +170,23 @@ public class MOMCTSAgent implements AgentInterface {
 
                         if(actionValue > bestLookingActionValue) {
                             bestLookingActionValue = actionValue;
-                            resultingAction = consideredAction;
+                            choosenAction = consideredAction;
                         }
                     } else {
-                        if(mHypervolume > bestLookingActionValue) {
-                            bestLookingActionValue = mHypervolume;
-                            resultingAction = consideredAction;
+                        if(mHypervolumeIndicator > bestLookingActionValue) {
+                            bestLookingActionValue = mHypervolumeIndicator;
+                            choosenAction = consideredAction;
                         }
                     }
                 }
 
             } else {
-                resultingAction = availableActions.get(0);
+                choosenAction = availableActions.get(0);
             }
 
-            mSearchTree.performActionOnCurrentNode(resultingAction);
+            mSearchTree.performActionOnCurrentNode(choosenAction);
+
+            return choosenAction;
         } else {
             //Using RAVE at this position did not improve the performance of the algorithm but rather made it worse.
 
@@ -194,19 +195,17 @@ public class MOMCTSAgent implements AgentInterface {
             availableActions.removeAll(nonAvailableActions);
 
             if(availableActions.size() != 0) {
-                resultingAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+                final DiscreteAction choosenAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+                //Tree building step 1, save the action
+                mSearchTree.saveTreeBuildingAction(choosenAction);
+                mRandomWalk = RandomWalkPhase.STARTED;
+
+                return choosenAction;
             } else {
-                resultingAction = mAvailableActions.get(Util.RNG.nextInt(mAvailableActions.size()));
+                mRandomWalk = RandomWalkPhase.IN;
+                return mAvailableActions.get(Util.RNG.nextInt(mAvailableActions.size()));
             }
-            //Tree building step 1, save the action
-            mSearchTree.saveTreeBuildingAction(resultingAction);
-
-            mRandomWalk = RandomWalkPhase.STARTED;
         }
-
-
-
-        return resultingAction;
     }
 
     /**
@@ -224,7 +223,7 @@ public class MOMCTSAgent implements AgentInterface {
     private boolean progressiveWidening() {
         int v_s = mSearchTree.getCurrentNode().getVisitationCount();
 
-        return Math.pow(v_s, 0.5) >= mSearchTree.getCurrentNode().getAmountOfChildren(); //&& mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
+        return (int) Math.pow(v_s +1, 0.25) != (int) Math.pow(v_s, 0.25);//>= mSearchTree.getCurrentNode().getAmountOfChildren(); //&& mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
     }
 
     /**
@@ -304,6 +303,8 @@ public class MOMCTSAgent implements AgentInterface {
             System.out.println(mParetoFront);
             mHypervolumeIndicator = Judge.hypervolume(mParetoFront);
             System.out.println(" Hypervolume: " +mHypervolumeIndicator);
+
+            System.err.println("Epsilon: " +Judge.additiveEpsilonIndicator(mParetoFront, OptimalSolutions.getSolution(SdpCollection.getLargeProblem())));
         }
 
         mRandomWalk = RandomWalkPhase.OUT;
