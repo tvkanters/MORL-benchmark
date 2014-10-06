@@ -5,7 +5,6 @@ import java.util.Random;
 
 import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
-import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
@@ -93,7 +92,7 @@ public class Experiment {
         if (args.length > 0) {
             sProblem = new ResourceGatheringEnv(Parameters.fromString(args, sRng));
         } else {
-            sProblem = new ResourceGatheringEnv(SdpCollection.getLargeProblem());
+            sProblem = new ResourceGatheringEnv();
         }
 
         // Start the experiment
