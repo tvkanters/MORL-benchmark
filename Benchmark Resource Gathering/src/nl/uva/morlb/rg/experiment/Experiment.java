@@ -5,6 +5,7 @@ import java.util.Random;
 
 import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
+import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
@@ -37,8 +38,8 @@ public class Experiment {
 
             final SolutionSet optimalSolution = OptimalSolutions.getSolution(sProblem.getParameters());
 
-            for (int episode = 0; episode < 10000; ++episode) {
-                RLGlue.RL_episode((int) Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
+            for (int episode = 0; episode < 1000000; ++episode) {
+                RLGlue.RL_episode((int) -Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
 
                 final String solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
                 if (!solutionSetString.equals("")) {
@@ -92,7 +93,7 @@ public class Experiment {
         if (args.length > 0) {
             sProblem = new ResourceGatheringEnv(Parameters.fromString(args, sRng));
         } else {
-            sProblem = new ResourceGatheringEnv();
+            sProblem = new ResourceGatheringEnv(SdpCollection.getLargeProblem());
         }
 
         // Start the experiment
