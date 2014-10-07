@@ -6,12 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import nl.uva.morlb.rg.agent.model.BenchmarkReward;
-import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
 import nl.uva.morlb.rg.environment.model.Location;
 import nl.uva.morlb.rg.environment.model.State;
 import nl.uva.morlb.rg.experiment.Judge;
-import nl.uva.morlb.rg.experiment.OptimalSolutions;
 import nl.uva.morlb.rg.experiment.model.Solution;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
 import nl.uva.morlb.util.Util;
@@ -279,6 +277,7 @@ public class MOMCTSAgent implements AgentInterface {
         //Update r*head*_s,a
         for(int historyPosition = 0; historyPosition < mStateHistory.size(); ++historyPosition) {
             TreeNode toEvaluateNode = mSearchTree.getNodeForState(mStateHistory.get(historyPosition));
+
             DiscreteAction takenAction = mActionHistory.get(historyPosition);
 
             BenchmarkReward oldReward = toEvaluateNode.getRewardForAction(takenAction);
@@ -303,8 +302,6 @@ public class MOMCTSAgent implements AgentInterface {
             System.out.println(mParetoFront);
             mHypervolumeIndicator = Judge.hypervolume(mParetoFront);
             System.out.println(" Hypervolume: " +mHypervolumeIndicator);
-
-            System.err.println("Epsilon: " +Judge.additiveEpsilonIndicator(mParetoFront, OptimalSolutions.getSolution(SdpCollection.getLargeProblem())));
         }
 
         mRandomWalk = RandomWalkPhase.OUT;
