@@ -24,7 +24,7 @@ import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 public class PhilippsGlueWrapper {
 
     private static final int EPISODE_COUNT = 100000;
-    private static final int STEP_COUNT = 100;
+    private static final int STEP_COUNT = 1000;
     private final static Random sRng = new Random(62434);
 
     public static void main(final String[] args) {

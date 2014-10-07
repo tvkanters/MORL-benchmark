@@ -3,7 +3,7 @@ package nl.uva.morlb.rg.experiment;
 import java.util.Arrays;
 import java.util.Random;
 
-import nl.uva.morlb.rg.agent.convexhull.ConvexHullQLearning;
+import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
@@ -37,7 +37,7 @@ public class Experiment {
 
             final SolutionSet optimalSolution = OptimalSolutions.getSolution(sProblem.getParameters());
 
-            for (int episode = 0; episode < 1000000; ++episode) {
+            for (int episode = 0; episode < 1000; ++episode) {
                 RLGlue.RL_episode((int) -Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
 
                 final String solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
@@ -115,7 +115,7 @@ public class Experiment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new AgentLoader(new ConvexHullQLearning()).run();
+                new AgentLoader(new MOMCTSAgent()).run();
             }
         }).start();
     }
