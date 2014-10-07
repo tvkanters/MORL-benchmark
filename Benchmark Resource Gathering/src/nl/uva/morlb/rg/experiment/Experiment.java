@@ -29,6 +29,7 @@ public class Experiment {
      * Runs the full experiment.
      */
     public void runExperiment() {
+        final Scalarisation scalarisation = new LinearScalarisation();
 
         for (int test = 1; test <= 10; ++test) {
             Log.f("\n\n========== TEST " + test + " ==========\n\n");
@@ -47,7 +48,6 @@ public class Experiment {
                     String metrics = "";
 
                     final SolutionSet solutionSet = new SolutionSet(solutionSetString);
-                    final Scalarisation scalarisation = new LinearScalarisation();
 
                     // Calculate non-reference metrics
                     final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);
