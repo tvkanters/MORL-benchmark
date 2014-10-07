@@ -40,7 +40,7 @@ public class Experiment {
 
             String solutionSetString = "";
             int episode;
-            for (episode = 0; episode < 1000; ++episode) {
+            for (episode = 0; episode < 1000000; ++episode) {
                 RLGlue.RL_episode((int) -Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
 
                 solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
@@ -77,7 +77,7 @@ public class Experiment {
             }
 
             Log.f("\n\n");
-            Log.f("Number of episodes: " + (episode + 1));
+            Log.f("Number of episodes: " + episode);
             Log.f("Solution set: " + solutionSetString);
             if (optimalSolution != null) {
                 Log.f("Optimal set: " + optimalSolution);
