@@ -22,7 +22,7 @@ public class ConvexHullQLearning implements AgentInterface {
     /** The discount factor of Q table updates */
     private static final double DISCOUNT = 1;
     /** The amount of times the solution set has to be the same before converging */
-    private static final int REPEAT_CONVERGE_LIMIT = 15;
+    private static final int REPEAT_CONVERGE_LIMIT = 50;
 
     /** The Q table to store values for state-action pairs */
     private final HashMap<QTableEntry, SolutionSet> mQTable = new HashMap<>();
@@ -61,10 +61,10 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Called when the environment just started and returned the initial observation.
-     * 
+     *
      * @param observation
      *            The observation as given by the environment
-     * 
+     *
      * @return The action to perform next
      */
     @Override
@@ -78,12 +78,12 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Called after performing an action.
-     * 
+     *
      * @param reward
      *            The reward given by performing the previous action
      * @param observation
      *            The observation as given by the environment
-     * 
+     *
      * @return The action to perform next
      */
     @Override
@@ -125,7 +125,7 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Called when a terminal state has been reached or a time limit is reached.
-     * 
+     *
      * @param reward
      *            The reward given by performing the previous action
      */
@@ -151,28 +151,28 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Handles Glue messages.
-     * 
+     *
      * @param message
      *            The message to handle
      */
     @Override
     public String agent_message(final String message) {
         switch (message) {
-        case "getSolutionSet":
-            return getSolutionSet().toString();
+            case "getSolutionSet":
+                return getSolutionSet().toString();
 
-        case "isConverged":
-            final String solutionSetString = getSolutionSet().toString();
-            if (mPrevSolutionSet.equals(solutionSetString)) {
-                ++mRepeatCount;
-                if (mRepeatCount == REPEAT_CONVERGE_LIMIT) {
-                    return Boolean.TRUE.toString();
+            case "isConverged":
+                final String solutionSetString = getSolutionSet().toString();
+                if (mPrevSolutionSet.equals(solutionSetString)) {
+                    ++mRepeatCount;
+                    if (mRepeatCount == REPEAT_CONVERGE_LIMIT) {
+                        return Boolean.TRUE.toString();
+                    }
+                } else {
+                    mRepeatCount = 0;
+                    mPrevSolutionSet = solutionSetString;
                 }
-            } else {
-                mRepeatCount = 0;
-                mPrevSolutionSet = solutionSetString;
-            }
-            return Boolean.FALSE.toString();
+                return Boolean.FALSE.toString();
         }
 
         throw new InvalidParameterException("Unknown message: " + message);
@@ -180,7 +180,7 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Unions the solutions sets of the initial state-actions to return the full Pareto front.
-     * 
+     *
      * @return The solution set
      */
     private SolutionSet getSolutionSet() {
@@ -200,10 +200,10 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Retrieves the saved Q value or creates a default one
-     * 
+     *
      * @param key
      *            The state-action pair to search
-     * 
+     *
      * @return The saved Q value or a solution set with a 0-solution
      */
     private SolutionSet getQValue(final QTableEntry key) {
@@ -216,10 +216,10 @@ public class ConvexHullQLearning implements AgentInterface {
 
     /**
      * Generates a state based on the given observation.
-     * 
+     *
      * @param observation
      *            The observation given by the environment
-     * 
+     *
      * @return The state corresponding to the observation
      */
     public State generateState(final Observation observation) {
