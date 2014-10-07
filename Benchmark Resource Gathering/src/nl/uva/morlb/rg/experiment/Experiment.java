@@ -37,10 +37,12 @@ public class Experiment {
 
             final SolutionSet optimalSolution = OptimalSolutions.getSolution(sProblem.getParameters());
 
-            for (int episode = 0; episode < 1000; ++episode) {
+            String solutionSetString = "";
+            int episode;
+            for (episode = 0; episode < 1000; ++episode) {
                 RLGlue.RL_episode((int) -Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
 
-                final String solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
+                solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
                 if (!solutionSetString.equals("")) {
                     String metrics = "";
 
@@ -70,16 +72,17 @@ public class Experiment {
 
                 // Print final results at the end of the test
                 if (Boolean.parseBoolean(RLGlue.RL_agent_message("isConverged"))) {
-                    Log.f("\n\n");
-                    Log.f("Number of episodes: " + (episode + 1));
-                    Log.f("Solution set: " + solutionSetString);
-                    if (optimalSolution != null) {
-                        Log.f("Optimal set: " + optimalSolution);
-                    }
-                    Log.f("\n\n");
                     break;
                 }
             }
+
+            Log.f("\n\n");
+            Log.f("Number of episodes: " + (episode + 1));
+            Log.f("Solution set: " + solutionSetString);
+            if (optimalSolution != null) {
+                Log.f("Optimal set: " + optimalSolution);
+            }
+            Log.f("\n\n");
 
             RLGlue.RL_cleanup();
             sProblem.shuffleResources(sRng);
