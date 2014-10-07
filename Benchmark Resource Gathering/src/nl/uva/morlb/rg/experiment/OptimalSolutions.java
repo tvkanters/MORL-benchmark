@@ -40,8 +40,8 @@ public class OptimalSolutions {
         // The solutions for the large problems
         sOptimalSolutions.put(Parameters.fromString("9 9 1 1 0 Infinity false 2147483647 "
                 + "0 3 2 1 1 1 2 5 1 1 1 4 9 1 1 0 8 4 1 1 2 4 1 1 1", null), new SolutionSet(
-                "(-18,0,2,0),(-18,0,1,1),(-18,1,0,1),(-18,2,0,0),(-20,1,2,0),(-20,2,0,1),(-20,1,1,1),(-22,1,2,1),"
-                        + "(-32,2,2,1)"));
+                "(-18,0,2,0),(-30,2,2,0),(-20,1,1,1),(-18,1,1,0),(-20,1,2,0),(-18,2,0,0),(-22,2,1,0),(-20,2,0,1),"
+                        + "(-32,2,2,1),(-18,1,0,1),(-22,1,2,1),(-24,2,1,1),(-18,0,1,1)"));
         sOptimalSolutions.put(Parameters.fromString("9 9 1 1 0 Infinity false 2147483647 "
                 + "0 5 1 1 1 1 6 9 1 1 1 2 0 1 1 0 6 4 1 1 2 7 4 1 1", null), new SolutionSet(
                 "(-18,2,2,0),(-18,1,2,1),(-20,2,2,1)"));
