@@ -17,7 +17,7 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
 
-public class ConvexHullQLearning implements AgentInterface {
+public class ConvexHullValueIteration implements AgentInterface {
 
     /** The discount factor of Q table updates */
     private static final double DISCOUNT = 1;
