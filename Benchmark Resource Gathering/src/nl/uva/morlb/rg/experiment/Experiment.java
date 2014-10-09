@@ -48,8 +48,10 @@ public class Experiment {
 
                     final SolutionSet solutionSet = new SolutionSet(solutionSetString);
 
-                    // Scalarisation must be created here for random seet purposes
-                    final Scalarisation scalarisation = new LinearScalarisation();
+                    // Scalarisation must be created here for random seed purposes
+                    final Scalarisation scalarisation = new LinearScalarisation(
+                            sProblem.getParameters().numResourceTypes + 1);
+                    // final Scalarisation scalarisation = new MinScalarisation();
 
                     // Calculate non-reference metrics
                     final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);

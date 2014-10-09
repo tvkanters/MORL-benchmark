@@ -2,7 +2,6 @@ package nl.uva.morlb.rg.experiment;
 
 import jmetal.qualityIndicator.Hypervolume;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
-import nl.uva.morlb.rg.experiment.model.ProductScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.Solution;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
@@ -38,7 +37,7 @@ public class Judge {
         double rewardSqSum = 0; // for the variance
         // perform the tests
         for (int test = 0; test < totalNumTests; test++) {
-            final double[] weights = scalarisation.randomWeightVector(solutionSet.getNumObjectives());
+            final double[] weights = scalarisation.randomWeightVector();
             // find the point in the solution set for which the scalarised value is maximal
             double maxScalarisedValue = Double.NEGATIVE_INFINITY;
             double scalarisedValue;
@@ -326,8 +325,7 @@ public class Judge {
         final SolutionSet testSolutionSet02 = new SolutionSet("(1,1,6,1)");
 
         // create a scalarization function
-        final LinearScalarisation linearScalarisation = new LinearScalarisation();
-        final ProductScalarisation productScalarisation = new ProductScalarisation();
+        final LinearScalarisation linearScalarisation = new LinearScalarisation(2);
 
         // perform tests
         final double[] avgRew = averageReward(testSolutionSet01, linearScalarisation);

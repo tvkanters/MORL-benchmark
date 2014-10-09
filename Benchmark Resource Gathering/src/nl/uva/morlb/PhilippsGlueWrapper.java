@@ -18,8 +18,9 @@ import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 
 /**
  * Don tuch tha stuff ya !
+ * 
  * @author philipp
- *
+ * 
  */
 public class PhilippsGlueWrapper {
 
@@ -30,7 +31,7 @@ public class PhilippsGlueWrapper {
     public static void main(final String[] args) {
 
         // Prepare the environment and agent
-        final Parameters parameters = SdpCollection.getLargeProblem();//Parameters.fromString(args, sRng);
+        final Parameters parameters = SdpCollection.getLargeProblem();// Parameters.fromString(args, sRng);
         ResourceGatheringEnv environment = new ResourceGatheringEnv(parameters);
         final AgentInterface agent = new MOMCTSAgent();
 
@@ -40,15 +41,18 @@ public class PhilippsGlueWrapper {
             agent.agent_init(environment.env_init());
             SolutionSet result = new SolutionSet(4);
             int episodeCounter = 0;
-            for (; Judge.additiveEpsilonIndicator(result, OptimalSolutions.getSolution(SdpCollection.getLargeProblem())) != 0; ++episodeCounter) { //episodeCounter < EPISODE_COUNT
+            for (; Judge
+                    .additiveEpsilonIndicator(result, OptimalSolutions.getSolution(SdpCollection.getLargeProblem())) != 0; ++episodeCounter) { // episodeCounter
+                                                                                                                                               // <
+                                                                                                                                               // EPISODE_COUNT
                 environment = new ResourceGatheringEnv(parameters);
 
                 // Start the episode until a terminal state is reached
                 Action performedAction = agent.agent_start(environment.env_start());
                 Reward_observation_terminal currentStep = environment.env_step(performedAction);
 
-                if(episodeCounter % (EPISODE_COUNT/100) == 0) {
-                    System.out.println(episodeCounter / (EPISODE_COUNT/100));
+                if (episodeCounter % (EPISODE_COUNT / 100) == 0) {
+                    System.out.println(episodeCounter / (EPISODE_COUNT / 100));
                 }
 
                 int stepCounter = 0;
@@ -57,8 +61,8 @@ public class PhilippsGlueWrapper {
                     currentStep = environment.env_step(performedAction);
                 }
 
-                if(episodeCounter % (EPISODE_COUNT/100) == 0) {
-                    System.out.println("Step counter: " +stepCounter);
+                if (episodeCounter % (EPISODE_COUNT / 100) == 0) {
+                    System.out.println("Step counter: " + stepCounter);
                 }
 
                 agent.agent_end(currentStep.r);
@@ -69,12 +73,12 @@ public class PhilippsGlueWrapper {
                     break;
                 }
             }
-            System.out.println("Converges after: " +episodeCounter +" Episeode");
+            System.out.println("Converges after: " + episodeCounter + " Episeode");
 
             final String solutionSetString = agent.agent_message("getSolutionSet");
             if (!solutionSetString.equals("")) {
                 final SolutionSet solutionSet = new SolutionSet(solutionSetString);
-                final Scalarisation scalarisation = new LinearScalarisation();
+                final Scalarisation scalarisation = new LinearScalarisation(solutionSet.getNumObjectives());
 
                 final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);
                 final int oNVG = Judge.overallNondominatedVectorGeneration(solutionSet);
