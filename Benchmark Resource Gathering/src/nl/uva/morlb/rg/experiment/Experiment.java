@@ -6,7 +6,7 @@ import java.util.Random;
 import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.model.Parameters;
-import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
+import nl.uva.morlb.rg.experiment.model.MinScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
 import nl.uva.morlb.util.Log;
@@ -30,7 +30,7 @@ public class Experiment {
      */
     public void runExperiment() {
 
-        for (int test = 1; test <= 10; ++test) {
+        for (int test = 1; test <= 1; ++test) {
             Log.f("\n\n========== TEST " + test + " ==========\n\n");
 
             RLGlue.RL_init();
@@ -39,7 +39,7 @@ public class Experiment {
 
             String solutionSetString = "";
             int episode;
-            for (episode = 0; episode < 1000000; ++episode) {
+            for (episode = 0; episode < 200; ++episode) {
                 RLGlue.RL_episode((int) -Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
 
                 solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
@@ -49,9 +49,10 @@ public class Experiment {
                     final SolutionSet solutionSet = new SolutionSet(solutionSetString);
 
                     // Scalarisation must be created here for random seed purposes
-                    final Scalarisation scalarisation = new LinearScalarisation(
+                    // final Scalarisation scalarisation = new LinearScalarisation(
+                    // sProblem.getParameters().numResourceTypes + 1);
+                    final Scalarisation scalarisation = new MinScalarisation(
                             sProblem.getParameters().numResourceTypes + 1);
-                    // final Scalarisation scalarisation = new MinScalarisation();
 
                     // Calculate non-reference metrics
                     final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);
@@ -122,6 +123,7 @@ public class Experiment {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // new AgentLoader(new ConvexHullValueIteration()).run();
                 new AgentLoader(new MOMCTSAgent()).run();
             }
         }).start();

@@ -41,9 +41,7 @@ public class Judge {
             // find the point in the solution set for which the scalarised value is maximal
             double maxScalarisedValue = Double.NEGATIVE_INFINITY;
             double scalarisedValue;
-            Solution solution;
-            for (int i = 0; i < solutionSet.getNumSolutions(); i++) {
-                solution = solutionSet.getSolutions().get(i);
+            for (final Solution solution : solutionSet.getSolutions()) {
                 scalarisedValue = scalarisation.scalarise(solution.getValues(), weights);
                 maxScalarisedValue = Math.max(maxScalarisedValue, scalarisedValue);
             }

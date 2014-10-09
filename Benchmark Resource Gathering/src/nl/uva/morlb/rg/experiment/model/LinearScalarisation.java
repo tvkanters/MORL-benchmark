@@ -10,6 +10,12 @@ public class LinearScalarisation extends Scalarisation {
     /** The amount of values this function accepts */
     private final int mNumValues;
 
+    /**
+     * Creates a new scalarisation function for the given amount of values.
+     * 
+     * @param numValues
+     *            The amount of values that will be scalarised
+     */
     public LinearScalarisation(final int numValues) {
         mNumValues = numValues;
     }
