@@ -19,7 +19,7 @@ public abstract class Scalarisation {
 
     /**
      * Scalarises the multi-objective rewards into a single reward given the weights.
-     *
+     * 
      * @param values
      *            The rewards to scalarise
      * @param weights
@@ -45,13 +45,22 @@ public abstract class Scalarisation {
      *            The dimensions of the weight vector
      * @return a randomly drawn weight vector
      */
-    public double[] randomWeightVector(final int dimensions) {
-        double[] randomWeightVector = new double[dimensions];
+    protected double[] randomWeightVector(final int dimensions) {
+        final double[] randomWeightVector = new double[dimensions];
         for (int i = 0; i < dimensions; i++) {
             randomWeightVector[i] = mRand.nextDouble();
         }
         return randomWeightVector;
     }
+
+    /**
+     * Returns a vector of randomly drawn weights that can be input into the scalarise method
+     * 
+     * @param dimensions
+     *            The dimensions of the weight vector
+     * @return a randomly drawn weight vector
+     */
+    public abstract double[] randomWeightVector();
 
     /**
      * Returns the minimum value a weight can take in the scalarisation function

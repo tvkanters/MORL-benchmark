@@ -7,9 +7,22 @@ import java.security.InvalidParameterException;
  */
 public class LinearScalarisation extends Scalarisation {
 
+    /** The amount of values this function accepts */
+    private final int mNumValues;
+
+    /**
+     * Creates a new scalarisation function for the given amount of values.
+     * 
+     * @param numValues
+     *            The amount of values that will be scalarised
+     */
+    public LinearScalarisation(final int numValues) {
+        mNumValues = numValues;
+    }
+
     /**
      * {@inheritDoc}
-     *
+     * 
      * Calculates the dot product of the values and weights.
      */
     @Override
@@ -32,14 +45,14 @@ public class LinearScalarisation extends Scalarisation {
      * Makes sure that the weights sum to one
      */
     @Override
-    public double[] randomWeightVector(final int dimensions) {
-        double[] randomWeightVector = super.randomWeightVector(dimensions);
+    public double[] randomWeightVector() {
+        final double[] randomWeightVector = super.randomWeightVector(mNumValues);
         // make the weights sum to one
         double sum = 0;
-        for (int i = 0; i < dimensions; i++) {
+        for (int i = 0; i < mNumValues; i++) {
             sum += randomWeightVector[i];
         }
-        for (int j = 0; j < dimensions; j++) {
+        for (int j = 0; j < mNumValues; j++) {
             randomWeightVector[j] /= sum;
         }
         return randomWeightVector;

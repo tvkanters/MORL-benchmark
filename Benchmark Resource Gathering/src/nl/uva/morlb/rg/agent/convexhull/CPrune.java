@@ -16,10 +16,10 @@ public class CPrune {
 
     /**
      * Prunes a solution set to the convex coverage set.
-     *
+     * 
      * @param solutionSet
      *            The solution set to prune
-     *
+     * 
      * @return The pruned solution set
      */
     public static SolutionSet prune(final SolutionSet solutionSet) {
@@ -44,7 +44,7 @@ public class CPrune {
         solutions.removeAll(convexCoverageSet.getSolutions());
 
         // Find the weights for each solution and save ones composing the convex hull
-        final Scalarisation scalarisation = new LinearScalarisation();
+        final Scalarisation scalarisation = new LinearScalarisation(solutionSet.getNumObjectives());
         while (!solutions.isEmpty()) {
             Solution target = solutions.peekFirst();
             final double[] weights = findWeights(target, convexCoverageSet);
@@ -70,12 +70,12 @@ public class CPrune {
 
     /**
      * Find the weights for a target in a solution set
-     *
+     * 
      * @param target
      *            The target solution to base the weights on
      * @param solutionSet
      *            The solution set to find the weights for
-     *
+     * 
      * @return The weights
      */
     public static double[] findWeights(final Solution target, final SolutionSet solutionSet) {

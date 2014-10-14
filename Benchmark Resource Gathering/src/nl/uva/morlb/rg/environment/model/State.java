@@ -1,6 +1,9 @@
 package nl.uva.morlb.rg.environment.model;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A state within the resource gathering problem. Cannot be modified after instantiation to prevent illegal state
@@ -20,7 +23,7 @@ public class State {
 
     /**
      * Creates a new state with the given variables.
-     *
+     * 
      * @param agent
      *            The agent's location
      * @param numResources
@@ -32,7 +35,7 @@ public class State {
 
     /**
      * Creates a new state with the given variables.
-     *
+     * 
      * @param agent
      *            The agent's location
      * @param pickedUp
@@ -52,10 +55,10 @@ public class State {
 
     /**
      * Checks if the resource at a given index has been picked up.
-     *
+     * 
      * @param index
      *            The resource index
-     *
+     * 
      * @return True iff the resource has been picked up
      */
     public boolean isPickedUp(final int index) {
@@ -72,22 +75,22 @@ public class State {
     /**
      * @return The amount of resources that are picked up
      */
-    public int getNumPickedUp() {
-        int numPickedUp = 0;
-        for (final boolean pickedUp : mPickedUp) {
-            if (pickedUp) {
-                ++numPickedUp;
+    public int getNumPickedUp(final List<Resource> resources) {
+        final Set<Location> pickedUpResources = new HashSet<>();
+        for (int i = 0; i < mPickedUp.length; ++i) {
+            if (mPickedUp[i]) {
+                pickedUpResources.add(resources.get(i).getLocation());
             }
         }
-        return numPickedUp;
+        return pickedUpResources.size();
     }
 
     /**
      * Checks if this state has the same contents as the given one.
-     *
+     * 
      * @param other
      *            The state to compare
-     *
+     * 
      * @return True iff the contents are the same
      */
     @Override
@@ -102,7 +105,7 @@ public class State {
 
     /**
      * Hashes the state based on the contents.
-     *
+     * 
      * @return The hash code for the state
      */
     @Override
@@ -129,10 +132,10 @@ public class State {
 
     /**
      * Creates a state from a string representation of a state.
-     *
+     * 
      * @param str
      *            The string representation of a state
-     *
+     * 
      * @return The state
      */
     public static State fromString(final String str) {

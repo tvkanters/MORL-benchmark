@@ -70,14 +70,19 @@ public class OptimalSolutions {
         sOptimalSolutions.put(Parameters.fromString("9 9 1 1 0 Infinity false 2147483647 "
                 + "0 9 5 1 1 1 1 0 1 1 1 3 0 1 1 0 5 2 1 1 2 5 7 1 1", null), new SolutionSet(
                 "(-18,2,2,0),(-18,1,2,1),(-22,2,2,1)"));
+
+        // The small convex hull indicating problem
+        sOptimalSolutions.put(Parameters.fromString("2 1 2 1 0 Infinity false 1 "
+                + "0 0 1 1 1 1 1 1 1 1 0 2 0 0.4 0.4 1 2 0 0.4 0.4", null), new SolutionSet(
+                "(-2,0,1),(-3,1,0),(-3,0.4,0.4)"));
     }
 
     /**
      * Retrieves the optimal solution set given a set of parameters.
-     *
+     * 
      * @param parameters
      *            The problem parameters
-     *
+     * 
      * @return The optimal solution set or null if none exist for the parameters
      */
     public static SolutionSet getSolution(final Parameters parameters) {
