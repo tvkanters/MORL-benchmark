@@ -31,7 +31,7 @@ public class Experiment {
      */
     public void runExperiment() {
 
-        for (int test = 1; test <= 1; ++test) {
+        for (int test = 1; test <= 10; ++test) {
             Log.f("\n\n========== TEST " + test + " ==========\n\n");
 
             RLGlue.RL_init();

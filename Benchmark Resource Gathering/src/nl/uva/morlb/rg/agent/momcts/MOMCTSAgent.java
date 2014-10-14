@@ -54,7 +54,7 @@ public class MOMCTSAgent implements AgentInterface {
     private final List<DiscreteAction> mActionHistory = new LinkedList<DiscreteAction>();
 
     /** The state history of the current tree walk **/
-    private final List<State> mStateHistory = new LinkedList<State>();
+    private final List<TreeNode> mStateHistory = new LinkedList<TreeNode>();
 
     /** The accumulated reward over the whole episode **/
     private BenchmarkReward mR_u;
@@ -119,9 +119,9 @@ public class MOMCTSAgent implements AgentInterface {
         //start a new r_u
         mR_u = new BenchmarkReward(new double[mTaskSpec.getNumOfObjectives()]);
 
+        mStateHistory.add(mSearchTree.getCurrentNode());
         DiscreteAction actionToTake = treeWalk(currentState);
         mActionHistory.add(actionToTake);
-        mStateHistory.add(currentState);
 
         return actionToTake.convertToRLGlueAction();
     }
@@ -129,13 +129,15 @@ public class MOMCTSAgent implements AgentInterface {
     @Override
     public Action agent_step(final Reward reward, final Observation observation) {
         mR_u = handleReward(reward);
+
         State currentState = generateState(observation, mInventory);
+        TreeNode currentNode = mSearchTree.getCurrentNode();
 
         DiscreteAction actionToTake = treeWalk(currentState);
 
         if(mRandomWalk != RandomWalkPhase.IN) {
             mActionHistory.add(actionToTake);
-            mStateHistory.add(currentState);
+            mStateHistory.add(currentNode);
         }
 
         return actionToTake.convertToRLGlueAction();
@@ -152,7 +154,7 @@ public class MOMCTSAgent implements AgentInterface {
             }
 
             return randomWalk();
-        } else if(!mSearchTree.isLeafNode() && !progressiveWidening()) {
+        } else if(mSearchTree.getPerformedActionsForCurrentNode().size() == mAvailableActions.size() || !mSearchTree.isLeafNode() && !progressiveWidening()) {
 
             List<DiscreteAction> availableActions = mSearchTree.getPerformedActionsForCurrentNode();
             DiscreteAction choosenAction = null;
@@ -191,18 +193,14 @@ public class MOMCTSAgent implements AgentInterface {
             List<DiscreteAction> nonAvailableActions = mSearchTree.getPerformedActionsForCurrentNode();
             List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
             availableActions.removeAll(nonAvailableActions);
+            System.out.println(mAvailableActions.size() + " - " +nonAvailableActions.size() +" = " +availableActions.size());
 
-            if(availableActions.size() != 0) {
-                final DiscreteAction choosenAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
-                //Tree building step 1, save the action
-                mSearchTree.saveTreeBuildingAction(choosenAction);
-                mRandomWalk = RandomWalkPhase.STARTED;
+            final DiscreteAction choosenAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
+            //Tree building step 1, save the action
+            mSearchTree.saveTreeBuildingAction(choosenAction);
+            mRandomWalk = RandomWalkPhase.STARTED;
 
-                return choosenAction;
-            } else {
-                mRandomWalk = RandomWalkPhase.IN;
-                return mAvailableActions.get(Util.RNG.nextInt(mAvailableActions.size()));
-            }
+            return choosenAction;
         }
     }
 
@@ -221,7 +219,7 @@ public class MOMCTSAgent implements AgentInterface {
     private boolean progressiveWidening() {
         int v_s = mSearchTree.getCurrentNode().getVisitationCount();
 
-        return (int) Math.pow(v_s +1, 0.25) != (int) Math.pow(v_s, 0.25);//>= mSearchTree.getCurrentNode().getAmountOfChildren(); //&& mSearchTree.getCurrentNode().getAmountOfChildren() < mAvailableActions.size();
+        return (int) Math.pow(v_s +1, 0.5) != (int) Math.pow(v_s, 0.5);
     }
 
     /**
@@ -276,7 +274,7 @@ public class MOMCTSAgent implements AgentInterface {
 
         //Update r*head*_s,a
         for(int historyPosition = 0; historyPosition < mStateHistory.size(); ++historyPosition) {
-            TreeNode toEvaluateNode = mSearchTree.getNodeForState(mStateHistory.get(historyPosition));
+            TreeNode toEvaluateNode = mStateHistory.get(historyPosition);
 
             DiscreteAction takenAction = mActionHistory.get(historyPosition);
 
@@ -287,6 +285,7 @@ public class MOMCTSAgent implements AgentInterface {
             toEvaluateNode.setRewardForAction(takenAction, newReward);
 
             toEvaluateNode.increaseActionCounterFor(takenAction);
+            toEvaluateNode.increaseVisitationCount();
         }
 
         mStateHistory.clear();
@@ -303,6 +302,7 @@ public class MOMCTSAgent implements AgentInterface {
             mHypervolumeIndicator = Judge.hypervolume(mParetoFront);
             System.out.println(" Hypervolume: " +mHypervolumeIndicator);
         }
+        System.out.println(mSearchTree);
 
         mRandomWalk = RandomWalkPhase.OUT;
         mR_u = null;
@@ -330,6 +330,7 @@ public class MOMCTSAgent implements AgentInterface {
         mRandomWalk = RandomWalkPhase.OUT;
         mR_u = null;
 
+        mAvailableActions.clear();
         mSearchTree.clear();
     }
 

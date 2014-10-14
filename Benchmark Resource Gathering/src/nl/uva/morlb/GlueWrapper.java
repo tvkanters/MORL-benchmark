@@ -22,7 +22,7 @@ public class GlueWrapper {
 
         agent.agent_init(environment.env_init());
 
-        for (int episodeCounter = 0; episodeCounter < 250000; ++episodeCounter) {
+        for (int episodeCounter = 0; episodeCounter < 100000; ++episodeCounter) {
             environment = new ResourceGatheringEnv(parameters);
 
             // Start the episode until a terminal state is reached
@@ -34,7 +34,7 @@ public class GlueWrapper {
             }
 
             int stepCounter = 0;
-            while (!currentStep.isTerminal() && stepCounter++ < 100) {
+            while (!currentStep.isTerminal() && stepCounter++ < 1000) {
                 performedAction = agent.agent_step(currentStep.r, currentStep.o);
                 currentStep = environment.env_step(performedAction);
             }

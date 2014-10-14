@@ -41,34 +41,6 @@ public class TreeNode {
     }
 
     /**
-     * Checks if this TreeNode has the same contents as the given one.
-     *
-     * @param other
-     *            The TreeNode to compare
-     *
-     * @return True iff the contents are the same
-     */
-    @Override
-    public boolean equals(final Object other) {
-        if (!(other instanceof TreeNode)) {
-            return false;
-        }
-
-        final TreeNode treeNode = (TreeNode) other;
-        return mState.equals(treeNode.mState);
-    }
-
-    /**
-     * Hashes the TreeNode based on the contents.
-     *
-     * @return The hash code for the TreeNode
-     */
-    @Override
-    public int hashCode() {
-        return mState.hashCode();
-    }
-
-    /**
      * Evaluates if this node is a leaf
      *
      * @return True if it is a leaf, false if not

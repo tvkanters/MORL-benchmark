@@ -1,6 +1,5 @@
 package nl.uva.morlb.rg.agent.momcts;
 
-import java.util.HashMap;
 import java.util.List;
 
 import nl.uva.morlb.rg.environment.model.DiscreteAction;
@@ -19,8 +18,8 @@ public class SearchTree {
     /** The action which got chosen in the tree building phase **/
     private DiscreteAction mActionForTreeBuilding;
 
-    /** A map for quick lookup if states where already visited **/
-    private final HashMap<State, TreeNode> mEntries = new HashMap<>();
+    /** The total amount of nodes in this search tree **/
+    private long mNodeCounter = 0;
 
     /**
      * Initialise the search tree with the root node
@@ -29,7 +28,7 @@ public class SearchTree {
      */
     public void initialise(final State initialState) {
         mRootNode = mCurrentNode = new TreeNode(initialState);
-        mEntries.put(initialState, mRootNode);
+        mNodeCounter = 0;
         mInitialised = true;
     }
 
@@ -69,18 +68,10 @@ public class SearchTree {
      * @param currentState The resulting state from the tree building step
      */
     public void completeTreeBuilding(final State currentState) {
-        TreeNode treeNode = mEntries.get(currentState);
+        TreeNode treeNode = new TreeNode(currentState);
 
-        if(treeNode != null) {
-            //we visited that state already
-            mCurrentNode.addChild(mActionForTreeBuilding, treeNode);
-        } else {
-            treeNode = new TreeNode(currentState);
-            mEntries.put(currentState, treeNode);
-
-            mCurrentNode.addChild(mActionForTreeBuilding, treeNode);
-        }
-
+        mCurrentNode.addChild(mActionForTreeBuilding, treeNode);
+        mNodeCounter++;
         performActionOnCurrentNode(mActionForTreeBuilding);
 
         mActionForTreeBuilding = null;
@@ -91,17 +82,7 @@ public class SearchTree {
      * @param action The action to perform on the current node
      */
     public void performActionOnCurrentNode(final DiscreteAction action) {
-        mCurrentNode.increaseVisitationCount();
         mCurrentNode = mCurrentNode.getNextNodeForAction(action);
-    }
-
-    public String info() {
-        String result = "Entries: " +mEntries.size();
-        for(TreeNode t : mEntries.values()) {
-            System.out.println(t);
-        }
-
-        return result;
     }
 
     /**
@@ -129,21 +110,16 @@ public class SearchTree {
     }
 
     /**
-     * Get the tree node for a given state
-     * @param state The given state
-     * @return The tree node for a given state
-     */
-    public TreeNode getNodeForState(final State state) {
-        return mEntries.get(state);
-    }
-
-    /**
      * Resets the search tree to an empty uninitialised one
      */
     public void clear() {
         mRootNode = mCurrentNode = null;
-        mEntries.clear();
         mActionForTreeBuilding = null;
         mInitialised = false;
+    }
+
+    @Override
+    public String toString() {
+        return mNodeCounter +"";
     }
 }
