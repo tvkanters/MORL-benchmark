@@ -172,10 +172,9 @@ public class MOMCTSAgent implements AgentInterface {
                 for(DiscreteAction consideredAction : availableActions) {
                     final BenchmarkReward actionReward = mSearchTree.getCurrentNode().getRewardForAction(consideredAction);
 
-                    if(mParetoFront.isDominated(new Solution(actionReward.getRewardVector()))) {
-                        System.err.println("Domination");
-                        final double actionValue = mHypervolumeIndicator - calculateParetoCubeProjection(actionReward).sub(actionReward).getLength();
-
+                    if(mParetoFront.isDominated(new Solution(actionReward.getRewardVector()))&& mParetoFront.getNumSolutions() > 1) {
+                        //                        final double actionValue = mHypervolumeIndicator - calculateParetoCubeProjection(actionReward).sub(actionReward).getLength();
+                        final double actionValue = mHypervolumeIndicator - calculateParetoProjection(actionReward).sub(actionReward).getLength();
                         if(actionValue > bestLookingActionValue) {
                             bestLookingActionValue = actionValue;
                             choosenAction = consideredAction;
@@ -235,11 +234,12 @@ public class MOMCTSAgent implements AgentInterface {
         Solution[] bigger = new Solution[x1.getDimension()];
 
         //1
-        double closestPoint = Double.NEGATIVE_INFINITY;
-        for(int dimension = 0; dimension < x1.getDimension(); ++dimension) {
+        for(int dimension = 0; dimension < x2.getDimension(); ++dimension) {
+            double closestPoint = Double.POSITIVE_INFINITY;
             for(Solution paretoSolution : mParetoFront.getSolutions()) {
                 final double dimValue = paretoSolution.getValues()[dimension];
-                if(dimValue - x1.getRewardForObjective(dimension) > closestPoint) {
+                final double distance = dimValue - x2.getRewardForObjective(dimension);
+                if(distance >= 0 && distance < closestPoint) {
                     closestPoint = dimValue;
                     bigger[dimension] = paretoSolution;
                 }
@@ -248,24 +248,36 @@ public class MOMCTSAgent implements AgentInterface {
 
         //2
         Algebra algebra = new Algebra();
-        DoubleMatrix2D matrix;
-        matrix = new DenseDoubleMatrix2D(4,4);
-        for (int row = 0; row < 4; row++) {
-            for (int column = 0; column < 4; column++) {
-                // We set and get a cell value:
-                matrix.set(row,column,row+column);
+        DoubleMatrix2D A;
+        int N = x1.getDimension();
+        A = new DenseDoubleMatrix2D(N,N);
+
+        BenchmarkReward temp = x1.sub(x2);
+        for (int row = 0; row < N; row++) {
+            A.set(row,0,temp.getRewardForObjective(row));
+        }
+
+        for (int column = 1; column < N; column++) {
+            temp = new BenchmarkReward(bigger[column].getValues()).sub(new BenchmarkReward(bigger[0].getValues()));
+
+            for(int row = 0; row < N; row++) {
+                A.set(row,column,temp.getRewardForObjective(row));
             }
         }
-        DoubleMatrix2D D;
-        D = new DenseDoubleMatrix2D(4,1);
-        D.set(0,0, 1.0);
-        D.set(1,0, -1.0);
-        D.set(2,0, 91.0);
-        D.set(3,0, -5.0);
-        DoubleMatrix2D X;
-        X = algebra.solve(matrix,D);
 
-        return null;
+        DoubleMatrix2D B = new DenseDoubleMatrix2D(N, 1);
+        temp = x1.sub(new BenchmarkReward(bigger[0].getValues()));
+        for (int row = 0; row < N; row++) {
+            B.set(row,0,temp.getRewardForObjective(row));
+        }
+
+        DoubleMatrix2D C = algebra.mult(A, B);
+        double[] c = new double[N];
+        for(int i = 0; i < N; ++i) {
+            c[i] = C.toArray()[i][0];
+        }
+
+        return x1.add(x2.sub(x1).mult(new BenchmarkReward(c)));
     }
 
     /**
