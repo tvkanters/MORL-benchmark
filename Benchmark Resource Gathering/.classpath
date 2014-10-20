@@ -5,5 +5,7 @@
 	<classpathentry kind="lib" path="libs/JavaRLGlueCodec.jar"/>
 	<classpathentry kind="lib" path="libs/jmetal4.5.jar" sourcepath="C:/Users/Luisa/git/MORL-benchmark/sources/jmetal4.5.src"/>
 	<classpathentry kind="lib" path="libs/lpsolve/lpsolve55j.jar"/>
+	<classpathentry kind="lib" path="libs/colt.jar"/>
+	<classpathentry kind="lib" path="libs/concurrent.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

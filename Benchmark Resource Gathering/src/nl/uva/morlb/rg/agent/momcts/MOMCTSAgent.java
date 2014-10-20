@@ -20,6 +20,10 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
 
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+
 /**
  * Multi-Objective Monte-Carlo Tree Search
  */
@@ -100,7 +104,10 @@ public class MOMCTSAgent implements AgentInterface {
 
         sInitialReward = new double[mTaskSpec.getNumOfObjectives()];
         for(int i = 0; i < sInitialReward.length; ++i) {
-            sInitialReward[i] = -100;
+            if(i==0)
+                sInitialReward[i] = -6;
+
+            sInitialReward[i] = 1;
         }
     }
 
@@ -166,7 +173,8 @@ public class MOMCTSAgent implements AgentInterface {
                     final BenchmarkReward actionReward = mSearchTree.getCurrentNode().getRewardForAction(consideredAction);
 
                     if(mParetoFront.isDominated(new Solution(actionReward.getRewardVector()))) {
-                        final double actionValue = mHypervolumeIndicator - calculateParetoProjection(actionReward).sub(actionReward).getLength();
+                        System.err.println("Domination");
+                        final double actionValue = mHypervolumeIndicator - calculateParetoCubeProjection(actionReward).sub(actionReward).getLength();
 
                         if(actionValue > bestLookingActionValue) {
                             bestLookingActionValue = actionValue;
@@ -222,12 +230,50 @@ public class MOMCTSAgent implements AgentInterface {
         return (int) Math.pow(v_s +1, 0.5) != (int) Math.pow(v_s, 0.5);
     }
 
+    private BenchmarkReward calculateParetoProjection(final BenchmarkReward x1) {
+        BenchmarkReward x2 = calculateParetoCubeProjection(x1);
+        Solution[] bigger = new Solution[x1.getDimension()];
+
+        //1
+        double closestPoint = Double.NEGATIVE_INFINITY;
+        for(int dimension = 0; dimension < x1.getDimension(); ++dimension) {
+            for(Solution paretoSolution : mParetoFront.getSolutions()) {
+                final double dimValue = paretoSolution.getValues()[dimension];
+                if(dimValue - x1.getRewardForObjective(dimension) > closestPoint) {
+                    closestPoint = dimValue;
+                    bigger[dimension] = paretoSolution;
+                }
+            }
+        }
+
+        //2
+        Algebra algebra = new Algebra();
+        DoubleMatrix2D matrix;
+        matrix = new DenseDoubleMatrix2D(4,4);
+        for (int row = 0; row < 4; row++) {
+            for (int column = 0; column < 4; column++) {
+                // We set and get a cell value:
+                matrix.set(row,column,row+column);
+            }
+        }
+        DoubleMatrix2D D;
+        D = new DenseDoubleMatrix2D(4,1);
+        D.set(0,0, 1.0);
+        D.set(1,0, -1.0);
+        D.set(2,0, 91.0);
+        D.set(3,0, -5.0);
+        DoubleMatrix2D X;
+        X = algebra.solve(matrix,D);
+
+        return null;
+    }
+
     /**
      * Calculates the projection on the pareto front
      * @param reward The reward to project
      * @return The projected point
      */
-    private BenchmarkReward calculateParetoProjection(final BenchmarkReward reward) {
+    private BenchmarkReward calculateParetoCubeProjection(final BenchmarkReward reward) {
         double maxGradient = Double.NEGATIVE_INFINITY;
 
         for(Solution solution : mParetoFront.getSolutions()) {
