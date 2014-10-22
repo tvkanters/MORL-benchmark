@@ -98,16 +98,6 @@ public class BenchmarkReward {
         return new BenchmarkReward(newReward);
     }
 
-    public BenchmarkReward mult(final BenchmarkReward multiplicant) {
-        final double[] newReward = Arrays.copyOf(mReward, mReward.length);
-
-        for (int i = 0; i < mReward.length; ++i) {
-            newReward[i] *= multiplicant.getRewardForObjective(i);
-        }
-
-        return new BenchmarkReward(newReward);
-    }
-
     /**
      * Scalarise this reward
      * @param scalar The scalar

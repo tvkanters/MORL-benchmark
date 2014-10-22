@@ -14,10 +14,12 @@ import nl.uva.morlb.rg.experiment.model.Solution;
 import nl.uva.morlb.rg.experiment.model.SolutionSet;
 
 /**
- * Runs recursively through all possible state action pairs until MAX_DEPTH and finds the pareto front
+ * Runs recursively through all possible state action pairs until MAX_DEPTH and finds the Pareto-front if MAX_DEPTH is big enough.
+ * Should be set to the maximum amount of steps needed to pick up all resources.
  */
 public class BruteForceParetoFrontFinder {
 
+    /** The maximum depth of the search tree **/
     private final static int MAX_DEPTH = 20;
 
     public static void main(final String[] args) {

@@ -13,7 +13,7 @@ import org.rlcommunity.rlglue.codec.types.Reward;
 /**
  * A sanity check agent that just runs to the top-right.
  */
-public class DumbContinuousAgent implements AgentInterface {
+public class RandomContinuousAgent implements AgentInterface {
 
     /**
      * Called when preparing the problem.

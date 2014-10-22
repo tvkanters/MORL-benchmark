@@ -19,12 +19,12 @@ public class Judge {
     /**
      * Estimates the average scalarised value and the corresponding standard deviation of a solution set achieves using
      * random weight samples and a provided scalarisation function.
-     * 
+     *
      * @param solutionSet
      *            The solution set that is evaluated
      * @param scalarisation
      *            The scalarisation function upon which the solution set is evaluated
-     * 
+     *
      * @return double array of the average reward and the standard deviation that was estimated for the solution set
      */
     public static double[] averageReward(final SolutionSet solutionSet, final Scalarisation scalarisation) {
@@ -62,12 +62,12 @@ public class Judge {
      * which has to be added to the solution set so that it weakly dominates the reference set. (See E. Zitzler, L.
      * Thiele, M. Laumanns, C.M. Fonesca, V. Grunert da Fonseca: Performance Assessment of Multiobjective Optimizers: An
      * Analysis and Review. IEEE Transactions on Evolutionary Computation 7(2), 117-132 (2003))
-     * 
+     *
      * @param solutionSet
      *            The solution set that is evaluated
      * @param referenceSet
      *            The true Pareto front or a good approximation to which the solution can be compared
-     * 
+     *
      * @return The additive epsilon indicator
      */
     public static double additiveEpsilonIndicator(final SolutionSet solutionSet, final SolutionSet referenceSet) {
@@ -107,12 +107,12 @@ public class Judge {
      * epsilon so that to the solution weakly dominates the reference set if multiplied with the factor epsilon. (See E.
      * Zitzler, L. Thiele, M. Laumanns, C.M. Fonesca, V. Grunert da Fonseca: Performance Assessment of Multiobjective
      * Optimizers: An Analysis and Review. IEEE Transactions on Evolutionary Computation 7(2), 117-132 (2003))
-     * 
+     *
      * @param solutionSet
      *            The solution set that is evaluated
      * @param referenceSet
      *            The true Pareto front or a good approximation to which the solution can be compared
-     * 
+     *
      * @return The multiplicative epsilon indicator
      */
     public static double multiplicativeEpsilonIndicator(final SolutionSet solutionSet, final SolutionSet referenceSet) {
@@ -167,10 +167,10 @@ public class Judge {
      * only useful in combination with other quality indicators, or in comparison with the ONVG of a reference set. (See
      * J. R. Schott: Fault tolerant design using single and multicriteria genetic algorithm optimization, M.S. thesis,
      * Dept. Aeronautics Astronautics, Massachusetts Instit. Technology, Cambridge, MA, USA, 1995)
-     * 
+     *
      * @param solutionSet
      *            The solution set that is evaluated
-     * 
+     *
      * @return The number of solutions in the solution set
      */
     public static int overallNondominatedVectorGeneration(final SolutionSet solutionSet) {
@@ -182,10 +182,10 @@ public class Judge {
      * the better. The runtime is quadratic in the number of objectives. (See J. R. Schott: Fault tolerant design using
      * single and multicriteria genetic algorithm optimization, M.S. thesis, Dept. Aeronautics Astronautics,
      * Massachusetts Instit. Technology, Cambridge, MA, USA, 1995)
-     * 
+     *
      * @param solutionSet
      *            The solution set that is evaluated
-     * 
+     *
      * @return The indicator of how evenly the solutions in the solution set are distributed. A lower value indicates a
      *         better(more uniform) distribution. Returns POSITIVE_INIFINITY if there exists no or only one solution.
      */
@@ -234,10 +234,10 @@ public class Judge {
      * Estimates the maximum spread of a solution set, which is an indicator for how well the solutions are spread. A
      * higher value indicates a better spread of solutions. (E. Zitzler, K. Deb, and L. Thiele: Comparison of
      * multiobjective evolutionary algorithms: Empirical results, Evol. Comput., vol. 8, no. 2, pp. 173-195, Jun. 2000)
-     * 
+     *
      * @param solutionSet
      *            The solution set that is evaluated
-     * 
+     *
      * @return The maximum spread. A higher value indicates a beter (larger) spread.
      */
     public static double maximumSpread(final SolutionSet solutionSet) {
@@ -257,47 +257,57 @@ public class Judge {
     }
 
     /**
+     * Builds the standard reference point z for the hypervolume indicator
+     * @param numberOfObjectives The number of objectives used
+     * @return The standard reference point z for the hypervolume indicator
+     */
+    public static double[] standardReferencepoint(final int numberOfObjectives) {
+        // set up default reference point
+        final double[] referencePoint = new double[numberOfObjectives];
+        referencePoint[0] = HYPERVOLUME_REFERENCE_POINT_TIME;
+        for (int d = 1; d < numberOfObjectives; d++) {
+            referencePoint[d] = HYPERVOLUME_REFERENCE_POINT_RESOURCES;
+        }
+
+        return referencePoint;
+    }
+
+    /**
      * Estimates the hypervolume of a soulution set (and a default reference point). The runtime is exponential in the
      * number of objectives. (See E. Zitzler and L. Thiele Multiobjective Evolutionary Algorithms: A Comparative Case
      * Study and the Strength Pareto Approach, IEEE Transactions on Evolutionary Computation, vol. 3, no. 4, pp.
      * 257-271, 1999)
-     * 
+     *
      * @param solutionSet
      *            The solution set that is evaluated
-     * 
+     *
      * @return the hypervolume of the solution set
      */
     public static double hypervolume(final SolutionSet solutionSet) {
-        // set up default reference point
-        final double[] referencePoint = new double[solutionSet.getNumObjectives()];
-        referencePoint[0] = HYPERVOLUME_REFERENCE_POINT_TIME;
-        for (int d = 1; d < solutionSet.getNumObjectives(); d++) {
-            referencePoint[d] = HYPERVOLUME_REFERENCE_POINT_RESOURCES;
-        }
-        return hypervolume(solutionSet, referencePoint);
+        return hypervolume(solutionSet, standardReferencepoint(solutionSet.getNumObjectives()));
     }
 
     /**
      * Estimates the hypervolume of a soulution set given a reference point. The runtime is exponential in the number of
      * objectives. (See E. Zitzler and L. Thiele Multiobjective Evolutionary Algorithms: A Comparative Case Study and
      * the Strength Pareto Approach, IEEE Transactions on Evolutionary Computation, vol. 3, no. 4, pp. 257-271, 1999)
-     * 
+     *
      * @param solutionSet
      *            The solution set that is evaluated
      * @param referencePoint
      *            The reference point for the hypervolume
-     * 
+     *
      * @return
      */
     public static double hypervolume(final SolutionSet solutionSet, final double[] referencePoint) {
         if (referencePoint.length != solutionSet.getNumObjectives()) {
             System.err
-                    .println("For the hypervolume the reference point has to have the same dimension as the solutions. Will take default reference point.");
+            .println("For the hypervolume the reference point has to have the same dimension as the solutions. Will take default reference point.");
             return hypervolume(solutionSet);
         } else {
             // put the solution set into a double array of doubles and shift them according to reference point
             final double[][] solutionSetDoubleArray = new double[solutionSet.getNumSolutions()][solutionSet
-                    .getNumObjectives()];
+                                                                                                .getNumObjectives()];
             for (int sol = 0; sol < solutionSet.getNumSolutions(); sol++) {
                 final double[] solutionValues = solutionSet.getSolutions().get(sol).getValues();
                 for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
@@ -313,7 +323,7 @@ public class Judge {
 
     /**
      * Performs some tests on this class
-     * 
+     *
      * @param args
      */
     public static void main(final String[] args) {

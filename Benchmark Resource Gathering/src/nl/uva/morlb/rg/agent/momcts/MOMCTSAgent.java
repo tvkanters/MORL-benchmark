@@ -20,15 +20,12 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
 
-import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.impl.DenseDoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
-
 /**
  * Multi-Objective Monte-Carlo Tree Search
  */
 public class MOMCTSAgent implements AgentInterface {
 
+    /** The initial reward values **/
     public static double[] sInitialReward;
 
     /** The search tree used by our tree walks **/
@@ -45,10 +42,6 @@ public class MOMCTSAgent implements AgentInterface {
      */
     /** The current inventory **/
     private boolean[] mInventory;
-
-    /*
-     * RL_GLUE values
-     */
 
     /*
      * Tree walk values
@@ -68,9 +61,6 @@ public class MOMCTSAgent implements AgentInterface {
 
     /** The current hypervolume indicator **/
     private double mHypervolumeIndicator = Double.NEGATIVE_INFINITY;
-
-    /** The reference point for the hypervolume indicator **/
-    private double[] mReferencePoint;
 
     /**
      * Defines the random walk phase
@@ -94,13 +84,6 @@ public class MOMCTSAgent implements AgentInterface {
         }
 
         mInventory = new boolean[mTaskSpec.getNumOfObjectives() -1];
-        mReferencePoint = new double[mTaskSpec.getNumOfObjectives()];
-
-        //Fill the reference point
-        mReferencePoint[0] = -100;
-        for(int i = 1; i < mReferencePoint.length; ++i) {
-            mReferencePoint[i] = -1;
-        }
 
         sInitialReward = new double[mTaskSpec.getNumOfObjectives()];
         for(int i = 0; i < sInitialReward.length; ++i) {
@@ -172,9 +155,8 @@ public class MOMCTSAgent implements AgentInterface {
                 for(DiscreteAction consideredAction : availableActions) {
                     final BenchmarkReward actionReward = mSearchTree.getCurrentNode().getRewardForAction(consideredAction);
 
-                    if(mParetoFront.isDominated(new Solution(actionReward.getRewardVector()))&& mParetoFront.getNumSolutions() > 1) {
-                        //                        final double actionValue = mHypervolumeIndicator - calculateParetoCubeProjection(actionReward).sub(actionReward).getLength();
-                        final double actionValue = mHypervolumeIndicator - calculateParetoProjection(actionReward).sub(actionReward).getLength();
+                    if(mParetoFront.isDominated(new Solution(actionReward.getRewardVector()))) {
+                        double actionValue = mHypervolumeIndicator - calculateParetoCubeProjection(actionReward).sub(actionReward).getLength();
                         if(actionValue > bestLookingActionValue) {
                             bestLookingActionValue = actionValue;
                             choosenAction = consideredAction;
@@ -195,12 +177,9 @@ public class MOMCTSAgent implements AgentInterface {
 
             return choosenAction;
         } else {
-            //Using RAVE at this position did not improve the performance of the algorithm but rather made it worse.
-
             List<DiscreteAction> nonAvailableActions = mSearchTree.getPerformedActionsForCurrentNode();
             List<DiscreteAction> availableActions = new ArrayList<DiscreteAction>(mAvailableActions);
             availableActions.removeAll(nonAvailableActions);
-            System.out.println(mAvailableActions.size() + " - " +nonAvailableActions.size() +" = " +availableActions.size());
 
             final DiscreteAction choosenAction = availableActions.get(Util.RNG.nextInt(availableActions.size()));
             //Tree building step 1, save the action
@@ -225,59 +204,7 @@ public class MOMCTSAgent implements AgentInterface {
      */
     private boolean progressiveWidening() {
         int v_s = mSearchTree.getCurrentNode().getVisitationCount();
-
         return (int) Math.pow(v_s +1, 0.5) != (int) Math.pow(v_s, 0.5);
-    }
-
-    private BenchmarkReward calculateParetoProjection(final BenchmarkReward x1) {
-        BenchmarkReward x2 = calculateParetoCubeProjection(x1);
-        Solution[] bigger = new Solution[x1.getDimension()];
-
-        //1
-        for(int dimension = 0; dimension < x2.getDimension(); ++dimension) {
-            double closestPoint = Double.POSITIVE_INFINITY;
-            for(Solution paretoSolution : mParetoFront.getSolutions()) {
-                final double dimValue = paretoSolution.getValues()[dimension];
-                final double distance = dimValue - x2.getRewardForObjective(dimension);
-                if(distance >= 0 && distance < closestPoint) {
-                    closestPoint = dimValue;
-                    bigger[dimension] = paretoSolution;
-                }
-            }
-        }
-
-        //2
-        Algebra algebra = new Algebra();
-        DoubleMatrix2D A;
-        int N = x1.getDimension();
-        A = new DenseDoubleMatrix2D(N,N);
-
-        BenchmarkReward temp = x1.sub(x2);
-        for (int row = 0; row < N; row++) {
-            A.set(row,0,temp.getRewardForObjective(row));
-        }
-
-        for (int column = 1; column < N; column++) {
-            temp = new BenchmarkReward(bigger[column].getValues()).sub(new BenchmarkReward(bigger[0].getValues()));
-
-            for(int row = 0; row < N; row++) {
-                A.set(row,column,temp.getRewardForObjective(row));
-            }
-        }
-
-        DoubleMatrix2D B = new DenseDoubleMatrix2D(N, 1);
-        temp = x1.sub(new BenchmarkReward(bigger[0].getValues()));
-        for (int row = 0; row < N; row++) {
-            B.set(row,0,temp.getRewardForObjective(row));
-        }
-
-        DoubleMatrix2D C = algebra.mult(A, B);
-        double[] c = new double[N];
-        for(int i = 0; i < N; ++i) {
-            c[i] = C.toArray()[i][0];
-        }
-
-        return x1.add(x2.sub(x1).mult(new BenchmarkReward(c)));
     }
 
     /**
@@ -287,9 +214,11 @@ public class MOMCTSAgent implements AgentInterface {
      */
     private BenchmarkReward calculateParetoCubeProjection(final BenchmarkReward reward) {
         double maxGradient = Double.NEGATIVE_INFINITY;
+        BenchmarkReward referencePoint = new BenchmarkReward(Judge.standardReferencepoint(mTaskSpec.getNumOfObjectives()));
 
         for(Solution solution : mParetoFront.getSolutions()) {
-            BenchmarkReward gradients = pointwiseDivision (solution, reward);
+            BenchmarkReward solutionTemp = new BenchmarkReward(solution.getValues());
+            BenchmarkReward gradients = pointwiseDivision (solutionTemp.sub(referencePoint), reward.sub(referencePoint));
             final double gradient = gradients.getMinimumRewardEntry();
 
             if(maxGradient < gradient) {
@@ -297,7 +226,7 @@ public class MOMCTSAgent implements AgentInterface {
             }
         }
 
-        return reward.mult(maxGradient);
+        return reward.sub(referencePoint).mult(maxGradient).add(referencePoint);
     }
 
     /**
@@ -306,10 +235,10 @@ public class MOMCTSAgent implements AgentInterface {
      * @param reward The reward
      * @return A pointwise division from the reward with the solution
      */
-    private BenchmarkReward pointwiseDivision(final Solution solution, final BenchmarkReward reward) {
+    private BenchmarkReward pointwiseDivision(final BenchmarkReward solution, final BenchmarkReward reward) {
         double[] result = new double[reward.getDimension()];
         for(int i = 0; i < result.length; i++) {
-            result[i] = solution.getValues()[i] / reward.getRewardForObjective(i);
+            result[i] = solution.getRewardForObjective(i) / reward.getRewardForObjective(i);
         }
 
         return new BenchmarkReward(result);
@@ -318,17 +247,6 @@ public class MOMCTSAgent implements AgentInterface {
     @Override
     public void agent_end(final Reward reward) {
         mR_u = handleReward(reward);
-
-        //This code must be used in a infinite horizon setting
-        //        if(mRandomWalk == RandomWalkPhase.STARTED ) {
-        //            //Tree building step 2, save the resulting state
-        //            //We do not get an observation for the end state so we create a fake end state to fit our data structure
-        //            Observation fakeEndstateObservation = new Observation();
-        //            fakeEndstateObservation.doubleArray = new double[2];
-        //            fakeEndstateObservation.doubleArray[0] = fakeEndstateObservation.doubleArray[1] = -1;
-        //
-        //            mSearchTree.completeTreeBuilding(generateState(fakeEndstateObservation, mInventory));
-        //        }
 
         //Update r*head*_s,a
         for(int historyPosition = 0; historyPosition < mStateHistory.size(); ++historyPosition) {
@@ -351,16 +269,10 @@ public class MOMCTSAgent implements AgentInterface {
 
         //Build pareto front
         Solution currentSolution = mR_u.toSolution();
-
         if(!mParetoFront.isDominated(currentSolution) && mParetoFront.addSolution(currentSolution)) {
-
-            System.out.println( mParetoFront +" -> ");
             mParetoFront.pruneDominatedSolutions();
-            System.out.println(mParetoFront);
             mHypervolumeIndicator = Judge.hypervolume(mParetoFront);
-            System.out.println(" Hypervolume: " +mHypervolumeIndicator);
         }
-        System.out.println(mSearchTree);
 
         mRandomWalk = RandomWalkPhase.OUT;
         mR_u = null;

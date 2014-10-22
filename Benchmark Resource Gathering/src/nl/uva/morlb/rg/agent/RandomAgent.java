@@ -18,7 +18,7 @@ import org.rlcommunity.rlglue.codec.util.AgentLoader;
 /**
  * A sanity check agent that just runs to the top-right.
  */
-public class DumbAgent implements AgentInterface {
+public class RandomAgent implements AgentInterface {
 
     /** The amount of possible actions according to the task spec */
     private int numActions;
@@ -148,7 +148,7 @@ public class DumbAgent implements AgentInterface {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                new AgentLoader(new DumbAgent()).run();
+                new AgentLoader(new RandomAgent()).run();
             }
         }).start();
     }
