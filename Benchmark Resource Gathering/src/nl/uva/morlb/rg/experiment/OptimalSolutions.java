@@ -75,14 +75,36 @@ public class OptimalSolutions {
         sOptimalSolutions.put(Parameters.fromString("2 1 2 1 0 Infinity false 1 "
                 + "0 0 1 1 1 1 1 1 1 1 0 2 0 0.4 0.4 1 2 0 0.4 0.4", null), new SolutionSet(
                 "(-2,0,1),(-3,1,0),(-3,0.4,0.4)"));
+
+        // The solutions for the full actions problems
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 1 2 1 1 1 2 1 1 1", null),
+                new SolutionSet("(-3,0,0),(-4,1,0),(-5,1,1),(-4,0,1)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 3 3 1 1 1 3 0 1 1", null),
+                new SolutionSet("(-3,1,0),(-6,1,1)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 1 3 1 1 1 0 1 1 1", null),
+                new SolutionSet("(-3,0,0),(-5,1,1),(-4,0,1)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 3 1 1 1 1 0 0 1 1", null),
+                new SolutionSet("(-3,0,0),(-5,1,0),(-4,0,1),(-6,1,1)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 2 0 1 1 1 0 3 1 1", null),
+                new SolutionSet("(-3,0,0),(-5,1,0),(-6,0,1),(-8,1,1)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 2 1 1 1 1 0 1 1 1", null),
+                new SolutionSet("(-3,0,0),(-5,1,1),(-4,0,1),(-4,1,0)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 1 0 1 1 1 3 2 1 1", null),
+                new SolutionSet("(-3,0,0),(-4,1,1)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 2 2 1 1 1 0 2 1 1", null),
+                new SolutionSet("(-3,1,0),(-5,1,1)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 0 3 1 1 1 1 2 1 1", null),
+                new SolutionSet("(-3,0,0),(-6,1,1),(-4,0,1)"));
+        sOptimalSolutions.put(Parameters.fromString("3 3 2 1 0 Infinity false 2147483647 0 1 1 1 1 1 1 2 1 1", null),
+                new SolutionSet("(-3,1,0),(-4,1,1)"));
     }
 
     /**
      * Retrieves the optimal solution set given a set of parameters.
-     * 
+     *
      * @param parameters
      *            The problem parameters
-     * 
+     *
      * @return The optimal solution set or null if none exist for the parameters
      */
     public static SolutionSet getSolution(final Parameters parameters) {
