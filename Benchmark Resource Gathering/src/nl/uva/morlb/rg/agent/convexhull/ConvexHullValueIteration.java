@@ -16,6 +16,7 @@ import org.rlcommunity.rlglue.codec.taskspec.TaskSpecVRLGLUE3;
 import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward;
+import org.rlcommunity.rlglue.codec.util.AgentLoader;
 
 public class ConvexHullValueIteration implements AgentInterface {
 
@@ -61,10 +62,10 @@ public class ConvexHullValueIteration implements AgentInterface {
 
     /**
      * Called when the environment just started and returned the initial observation.
-     * 
+     *
      * @param observation
      *            The observation as given by the environment
-     * 
+     *
      * @return The action to perform next
      */
     @Override
@@ -78,12 +79,12 @@ public class ConvexHullValueIteration implements AgentInterface {
 
     /**
      * Called after performing an action.
-     * 
+     *
      * @param reward
      *            The reward given by performing the previous action
      * @param observation
      *            The observation as given by the environment
-     * 
+     *
      * @return The action to perform next
      */
     @Override
@@ -125,7 +126,7 @@ public class ConvexHullValueIteration implements AgentInterface {
 
     /**
      * Called when a terminal state has been reached or a time limit is reached.
-     * 
+     *
      * @param reward
      *            The reward given by performing the previous action
      */
@@ -151,28 +152,28 @@ public class ConvexHullValueIteration implements AgentInterface {
 
     /**
      * Handles Glue messages.
-     * 
+     *
      * @param message
      *            The message to handle
      */
     @Override
     public String agent_message(final String message) {
         switch (message) {
-        case "getSolutionSet":
-            return getSolutionSet().toString();
+            case "getSolutionSet":
+                return getSolutionSet().toString();
 
-        case "isConverged":
-            final String solutionSetString = getSolutionSet().toString();
-            if (mPrevSolutionSet.equals(solutionSetString)) {
-                ++mRepeatCount;
-                if (mRepeatCount == REPEAT_CONVERGE_LIMIT) {
-                    return Boolean.TRUE.toString();
+            case "isConverged":
+                final String solutionSetString = getSolutionSet().toString();
+                if (mPrevSolutionSet.equals(solutionSetString)) {
+                    ++mRepeatCount;
+                    if (mRepeatCount == REPEAT_CONVERGE_LIMIT) {
+                        return Boolean.TRUE.toString();
+                    }
+                } else {
+                    mRepeatCount = 0;
+                    mPrevSolutionSet = solutionSetString;
                 }
-            } else {
-                mRepeatCount = 0;
-                mPrevSolutionSet = solutionSetString;
-            }
-            return Boolean.FALSE.toString();
+                return Boolean.FALSE.toString();
         }
 
         throw new InvalidParameterException("Unknown message: " + message);
@@ -180,7 +181,7 @@ public class ConvexHullValueIteration implements AgentInterface {
 
     /**
      * Unions the solutions sets of the initial state-actions to return the full Pareto front.
-     * 
+     *
      * @return The solution set
      */
     private SolutionSet getSolutionSet() {
@@ -198,10 +199,10 @@ public class ConvexHullValueIteration implements AgentInterface {
 
     /**
      * Retrieves the saved Q value or creates a default one
-     * 
+     *
      * @param key
      *            The state-action pair to search
-     * 
+     *
      * @return The saved Q value or a solution set with a 0-solution
      */
     private SolutionSet getQValue(final QTableEntry key) {
@@ -214,10 +215,10 @@ public class ConvexHullValueIteration implements AgentInterface {
 
     /**
      * Generates a state based on the given observation.
-     * 
+     *
      * @param observation
      *            The observation given by the environment
-     * 
+     *
      * @return The state corresponding to the observation
      */
     public State generateState(final Observation observation) {
@@ -237,6 +238,16 @@ public class ConvexHullValueIteration implements AgentInterface {
      */
     public DiscreteAction getRandomAction() {
         return DiscreteAction.values()[Util.RNG.nextInt(mMaxAction - mMinAction + 1) + mMinAction];
+    }
+
+    public static void main(final String[] args) {
+        // Start the agent
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new AgentLoader(new ConvexHullValueIteration()).run();
+            }
+        }).start();
     }
 
 }

@@ -3,7 +3,6 @@ package nl.uva.morlb.rg.experiment;
 import java.util.Arrays;
 import java.util.Random;
 
-import nl.uva.morlb.rg.agent.convexhull.ConvexHullValueIteration;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.Parameters;
@@ -13,7 +12,6 @@ import nl.uva.morlb.rg.experiment.model.SolutionSet;
 import nl.uva.morlb.util.Log;
 
 import org.rlcommunity.rlglue.codec.RLGlue;
-import org.rlcommunity.rlglue.codec.util.AgentLoader;
 import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
 
 /**
@@ -117,15 +115,6 @@ public class Experiment {
             @Override
             public void run() {
                 new EnvironmentLoader(sProblem).run();
-            }
-        }).start();
-
-        // Start the agent
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                new AgentLoader(new ConvexHullValueIteration()).run();
-                // new AgentLoader(new MOMCTSAgent()).run();
             }
         }).start();
     }
