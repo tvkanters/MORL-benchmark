@@ -26,6 +26,8 @@ public class Parameters {
     public static final boolean STATES_CONTINUOUS = true;
     /** The value indicating a continuous action and action space */
     public static final int MAX_PICKED_UP_UNLIMITED = Integer.MAX_VALUE;
+    /** The value indicating a the default experiment horizon */
+    public static final int DEFAULT_HORIZON = 1000;
 
     /** The highest possible x value of a location */
     public final double maxX;
@@ -48,6 +50,8 @@ public class Parameters {
 
     /** Whether or not the problem has a finite horizon rather than an infinite horizon */
     public final boolean finiteHorizon;
+    /** The horizon for the experiment */
+    public final int horizon;
     /** The discount factor applied to rewards */
     public final double discountFactor;
 
@@ -88,10 +92,12 @@ public class Parameters {
      *            Whether or not the state and actions are continuous
      * @param maxPickedUp
      *            The amount of resources an agent can pick up
+     * @param horizon
+     *            The horizon for the experiment
      */
     public Parameters(final double maxX, final double maxY, final List<Resource> resources, final int actionSpace,
             final double discountFactor, final double actionFailProb, final double observationSuccess,
-            final boolean continuousStatesActions, final int maxPickedUp) {
+            final boolean continuousStatesActions, final int maxPickedUp, final int horizon) {
         // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
@@ -127,6 +133,7 @@ public class Parameters {
         }
         finiteHorizon = discountFactor == 1;
         this.discountFactor = discountFactor;
+        this.horizon = horizon;
 
         // Define the probability or an action failing
         if (actionFailProb < 0 || actionFailProb > 1) {
@@ -173,7 +180,7 @@ public class Parameters {
     @Override
     public String toString() {
         String str = maxX + " " + maxY + " " + actionSpace + " " + discountFactor + " " + actionFailProb + " "
-                + observationSuccess + " " + continuousStatesActions + " " + maxPickedUp;
+                + observationSuccess + " " + continuousStatesActions + " " + maxPickedUp + " " + horizon;
         for (final Resource resource : resources) {
             str += " " + resource;
         }
@@ -210,9 +217,9 @@ public class Parameters {
         final boolean continuousStatesActions = Boolean.parseBoolean(values[6]);
 
         final List<Resource> resources = new LinkedList<>();
-        if (values.length == 10) {
-            final int numObjectives = Integer.parseInt(values[8]);
-            final int numResources = Integer.parseInt(values[9]);
+        if (values.length == 11) {
+            final int numObjectives = Integer.parseInt(values[9]);
+            final int numResources = Integer.parseInt(values[10]);
             for (int i = 0; i < numResources; ++i) {
                 final int type = (i < numObjectives ? i : Util.RNG.nextInt(numObjectives));
                 final double x = (continuousStatesActions ? rng.nextDouble() * maxX : rng.nextInt((int) maxX + 1));
@@ -220,7 +227,7 @@ public class Parameters {
                 resources.add(new Resource(type, x, y));
             }
         } else {
-            for (int i = 8; i < values.length; i += 5) {
+            for (int i = 9; i < values.length; i += 5) {
                 resources.add(Resource.fromString(values[i] + " " + values[i + 1] + " " + values[i + 2] + " "
                         + values[i + 3] + " " + values[i + 4]));
             }
@@ -228,7 +235,7 @@ public class Parameters {
 
         return new Parameters(maxX, maxY, resources, Integer.parseInt(values[2]), Double.parseDouble(values[3]),
                 Double.parseDouble(values[4]), Double.parseDouble(values[5]), continuousStatesActions,
-                Integer.parseInt(values[7]));
+                Integer.parseInt(values[7]), Integer.parseInt(values[8]));
     }
 
     /**

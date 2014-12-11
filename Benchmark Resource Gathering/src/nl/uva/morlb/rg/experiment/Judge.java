@@ -1,6 +1,9 @@
 package nl.uva.morlb.rg.experiment;
 
+import java.security.InvalidParameterException;
+
 import jmetal.qualityIndicator.Hypervolume;
+import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.experiment.model.LinearScalarisation;
 import nl.uva.morlb.rg.experiment.model.Scalarisation;
 import nl.uva.morlb.rg.experiment.model.Solution;
@@ -11,9 +14,7 @@ import nl.uva.morlb.rg.experiment.model.SolutionSet;
  */
 public class Judge {
 
-    /** The default reference point for the hypervolume for the time dimension */
-    public static final double HYPERVOLUME_REFERENCE_POINT_TIME = -1000;
-    /** The default reference point fo rthe hypervolume for the resource dimensions */
+    /** The default reference point for the hypervolume for the resource dimensions */
     public static final double HYPERVOLUME_REFERENCE_POINT_RESOURCES = -1;
 
     /**
@@ -112,10 +113,13 @@ public class Judge {
      *            The solution set that is evaluated
      * @param referenceSet
      *            The true Pareto front or a good approximation to which the solution can be compared
+     * @param horizon
+     *            The experiment's horizon for reference point purpose
      *
      * @return The multiplicative epsilon indicator
      */
-    public static double multiplicativeEpsilonIndicator(final SolutionSet solutionSet, final SolutionSet referenceSet) {
+    public static double multiplicativeEpsilonIndicator(final SolutionSet solutionSet, final SolutionSet referenceSet,
+            final int horizon) {
         if (referenceSet.getNumObjectives() != solutionSet.getNumObjectives()) {
             System.err.println("Reference and solution set must have same number of objectives");
         }
@@ -135,8 +139,8 @@ public class Judge {
                 // epsilon-dominates the current reference point ref
                 double maxEpsilonPerSingleDim = Double.NEGATIVE_INFINITY;
                 for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
-                    final double solValue = sol.getValues()[dim] - (dim == 0 ? HYPERVOLUME_REFERENCE_POINT_TIME : 0);
-                    final double refValue = ref.getValues()[dim] - (dim == 0 ? HYPERVOLUME_REFERENCE_POINT_TIME : 0);
+                    final double solValue = sol.getValues()[dim] - (dim == 0 ? -horizon : 0);
+                    final double refValue = ref.getValues()[dim] - (dim == 0 ? -horizon : 0);
 
                     final double distance;
                     if (refValue == 0) {
@@ -258,13 +262,17 @@ public class Judge {
 
     /**
      * Builds the standard reference point z for the hypervolume indicator
-     * @param numberOfObjectives The number of objectives used
+     *
+     * @param numberOfObjectives
+     *            The number of objectives used
+     * @param horizon
+     *            The experiment's horizon for reference point purpose
      * @return The standard reference point z for the hypervolume indicator
      */
-    public static double[] standardReferencepoint(final int numberOfObjectives) {
+    public static double[] standardReferencepoint(final int numberOfObjectives, final int horizon) {
         // set up default reference point
         final double[] referencePoint = new double[numberOfObjectives];
-        referencePoint[0] = HYPERVOLUME_REFERENCE_POINT_TIME;
+        referencePoint[0] = -horizon;
         for (int d = 1; d < numberOfObjectives; d++) {
             referencePoint[d] = HYPERVOLUME_REFERENCE_POINT_RESOURCES;
         }
@@ -280,11 +288,13 @@ public class Judge {
      *
      * @param solutionSet
      *            The solution set that is evaluated
+     * @param horizon
+     *            The experiment's horizon for reference point purpose
      *
      * @return the hypervolume of the solution set
      */
-    public static double hypervolume(final SolutionSet solutionSet) {
-        return hypervolume(solutionSet, standardReferencepoint(solutionSet.getNumObjectives()));
+    public static double hypervolume(final SolutionSet solutionSet, final int horizon) {
+        return hypervolume(solutionSet, standardReferencepoint(solutionSet.getNumObjectives(), horizon));
     }
 
     /**
@@ -301,13 +311,13 @@ public class Judge {
      */
     public static double hypervolume(final SolutionSet solutionSet, final double[] referencePoint) {
         if (referencePoint.length != solutionSet.getNumObjectives()) {
-            System.err
-            .println("For the hypervolume the reference point has to have the same dimension as the solutions. Will take default reference point.");
-            return hypervolume(solutionSet);
+            throw new InvalidParameterException(
+                    "For the hypervolume the reference point has to have the same dimension as the solutions.");
+
         } else {
             // put the solution set into a double array of doubles and shift them according to reference point
             final double[][] solutionSetDoubleArray = new double[solutionSet.getNumSolutions()][solutionSet
-                                                                                                .getNumObjectives()];
+                    .getNumObjectives()];
             for (int sol = 0; sol < solutionSet.getNumSolutions(); sol++) {
                 final double[] solutionValues = solutionSet.getSolutions().get(sol).getValues();
                 for (int dim = 0; dim < solutionSet.getNumObjectives(); dim++) {
@@ -343,7 +353,8 @@ public class Judge {
         final double addEps = additiveEpsilonIndicator(testSolutionSet01, testSolutionSet02);
         System.out.println("Additive Epsilon Indicator : " + addEps);
 
-        final double multEps = multiplicativeEpsilonIndicator(testSolutionSet01, testSolutionSet02);
+        final double multEps = multiplicativeEpsilonIndicator(testSolutionSet01, testSolutionSet02,
+                Parameters.DEFAULT_HORIZON);
         System.out.println("Multiplicative Epsilon Indicator: " + multEps);
 
         final int oNVG = overallNondominatedVectorGeneration(testSolutionSet01);
@@ -355,7 +366,7 @@ public class Judge {
         final double spread = maximumSpread(testSolutionSet01);
         System.out.println("Spread measure: " + spread);
 
-        final double hypervolume = hypervolume(testSolutionSet01);
+        final double hypervolume = hypervolume(testSolutionSet01, Parameters.DEFAULT_HORIZON);
         System.out.println("Hypervolume: " + hypervolume);
 
     }

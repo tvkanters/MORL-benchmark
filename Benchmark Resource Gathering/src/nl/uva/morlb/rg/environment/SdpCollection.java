@@ -21,8 +21,8 @@ public class SdpCollection {
         resources.add(new Resource(0, 1, 2));
         resources.add(new Resource(1, 2, 1));
 
-        return new Parameters(3, 3, resources, Parameters.ACTIONS_FULL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
+        return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
     }
 
     /**
@@ -39,7 +39,7 @@ public class SdpCollection {
         resources.add(new Resource(2, 4, 1));
 
         return new Parameters(9, 9, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
     }
 
     /**
@@ -53,7 +53,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 2, 1));
 
         return new Parameters(3, 3, resources, Parameters.ACTIONS_TINY, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
     }
 
     /**
@@ -68,7 +68,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 0, 4));
 
         return new Parameters(5, 5, resources, Parameters.ACTIONS_FULL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
     }
 
     /**
@@ -82,7 +82,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 2, 1));
 
         return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_CONTINUOUS, Parameters.MAX_PICKED_UP_UNLIMITED);
+                Parameters.STATES_CONTINUOUS, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
     }
 
     /**
@@ -97,7 +97,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 0, 4));
 
         return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0, 1, Parameters.STATES_DISCRETE,
-                Parameters.MAX_PICKED_UP_UNLIMITED);
+                Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
     }
 
     /**
@@ -112,7 +112,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 0, 4, 0.3, 1.0));
 
         return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0.4, 1, Parameters.STATES_DISCRETE,
-                Parameters.MAX_PICKED_UP_UNLIMITED);
+                Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
     }
 
     /**
@@ -126,7 +126,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 2, 1));
 
         return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 0.8, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
     }
 
     /**
@@ -141,7 +141,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 0, 4));
 
         return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, 2);
+                Parameters.STATES_DISCRETE, 2, Parameters.DEFAULT_HORIZON);
     }
 
 }

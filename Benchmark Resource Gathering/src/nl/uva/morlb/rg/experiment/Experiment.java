@@ -39,7 +39,7 @@ public class Experiment {
             String solutionSetString = "";
             int episode;
             for (episode = 0; episode < 1000; ++episode) {
-                RLGlue.RL_episode((int) -Judge.HYPERVOLUME_REFERENCE_POINT_TIME);
+                RLGlue.RL_episode(-sProblem.getParameters().horizon);
 
                 solutionSetString = RLGlue.RL_agent_message("getSolutionSet");
                 if (!solutionSetString.equals("")) {
@@ -58,7 +58,7 @@ public class Experiment {
                     final int oNVG = Judge.overallNondominatedVectorGeneration(solutionSet);
                     final double unif = Judge.schottSpacingMetric(solutionSet);
                     final double spread = Judge.maximumSpread(solutionSet);
-                    final double hypervolume = Judge.hypervolume(solutionSet);
+                    final double hypervolume = Judge.hypervolume(solutionSet, sProblem.getParameters().horizon);
                     final double[] returnValues = RLGlue.RL_return().doubleArray;
 
                     metrics += avgRew[0] + " " + avgRew[1] + " " + oNVG + " " + unif + " " + spread + " " + hypervolume;
@@ -66,7 +66,8 @@ public class Experiment {
                     // Check if we can use reference set metrics
                     if (optimalSolution != null) {
                         final double addEpsilon = Judge.additiveEpsilonIndicator(solutionSet, optimalSolution);
-                        final double multEpsilon = Judge.multiplicativeEpsilonIndicator(solutionSet, optimalSolution);
+                        final double multEpsilon = Judge.multiplicativeEpsilonIndicator(solutionSet, optimalSolution,
+                                sProblem.getParameters().horizon);
 
                         metrics += " " + addEpsilon + " " + multEpsilon;
                     }
