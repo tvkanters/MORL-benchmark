@@ -13,7 +13,7 @@ import nl.uva.morlb.util.Util;
 public class Parameters {
 
     /** The value indicating a fully observable state */
-    public static final double FULLY_OBSERVABLE = Double.POSITIVE_INFINITY;
+    public static final double FULLY_OBSERVABLE = 1;
     /** The value indicating only 3 actions */
     public static final int ACTIONS_TINY = 0;
     /** The value indicating only 5 actions */
@@ -55,6 +55,8 @@ public class Parameters {
     public final boolean fullyObservable;
     /** The maximum Manhattan distance that an agent can see in a partial observable setting */
     public final double viewDistance;
+    /** The chance that an observation is successful, {@link #FULLY_OBSERVABLE} indicates full observability */
+    public final double observationSuccess;
 
     /** Whether or not the state and actions are continuous */
     public final boolean continuousStatesActions;
@@ -79,16 +81,16 @@ public class Parameters {
      *            The discount factor applied to rewards, indicates a finite horizon problem when the value is 1
      * @param actionFailProb
      *            The probability that an additional random action will be performed when taking an action
-     * @param viewDistance
-     *            The maximum Manhattan distance that an agent can see, {@link #FULLY_OBSERVABLE} indicates full
-     *            observability
+     * @param observationSuccess
+     *            The chance that an observation is successful, {@link #FULLY_OBSERVABLE} indicates full observability
+     *            but with partial observability, view distance is limited to 1
      * @param continuousStatesActions
      *            Whether or not the state and actions are continuous
      * @param maxPickedUp
      *            The amount of resources an agent can pick up
      */
     public Parameters(final double maxX, final double maxY, final List<Resource> resources, final int actionSpace,
-            final double discountFactor, final double actionFailProb, final double viewDistance,
+            final double discountFactor, final double actionFailProb, final double observationSuccess,
             final boolean continuousStatesActions, final int maxPickedUp) {
         // Define the state space size
         this.maxX = maxX;
@@ -134,8 +136,9 @@ public class Parameters {
         this.actionFailProb = actionFailProb;
 
         // Define the observability of the problem
-        fullyObservable = (viewDistance == FULLY_OBSERVABLE);
-        this.viewDistance = viewDistance;
+        this.observationSuccess = observationSuccess;
+        fullyObservable = (observationSuccess == FULLY_OBSERVABLE);
+        viewDistance = (fullyObservable ? Double.POSITIVE_INFINITY : 1);
 
         // Define the continuity of the states and actions
         this.continuousStatesActions = continuousStatesActions;
@@ -170,7 +173,7 @@ public class Parameters {
     @Override
     public String toString() {
         String str = maxX + " " + maxY + " " + actionSpace + " " + discountFactor + " " + actionFailProb + " "
-                + viewDistance + " " + continuousStatesActions + " " + maxPickedUp;
+                + observationSuccess + " " + continuousStatesActions + " " + maxPickedUp;
         for (final Resource resource : resources) {
             str += " " + resource;
         }

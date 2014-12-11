@@ -12,6 +12,7 @@ import nl.uva.morlb.rg.environment.model.Parameters;
 import nl.uva.morlb.rg.environment.model.Resource;
 import nl.uva.morlb.rg.environment.model.RewardRange;
 import nl.uva.morlb.rg.environment.model.State;
+import nl.uva.morlb.util.Util;
 
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.taskspec.TaskSpec;
@@ -239,9 +240,15 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
         final List<Resource> resources = mProblem.getResources();
         int resourceIndex = 0;
         for (final Resource resource : resources) {
-            // Determine what resource information to show in the observation
-            final boolean showResource = (!state.isPickedUp(resourceIndex++) && Location.distance(agent,
-                    resource.getLocation()) <= mParameters.viewDistance);
+            final boolean showResource;
+
+            // Check if the observation succeeded
+            if (Util.RNG.nextDouble() < mParameters.observationSuccess) {
+                // Determine what resource information to show in the observation
+                showResource = (!state.isPickedUp(resourceIndex++) && Location.distance(agent, resource.getLocation()) <= mParameters.viewDistance);
+            } else {
+                showResource = false;
+            }
 
             // Add the available resource information
             final Location location = resource.getLocation();

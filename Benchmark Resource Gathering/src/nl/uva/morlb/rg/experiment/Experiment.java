@@ -3,7 +3,7 @@ package nl.uva.morlb.rg.experiment;
 import java.util.Arrays;
 import java.util.Random;
 
-import nl.uva.morlb.rg.agent.momcts.MOMCTSAgent;
+import nl.uva.morlb.rg.agent.convexhull.ConvexHullValueIteration;
 import nl.uva.morlb.rg.environment.ResourceGatheringEnv;
 import nl.uva.morlb.rg.environment.SdpCollection;
 import nl.uva.morlb.rg.environment.model.Parameters;
@@ -52,8 +52,8 @@ public class Experiment {
                     // Scalarisation must be created here for random seed purposes
                     final Scalarisation scalarisation = new LinearScalarisation(
                             sProblem.getParameters().numResourceTypes + 1);
-                    //                    final Scalarisation scalarisation = new MinScalarisation(
-                    //                            sProblem.getParameters().numResourceTypes + 1);
+                    // final Scalarisation scalarisation = new MinScalarisation(
+                    // sProblem.getParameters().numResourceTypes + 1);
 
                     // Calculate non-reference metrics
                     final double[] avgRew = Judge.averageReward(solutionSet, scalarisation);
@@ -124,8 +124,8 @@ public class Experiment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                // new AgentLoader(new ConvexHullValueIteration()).run();
-                new AgentLoader(new MOMCTSAgent()).run();
+                new AgentLoader(new ConvexHullValueIteration()).run();
+                // new AgentLoader(new MOMCTSAgent()).run();
             }
         }).start();
     }
