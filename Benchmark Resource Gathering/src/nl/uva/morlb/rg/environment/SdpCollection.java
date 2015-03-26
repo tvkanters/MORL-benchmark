@@ -13,7 +13,7 @@ public class SdpCollection {
 
     /**
      * Creates a small, discrete problem with 3 objectives.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getSimpleProblem() {
@@ -22,12 +22,13 @@ public class SdpCollection {
         resources.add(new Resource(1, 2, 1));
 
         return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON,
+                Parameters.PICK_UP_ON_COLLECT);
     }
 
     /**
      * Creates a large, discrete problem with 4 objectives.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getLargeProblem() {
@@ -39,12 +40,13 @@ public class SdpCollection {
         resources.add(new Resource(2, 4, 1));
 
         return new Parameters(9, 9, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON,
+                Parameters.PICK_UP_ON_COLLECT);
     }
 
     /**
      * Creates a small, discrete problem with 3 objectives and 3 actions.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getTinyActionsProblem() {
@@ -53,12 +55,13 @@ public class SdpCollection {
         resources.add(new Resource(1, 2, 1));
 
         return new Parameters(3, 3, resources, Parameters.ACTIONS_TINY, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON,
+                Parameters.PICK_UP_ON_COLLECT);
     }
 
     /**
      * Creates a medium, discrete problem with 3 objectives and 9 actions.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getFullActionsProblem() {
@@ -68,12 +71,13 @@ public class SdpCollection {
         resources.add(new Resource(1, 0, 4));
 
         return new Parameters(5, 5, resources, Parameters.ACTIONS_FULL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON,
+                Parameters.PICK_UP_ON_COLLECT);
     }
 
     /**
      * Creates a small, continuous problem with 3 objectives.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getSmallContinuousProblem() {
@@ -82,12 +86,13 @@ public class SdpCollection {
         resources.add(new Resource(1, 2, 1));
 
         return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_CONTINUOUS, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
+                Parameters.STATES_CONTINUOUS, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON,
+                Parameters.PICK_UP_ON_COLLECT);
     }
 
     /**
      * Creates a medium, discrete partially observable problem with 3 objectives.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getPartiallyObservableProblem() {
@@ -97,12 +102,12 @@ public class SdpCollection {
         resources.add(new Resource(1, 0, 4));
 
         return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0, 1, Parameters.STATES_DISCRETE,
-                Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
+                Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON, Parameters.PICK_UP_ON_COLLECT);
     }
 
     /**
      * Creates a medium, discrete problem with 3 objectives and stochasticity in transitions and rewards.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getStochasticProblem() {
@@ -112,12 +117,12 @@ public class SdpCollection {
         resources.add(new Resource(1, 0, 4, 0.3, 1.0));
 
         return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0.4, 1, Parameters.STATES_DISCRETE,
-                Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
+                Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON, Parameters.PICK_UP_ON_COLLECT);
     }
 
     /**
      * Creates a small, discrete problem with 3 objectives and an infinite horizon.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getInfiniteHorizonProblem() {
@@ -126,12 +131,13 @@ public class SdpCollection {
         resources.add(new Resource(1, 2, 1));
 
         return new Parameters(3, 3, resources, Parameters.ACTIONS_SMALL, 0.8, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON);
+                Parameters.STATES_DISCRETE, Parameters.MAX_PICKED_UP_UNLIMITED, Parameters.DEFAULT_HORIZON,
+                Parameters.LEAVE_ON_COLLECT);
     }
 
     /**
      * Creates a medium, discrete problem with 3 objectives and a limit of picking 2 resources up.
-     *
+     * 
      * @return The parameters to pass to the resource gathering problem
      */
     public static Parameters getLimitedMaxPickedUpProblem() {
@@ -141,7 +147,7 @@ public class SdpCollection {
         resources.add(new Resource(1, 0, 4));
 
         return new Parameters(5, 5, resources, Parameters.ACTIONS_SMALL, 1, 0, Parameters.FULLY_OBSERVABLE,
-                Parameters.STATES_DISCRETE, 2, Parameters.DEFAULT_HORIZON);
+                Parameters.STATES_DISCRETE, 2, Parameters.DEFAULT_HORIZON, Parameters.PICK_UP_ON_COLLECT);
     }
 
 }

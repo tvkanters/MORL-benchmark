@@ -99,11 +99,11 @@ public class ResourceGatheringEnv implements EnvironmentInterface {
             taskSpec.addContinuousAction(new DoubleRange(-mParameters.maxStepSize, mParameters.maxStepSize));
             taskSpec.addContinuousAction(new DoubleRange(-mParameters.maxStepSize, mParameters.maxStepSize));
         } else {
-            taskSpec.addDiscreteAction(new IntRange((mParameters.finiteHorizon ? 1 : 0), mParameters.actionMax));
+            taskSpec.addDiscreteAction(new IntRange((mParameters.pickUpOnCollect ? 1 : 0), mParameters.actionMax));
         }
 
         // Set the (in)finite horizon property
-        if (mParameters.finiteHorizon) {
+        if (mParameters.discountFactor == 1) {
             taskSpec.setEpisodic();
         } else {
             taskSpec.setContinuing();

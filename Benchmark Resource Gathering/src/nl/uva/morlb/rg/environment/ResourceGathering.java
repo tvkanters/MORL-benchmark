@@ -195,7 +195,7 @@ public class ResourceGathering {
 
         // Calculate the reward for this state and picks items up if needed
         final boolean[] pickedUp = state.getPickedUp();
-        if (mParameters.finiteHorizon && state.getNumPickedUp(mParameters.resources) < mParameters.maxPickedUp) {
+        if (mParameters.pickUpOnCollect && state.getNumPickedUp(mParameters.resources) < mParameters.maxPickedUp) {
             int resourceIndex = 0;
             for (final Resource resource : mResources) {
                 if (!pickedUp[resourceIndex] && resource.isCollected(nextAgent)) {

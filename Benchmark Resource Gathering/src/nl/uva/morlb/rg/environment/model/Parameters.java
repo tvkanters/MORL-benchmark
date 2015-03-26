@@ -28,6 +28,10 @@ public class Parameters {
     public static final int MAX_PICKED_UP_UNLIMITED = Integer.MAX_VALUE;
     /** The value indicating a the default experiment horizon */
     public static final int DEFAULT_HORIZON = 1000;
+    /** The value indicating resources should be picked up upon collecting them */
+    public static final boolean PICK_UP_ON_COLLECT = true;
+    /** The value indicating resources should not be picked up upon collecting them */
+    public static final boolean LEAVE_ON_COLLECT = false;
 
     /** The highest possible x value of a location */
     public final double maxX;
@@ -48,8 +52,8 @@ public class Parameters {
     /** The probability that an additional random action will be performed when taking an action */
     public final double actionFailProb;
 
-    /** Whether or not the problem has a finite horizon rather than an infinite horizon */
-    public final boolean finiteHorizon;
+    /** Whether or not resources should be picked up upon collecting them */
+    public final boolean pickUpOnCollect;
     /** The horizon for the experiment */
     public final int horizon;
     /** The discount factor applied to rewards */
@@ -72,7 +76,7 @@ public class Parameters {
 
     /**
      * Creates a new parameter set for a discrete problem.
-     *
+     * 
      * @param maxX
      *            The highest possible x value of a location
      * @param maxY
@@ -82,7 +86,7 @@ public class Parameters {
      * @param actionsExpanded
      *            Which action space to use
      * @param discountFactor
-     *            The discount factor applied to rewards, indicates a finite horizon problem when the value is 1
+     *            The discount factor applied to rewards
      * @param actionFailProb
      *            The probability that an additional random action will be performed when taking an action
      * @param observationSuccess
@@ -94,10 +98,13 @@ public class Parameters {
      *            The amount of resources an agent can pick up
      * @param horizon
      *            The horizon for the experiment
+     * @param pickUpOnCollect
+     *            Whether or not resources should be picked up upon collecting them
      */
     public Parameters(final double maxX, final double maxY, final List<Resource> resources, final int actionSpace,
             final double discountFactor, final double actionFailProb, final double observationSuccess,
-            final boolean continuousStatesActions, final int maxPickedUp, final int horizon) {
+            final boolean continuousStatesActions, final int maxPickedUp, final int horizon,
+            final boolean pickUpOnCollect) {
         // Define the state space size
         this.maxX = maxX;
         this.maxY = maxY;
@@ -114,24 +121,24 @@ public class Parameters {
         // Define the action space size
         this.actionSpace = actionSpace;
         switch (actionSpace) {
-            case Parameters.ACTIONS_TINY:
-                actionMax = 2;
-                break;
-            case Parameters.ACTIONS_SMALL:
-                actionMax = 4;
-                break;
-            case Parameters.ACTIONS_FULL:
-                actionMax = 8;
-                break;
-            default:
-                throw new InvalidParameterException("Invalid action space");
+        case Parameters.ACTIONS_TINY:
+            actionMax = 2;
+            break;
+        case Parameters.ACTIONS_SMALL:
+            actionMax = 4;
+            break;
+        case Parameters.ACTIONS_FULL:
+            actionMax = 8;
+            break;
+        default:
+            throw new InvalidParameterException("Invalid action space");
         }
 
         // Define the discount factor
         if (discountFactor <= 0 || discountFactor > 1) {
             throw new InvalidParameterException("Discount factor must be in range ]0,1]");
         }
-        finiteHorizon = discountFactor == 1;
+        this.pickUpOnCollect = pickUpOnCollect;
         this.discountFactor = discountFactor;
         this.horizon = horizon;
 
@@ -156,7 +163,7 @@ public class Parameters {
 
     /**
      * Shuffles the locations of the resources to random locations.
-     *
+     * 
      * @param rng
      *            The random number generator to determine the new positions with
      */
@@ -189,12 +196,12 @@ public class Parameters {
 
     /**
      * Converts a string representation of parameters to an object.
-     *
+     * 
      * @param str
      *            The string in the toString format
      * @param rng
      *            The random number generator to determine the new positions with
-     *
+     * 
      * @return The parameters
      */
     public static Parameters fromString(final String str, final Random rng) {
@@ -203,12 +210,12 @@ public class Parameters {
 
     /**
      * Converts a string representation of parameters to an object.
-     *
+     * 
      * @param values
      *            The string in the toString format split on spaces
      * @param rng
      *            The random number generator to determine the new positions with
-     *
+     * 
      * @return The parameters
      */
     public static Parameters fromString(final String[] values, final Random rng) {
@@ -217,9 +224,9 @@ public class Parameters {
         final boolean continuousStatesActions = Boolean.parseBoolean(values[6]);
 
         final List<Resource> resources = new LinkedList<>();
-        if (values.length == 11) {
-            final int numObjectives = Integer.parseInt(values[9]);
-            final int numResources = Integer.parseInt(values[10]);
+        if (values.length == 12) {
+            final int numObjectives = Integer.parseInt(values[10]);
+            final int numResources = Integer.parseInt(values[11]);
             for (int i = 0; i < numResources; ++i) {
                 final int type = (i < numObjectives ? i : Util.RNG.nextInt(numObjectives));
                 final double x = (continuousStatesActions ? rng.nextDouble() * maxX : rng.nextInt((int) maxX + 1));
@@ -227,7 +234,7 @@ public class Parameters {
                 resources.add(new Resource(type, x, y));
             }
         } else {
-            for (int i = 9; i < values.length; i += 5) {
+            for (int i = 10; i < values.length; i += 5) {
                 resources.add(Resource.fromString(values[i] + " " + values[i + 1] + " " + values[i + 2] + " "
                         + values[i + 3] + " " + values[i + 4]));
             }
@@ -235,15 +242,15 @@ public class Parameters {
 
         return new Parameters(maxX, maxY, resources, Integer.parseInt(values[2]), Double.parseDouble(values[3]),
                 Double.parseDouble(values[4]), Double.parseDouble(values[5]), continuousStatesActions,
-                Integer.parseInt(values[7]), Integer.parseInt(values[8]));
+                Integer.parseInt(values[7]), Integer.parseInt(values[8]), Boolean.parseBoolean(values[9]));
     }
 
     /**
      * Checks if this state has the same contents as the given one.
-     *
+     * 
      * @param other
      *            The state to compare
-     *
+     * 
      * @return True iff the contents are the same
      */
     @Override
@@ -257,7 +264,7 @@ public class Parameters {
 
     /**
      * Hashes the state based on the contents.
-     *
+     * 
      * @return The hash code for the state
      */
     @Override

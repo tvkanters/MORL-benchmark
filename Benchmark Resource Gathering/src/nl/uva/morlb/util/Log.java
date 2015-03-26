@@ -28,7 +28,7 @@ public class Log {
 
     /**
      * Logs a debug level message.
-     *
+     * 
      * @param message
      *            The message to log
      */
@@ -40,7 +40,7 @@ public class Log {
 
     /**
      * Logs an informative level message.
-     *
+     * 
      * @param message
      *            The message to log
      */
@@ -52,7 +52,7 @@ public class Log {
 
     /**
      * Logs an error level message.
-     *
+     * 
      * @param message
      *            The message to log
      */
@@ -64,7 +64,7 @@ public class Log {
 
     /**
      * Logs a message into a file.
-     *
+     * 
      * @param message
      *            The message to log
      */
